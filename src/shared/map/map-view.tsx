@@ -1,7 +1,14 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { useMemo } from 'react';
-import { Layer, Map, Marker, Source, type LngLatBoundsLike } from 'react-map-gl/maplibre';
+import { useEffect, useMemo, useRef } from 'react';
+import {
+  Layer,
+  Map,
+  Marker,
+  Source,
+  type LngLatBoundsLike,
+  type MapRef,
+} from 'react-map-gl/maplibre';
 
 import { cn } from '@/shared/lib/cn';
 
@@ -40,6 +47,15 @@ export function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const mapRef = useRef<MapRef>(null);
+
+  // Follow later centre changes (e.g. once the Visitor has been located).
+  useEffect(() => {
+    if (!fitTo) {
+      mapRef.current?.flyTo({ center: [center.longitude, center.latitude], zoom });
+    }
+  }, [center.latitude, center.longitude, zoom, fitTo]);
+
   const lineData = useMemo(
     () =>
       line && {
@@ -56,6 +72,7 @@ export function MapView({
   return (
     <section aria-label={label} className={cn('overflow-hidden rounded-xl', className)}>
       <Map
+        ref={mapRef}
         initialViewState={initialViewState}
         mapStyle={MAP_STYLE}
         style={{ width: '100%', height: '100%' }}

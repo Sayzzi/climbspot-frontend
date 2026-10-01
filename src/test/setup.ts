@@ -4,6 +4,7 @@ import '@/shared/i18n/i18n';
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
+import './geolocation';
 import { server } from './server';
 
 // MapLibre needs WebGL, which jsdom lacks: features get the fake map adapter.

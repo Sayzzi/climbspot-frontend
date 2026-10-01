@@ -1,8 +1,9 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { setWorkerUrl } from 'maplibre-gl';
+import * as maplibre from 'maplibre-gl';
 // MapLibre locates its worker relative to its own file, which breaks once Vite has
 // bundled it; let Vite bundle the worker (and the module it imports) and say where.
+// The map is then given this very instance (`mapLib`), not a separately bundled copy.
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -19,7 +20,7 @@ import type { Position } from '@/shared/lib/position';
 
 import type { MapMarker, MapViewProps } from './types';
 
-setWorkerUrl(maplibreWorkerUrl);
+maplibre.setWorkerUrl(maplibreWorkerUrl);
 
 /** OpenFreeMap vector style: free, no API key. */
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
@@ -77,6 +78,7 @@ export function MapView({
     <section aria-label={label} className={cn('overflow-hidden rounded-xl', className)}>
       <Map
         ref={mapRef}
+        mapLib={maplibre}
         initialViewState={initialViewState}
         mapStyle={MAP_STYLE}
         style={{ width: '100%', height: '100%' }}

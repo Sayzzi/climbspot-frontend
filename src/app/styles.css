@@ -1,0 +1,30 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Components only use these through Tailwind utilities
+ * (e.g. `bg-brand-600`, `text-ink-muted`), never raw colour values.
+ */
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-brand-50: oklch(0.98 0.016 73.7);
+  --color-brand-100: oklch(0.954 0.038 75.2);
+  --color-brand-200: oklch(0.901 0.076 70.7);
+  --color-brand-300: oklch(0.837 0.128 66.3);
+  --color-brand-400: oklch(0.75 0.183 55.9);
+  --color-brand-500: oklch(0.705 0.213 47.6);
+  --color-brand-600: oklch(0.646 0.222 41.1);
+  --color-brand-700: oklch(0.553 0.195 38.4);
+  --color-brand-800: oklch(0.47 0.157 37.3);
+  --color-brand-900: oklch(0.408 0.123 38.2);
+
+  --color-surface: oklch(0.985 0.002 75);
+  --color-ink: oklch(0.21 0.006 56);
+  --color-ink-muted: oklch(0.45 0.01 56);
+}
+
+@layer base {
+  body {
+    @apply bg-surface font-sans text-ink antialiased;
+  }
+}

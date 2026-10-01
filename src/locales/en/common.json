@@ -1,0 +1,22 @@
+{
+  "app": {
+    "name": "ClimbSpot",
+    "tagline": "Find the hills worth climbing near you."
+  },
+  "home": {
+    "title": "Find climbs near you",
+    "description": "Discover ascents for running, trail running and cycling, sorted by how far their start is from you."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "This page does not exist or has moved.",
+    "backHome": "Back to home"
+  },
+  "errors": {
+    "BAD_REQUEST": "The request could not be understood.",
+    "VALIDATION_FAILED": "Some information is missing or invalid.",
+    "ROUTE_NOT_FOUND": "This resource does not exist.",
+    "INTERNAL_ERROR": "Something went wrong on our side. Please try again.",
+    "NETWORK_ERROR": "We could not reach ClimbSpot. Check your connection."
+  }
+}

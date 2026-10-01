@@ -1,5 +1,9 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+import { setWorkerUrl } from 'maplibre-gl';
+// MapLibre locates its worker relative to its own file, which breaks once Vite has
+// bundled it; let Vite bundle the worker (and the module it imports) and say where.
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Layer,
@@ -14,6 +18,8 @@ import { cn } from '@/shared/lib/cn';
 import type { Position } from '@/shared/lib/position';
 
 import type { MapMarker, MapViewProps } from './types';
+
+setWorkerUrl(maplibreWorkerUrl);
 
 /** OpenFreeMap vector style: free, no API key. */
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';

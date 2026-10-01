@@ -19,9 +19,12 @@ function RootLayout() {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-brand-100 bg-white">
-        <nav className="mx-auto flex h-14 max-w-5xl items-center px-4">
+        <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
           <Link to="/" className="text-lg font-semibold text-brand-700">
             {t('app.name')}
+          </Link>
+          <Link to="/ascents/new" className={buttonVariants({ variant: 'secondary', size: 'sm' })}>
+            {t('nav.addAscent')}
           </Link>
         </nav>
       </header>

@@ -32,5 +32,8 @@
   },
   "actions": {
     "retry": "Try again"
+  },
+  "nav": {
+    "addAscent": "Add a climb"
   }
 }

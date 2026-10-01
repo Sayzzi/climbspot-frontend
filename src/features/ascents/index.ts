@@ -4,6 +4,7 @@ export { AscentLoadError } from './components/ascent-load-error';
 export { AscentNotFound } from './components/ascent-not-found';
 export { LocateNotice } from './components/locate-notice';
 export { NearbySearch } from './components/nearby-search';
+export { UploadForm } from './components/upload-form';
 export { SearchFilters, type SearchFilterValues } from './components/search-filters';
 export { activities, categories, MAXIMUM_RADIUS } from './domain';
 export type { NearbyCriteria, Position } from './types';

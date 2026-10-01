@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './../routes/__root'
 import { Route as IndexRouteImport } from './../routes/index'
 import { Route as AscentsAscentIdRouteImport } from './../routes/ascents/$ascentId'
+import { Route as AscentsNewRouteImport } from './../routes/ascents/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const AscentsAscentIdRoute = AscentsAscentIdRouteImport.update({
   path: '/ascents/$ascentId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AscentsNewRoute = AscentsNewRouteImport.update({
+  id: '/ascents/new',
+  path: '/ascents/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ascents/$ascentId': typeof AscentsAscentIdRoute
+  '/ascents/new': typeof AscentsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ascents/$ascentId': typeof AscentsAscentIdRoute
+  '/ascents/new': typeof AscentsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ascents/$ascentId': typeof AscentsAscentIdRoute
+  '/ascents/new': typeof AscentsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ascents/$ascentId'
+  fullPaths: '/' | '/ascents/$ascentId' | '/ascents/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ascents/$ascentId'
-  id: '__root__' | '/' | '/ascents/$ascentId'
+  to: '/' | '/ascents/$ascentId' | '/ascents/new'
+  id: '__root__' | '/' | '/ascents/$ascentId' | '/ascents/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AscentsAscentIdRoute: typeof AscentsAscentIdRoute
+  AscentsNewRoute: typeof AscentsNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AscentsAscentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ascents/new': {
+      id: '/ascents/new'
+      path: '/ascents/new'
+      fullPath: '/ascents/new'
+      preLoaderRoute: typeof AscentsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AscentsAscentIdRoute: AscentsAscentIdRoute,
+  AscentsNewRoute: AscentsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

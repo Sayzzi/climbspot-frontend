@@ -23,8 +23,8 @@ export class NetworkError extends Error {
   }
 }
 
-interface ClientResult<T> {
-  readonly data?: T;
+interface ClientResult {
+  readonly data?: unknown;
   readonly error?: unknown;
   readonly response: Response;
 }
@@ -33,8 +33,10 @@ interface ClientResult<T> {
  * Resolves an `apiClient` call to its data, or throws an {@link ApiRequestError}
  * or a {@link NetworkError}, so that callers (e.g. TanStack Query) only see data or errors.
  */
-export async function unwrap<T>(request: Promise<ClientResult<T>>): Promise<T> {
-  let result: ClientResult<T>;
+export async function unwrap<R extends ClientResult>(
+  request: Promise<R>,
+): Promise<NonNullable<R['data']>> {
+  let result: R;
   try {
     result = await request;
   } catch (cause) {
@@ -42,7 +44,7 @@ export async function unwrap<T>(request: Promise<ClientResult<T>>): Promise<T> {
   }
 
   const { data, error, response } = result;
-  if (error !== undefined || data === undefined) {
+  if (error !== undefined || data === undefined || data === null) {
     const body = isApiError(error) ? error.error : undefined;
     throw new ApiRequestError(
       body?.code ?? 'UNKNOWN_ERROR',

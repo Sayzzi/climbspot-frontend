@@ -21,9 +21,7 @@ export function AscentDetail({ id }: { readonly id: string }) {
   const profileId = useId();
 
   // GeoJSON pairs are [longitude, latitude].
-  const path = ascent.path.coordinates.flatMap(([longitude, latitude]) =>
-    longitude === undefined || latitude === undefined ? [] : [{ latitude, longitude }],
-  );
+  const path = ascent.path.coordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
   const facts: [string, string][] = [
     [t('facts.length'), format.distance(ascent.length)],
     [t('facts.elevationGain'), format.elevation(ascent.elevationGain)],

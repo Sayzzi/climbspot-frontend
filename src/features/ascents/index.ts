@@ -1,3 +1,7 @@
+export { ascentQuery, isAscentMissing } from './api/ascent';
+export { AscentDetail } from './components/ascent-detail';
+export { AscentLoadError } from './components/ascent-load-error';
+export { AscentNotFound } from './components/ascent-not-found';
 export { LocateNotice } from './components/locate-notice';
 export { NearbySearch } from './components/nearby-search';
 export { SearchFilters, type SearchFilterValues } from './components/search-filters';

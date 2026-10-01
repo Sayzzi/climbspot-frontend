@@ -76,7 +76,10 @@ export const handlers = {
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.get(apiUrl('/ascents/nearby'), ({ request }) => respond(request)),
   ascent: (respond: (id: string) => HttpResponse<JsonBodyType>) =>
-    http.get(apiUrl('/ascents/:id'), ({ params }) => respond(String(params.id))),
+    // `/ascents/nearby` matches `/ascents/:id` too; leave it to its own handler.
+    http.get(apiUrl('/ascents/:id'), ({ params }) =>
+      params.id === 'nearby' ? undefined : respond(String(params.id)),
+    ),
   createAscent: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/ascents'), ({ request }) => respond(request)),

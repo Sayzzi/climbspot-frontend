@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/shared/lib/cn';
@@ -54,6 +55,14 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
             className="col-span-2 sm:col-span-3"
           />
         </dl>
+        <Link
+          to="/ascents/$ascentId"
+          params={{ ascentId: ascent.id }}
+          aria-label={t('search.viewDetails', { name: ascent.name })}
+          className="mt-3 inline-block text-sm font-medium text-brand-700 hover:underline"
+        >
+          {t('search.details')}
+        </Link>
       </article>
     </li>
   );

@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './../routes/__root'
 import { Route as IndexRouteImport } from './../routes/index'
+import { Route as AscentsAscentIdRouteImport } from './../routes/ascents/$ascentId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AscentsAscentIdRoute = AscentsAscentIdRouteImport.update({
+  id: '/ascents/$ascentId',
+  path: '/ascents/$ascentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ascents/$ascentId': typeof AscentsAscentIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ascents/$ascentId': typeof AscentsAscentIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ascents/$ascentId': typeof AscentsAscentIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/ascents/$ascentId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/ascents/$ascentId'
+  id: '__root__' | '/' | '/ascents/$ascentId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AscentsAscentIdRoute: typeof AscentsAscentIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ascents/$ascentId': {
+      id: '/ascents/$ascentId'
+      path: '/ascents/$ascentId'
+      fullPath: '/ascents/$ascentId'
+      preLoaderRoute: typeof AscentsAscentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AscentsAscentIdRoute: AscentsAscentIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

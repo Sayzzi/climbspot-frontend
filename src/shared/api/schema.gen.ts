@@ -21,6 +21,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ascents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Catalogue an Ascent from a GPX file */
+        post: operations["createAscent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ascents/nearby": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find the Ascents whose Start is closest to a position */
+        get: operations["findAscentsNearby"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ascents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an Ascent with its path and Elevation Profile */
+        get: operations["getAscent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -36,6 +87,93 @@ export interface components {
         HealthResponse: {
             /** @enum {string} */
             status: "ok";
+        };
+        Ascent: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            surface: components["schemas"]["Surface"];
+            activities: components["schemas"]["Activity"][];
+            start: components["schemas"]["AscentPoint"];
+            top: components["schemas"]["AscentPoint"];
+            /** @description Length along the path, in metres. */
+            length: number;
+            /** @description Top elevation minus Start elevation, in metres. */
+            elevationGain: number;
+            /**
+             * @description Average Gradient, as a ratio (0.08 = 8 %).
+             * @example 0.072
+             */
+            averageGradient: number;
+            /**
+             * @description Steepest Gradient over at least 100 m, as a ratio (0.08 = 8 %).
+             * @example 0.072
+             */
+            maximumGradient: number;
+            /** @description Length in metres × average Gradient in percent. */
+            difficultyScore: number;
+            category: components["schemas"]["Category"];
+            /** Format: date-time */
+            createdAt: string;
+            /** @description GeoJSON LineString from Start to Top ([longitude, latitude] pairs). */
+            path: {
+                /** @enum {string} */
+                type: "LineString";
+                coordinates: [
+                    number,
+                    number
+                ][];
+            };
+            elevationProfile: {
+                /** @description Distance from the Start along the path, in metres. */
+                distance: number;
+                /** @description Elevation, in metres. */
+                elevation: number;
+            }[];
+        };
+        /** @enum {string} */
+        Surface: "paved" | "gravel" | "trail";
+        /** @enum {string} */
+        Activity: "running" | "trail_running" | "road_cycling" | "gravel_cycling" | "mountain_biking";
+        AscentPoint: {
+            latitude: number;
+            longitude: number;
+            /** @description Elevation, in metres. */
+            elevation: number;
+        };
+        /** @enum {string} */
+        Category: "uncategorized" | "cat4" | "cat3" | "cat2" | "cat1" | "hc";
+        NearbyAscents: {
+            ascents: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                surface: components["schemas"]["Surface"];
+                activities: components["schemas"]["Activity"][];
+                start: components["schemas"]["AscentPoint"];
+                top: components["schemas"]["AscentPoint"];
+                /** @description Length along the path, in metres. */
+                length: number;
+                /** @description Top elevation minus Start elevation, in metres. */
+                elevationGain: number;
+                /**
+                 * @description Average Gradient, as a ratio (0.08 = 8 %).
+                 * @example 0.072
+                 */
+                averageGradient: number;
+                /**
+                 * @description Steepest Gradient over at least 100 m, as a ratio (0.08 = 8 %).
+                 * @example 0.072
+                 */
+                maximumGradient: number;
+                /** @description Length in metres × average Gradient in percent. */
+                difficultyScore: number;
+                category: components["schemas"]["Category"];
+                /** Format: date-time */
+                createdAt: string;
+                /** @description Geodesic distance from the searched position to the Start, in metres. */
+                distanceToStart: number;
+            }[];
         };
     };
     responses: never;
@@ -62,6 +200,162 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    createAscent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    name: string;
+                    surface: components["schemas"]["Surface"];
+                    /**
+                     * Format: binary
+                     * @description GPX file of the path (track or route).
+                     */
+                    gpx: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The Ascent was created. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ascent"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: a field is missing or invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `ASCENT_CREATION_DISABLED`: creating Ascents is disabled on this server. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `GPX_TOO_LARGE`: the file exceeds 5 MB or its path has more than 20,000 points. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description The upload cannot become an Ascent: `GPX_INVALID` (not a valid GPX file), `GPX_EMPTY` (no track or route with two distinct points), `ASCENT_TOO_LONG` (over 50 km), `ASCENT_TOO_LOW` (gains under 10 m), `ASCENT_TOO_FLAT` (averages under 3 %) or `ASCENT_DIP_TOO_LARGE` (loses more than the larger of 10 m and 10 % of its Elevation Gain in Dips). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `ELEVATION_UNAVAILABLE`: the terrain model cannot be reached; retry later. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    findAscentsNearby: {
+        parameters: {
+            query: {
+                latitude: number;
+                longitude: number;
+                /** @description Maximum distance to the Start, in metres. */
+                radius?: number;
+                limit?: number;
+                /** @description Only Ascents suitable for one of these Activities. Repeatable. */
+                activity?: components["schemas"]["Activity"][];
+                /** @description Only Ascents in one of these Categories. Repeatable. */
+                category?: components["schemas"]["Category"][];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ascents within the radius, nearest Start first. Empty when none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NearbyAscents"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: a query parameter is missing or out of range. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    getAscent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Ascent. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ascent"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: the id is not a UUID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `ASCENT_NOT_FOUND`: no Ascent has this id. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };

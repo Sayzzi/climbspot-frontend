@@ -70,7 +70,8 @@ export default defineConfig(
 
   {
     files: ['src/**/*.{ts,tsx}'],
-    ignores: ['src/**/*.test.{ts,tsx}'],
+    // Tests and their helpers render the whole app, so they may import any layer.
+    ignores: ['src/**/*.test.{ts,tsx}', 'src/test/**'],
     plugins: { boundaries },
     settings: {
       'boundaries/elements': elements,

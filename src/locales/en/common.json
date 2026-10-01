@@ -17,6 +17,20 @@
     "VALIDATION_FAILED": "Some information is missing or invalid.",
     "ROUTE_NOT_FOUND": "This resource does not exist.",
     "INTERNAL_ERROR": "Something went wrong on our side. Please try again.",
-    "NETWORK_ERROR": "We could not reach ClimbSpot. Check your connection."
+    "ASCENT_NOT_FOUND": "This climb does not exist or has been removed.",
+    "ASCENT_CREATION_DISABLED": "Adding climbs is not open yet. Check back soon!",
+    "GPX_INVALID": "This file is not a valid GPX file.",
+    "GPX_EMPTY": "This file has no track or route with at least two points.",
+    "GPX_TOO_LARGE": "This file is too large. Use a file under 5 MB with at most 20,000 points.",
+    "ASCENT_TOO_LONG": "This path is too long. A climb is at most 50 km.",
+    "ASCENT_TOO_FLAT": "This path is too flat. A climb averages at least 3 %.",
+    "ASCENT_TOO_LOW": "This path does not gain enough height. A climb gains at least 10 m.",
+    "ASCENT_DIP_TOO_LARGE": "This path goes down too much along the way. Split it into two climbs.",
+    "ELEVATION_UNAVAILABLE": "Elevation data is temporarily unavailable. Please try again in a moment.",
+    "NETWORK_ERROR": "We could not reach ClimbSpot. Check your connection.",
+    "UNKNOWN_ERROR": "Something unexpected happened. Please try again."
+  },
+  "actions": {
+    "retry": "Try again"
   }
 }

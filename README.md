@@ -18,6 +18,7 @@ Web app for ClimbSpot: find uphill paths (**Ascents**) near you for running, tra
 | i18n         | i18next + react-i18next, type-checked keys                                                                                        |
 | Tests        | Vitest + Testing Library (jsdom)                                                                                                  |
 | Quality      | TypeScript strict, ESLint (typescript-eslint strict, React, a11y, TanStack, boundaries), Prettier, husky, lint-staged, commitlint |
+| Map          | MapLibre GL (react-map-gl) with OpenFreeMap tiles, behind `shared/map`                                                            |
 | Hosting      | Vercel                                                                                                                            |
 
 ## Getting started
@@ -58,12 +59,15 @@ src/
 │       ├── hooks/       # feature logic
 │       └── index.ts     # the feature's public API
 ├── shared/
-│   ├── api/      # typed API client and generated schema (schema.gen.ts)
+│   ├── api/      # typed API client, generated schema (schema.gen.ts), errors → translation keys
 │   ├── config/   # environment validation
 │   ├── i18n/     # i18next setup and typed resources
-│   ├── lib/      # framework-agnostic helpers (cn, formatters…)
+│   ├── lib/      # framework-agnostic helpers (cn, geolocation…)
+│   ├── map/      # the map adapter: the only code that knows the map library
+│   ├── units/    # metric/imperial preference and formatters
 │   └── ui/       # design-system primitives (Button…)
-├── locales/      # translation files, one folder per language
+├── locales/      # translation files, one folder per language and namespace
+├── test/         # test harness: app renderer, MSW API stand-in, fake map, browser stubs
 └── main.tsx      # entry point
 ```
 
@@ -78,6 +82,14 @@ Principles applied:
 - **Single responsibility**: components render, hooks hold logic, `api/` handles transport.
 - **Open/closed**: components expose variants through `cva` instead of being edited for each new look.
 - **Dependency inversion**: features consume the typed `apiClient`, never `fetch` directly; tests swap the router history and query client through factories (`createAppRouter`, `createQueryClient`).
+
+## Testing
+
+Tests act like a Visitor: they render the whole app at a URL (`renderApp` in `src/test/render-app.tsx`), interact through roles, labels and text with Testing Library, and assert on what is shown or what the URL becomes. Only three boundaries are replaced:
+
+- **The API**, by [MSW](https://mswjs.io/) (`src/test/server.ts`; handlers and fixtures typed from the generated schema in `src/test/api.ts`). A request without a handler fails.
+- **The browser**: geolocation (`stubGeolocation`) and preferred languages (`stubLanguages`, en-GB by default).
+- **The map**: MapLibre needs WebGL, which jsdom lacks, so `shared/map` is replaced by a fake that renders markers as buttons; `fakeMap.moveTo()` simulates panning. The real map is checked by hand against a running API.
 
 ## Styling
 
@@ -115,4 +127,4 @@ The backend owns the contract ([ADR 0003](https://github.com/Sayzzi/climbspot-ba
 
 ## Deployment
 
-Vercel detects Vite and pnpm automatically. Set `VITE_API_URL` in the project's environment variables. `vercel.json` rewrites every path to `index.html` so client-side routes survive a refresh.
+Vercel detects Vite and pnpm automatically. Set `VITE_API_URL` in the project's environment variables, and add the Vercel domain to the backend's `CORS_ORIGINS`. `vercel.json` rewrites every path to `index.html` so client-side routes survive a refresh.

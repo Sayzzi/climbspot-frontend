@@ -1,20 +1,30 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
-export const Route = createFileRoute('/')({
-  component: HomePage,
+import { NearbySearch } from '@/features/ascents';
+
+/** The search lives in the URL so it can be shared and survives a refresh. */
+const searchSchema = z.object({
+  latitude: z.number().min(-90).max(90).optional().catch(undefined),
+  longitude: z.number().min(-180).max(180).optional().catch(undefined),
 });
 
-function HomePage() {
-  const { t } = useTranslation();
+export const Route = createFileRoute('/')({
+  validateSearch: searchSchema,
+  component: SearchPage,
+});
+
+function SearchPage() {
+  const { t } = useTranslation('ascents');
+  const { latitude, longitude } = Route.useSearch();
 
   return (
-    <section className="flex max-w-2xl flex-col gap-4">
-      <p className="text-sm font-medium tracking-wide text-brand-600 uppercase">
-        {t('app.tagline')}
-      </p>
-      <h1 className="text-4xl font-bold tracking-tight">{t('home.title')}</h1>
-      <p className="text-lg text-ink-muted">{t('home.description')}</p>
+    <section className="flex flex-col gap-6">
+      <h1 className="text-3xl font-bold tracking-tight">{t('search.title')}</h1>
+      {latitude !== undefined && longitude !== undefined && (
+        <NearbySearch criteria={{ position: { latitude, longitude } }} />
+      )}
     </section>
   );
 }

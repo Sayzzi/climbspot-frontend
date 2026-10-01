@@ -6,10 +6,13 @@ import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
 import { server } from './server';
 
+// MapLibre needs WebGL, which jsdom lacks: features get the fake map adapter.
+vi.mock('@/shared/map/map-view', () => import('./fake-map'));
+
 // jsdom does not implement scrolling, which the router's scroll restoration calls.
 vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
 
-// Any request without a handler is a test bug: fail loudly instead of hitting the network.
+// A request without a handler is a test bug: MSW fails it and reports it instead of hitting the network.
 beforeAll(() => {
   server.listen({ onUnhandledFrame: 'error' });
 });

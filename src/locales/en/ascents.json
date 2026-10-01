@@ -1,0 +1,43 @@
+{
+  "search": {
+    "title": "Climbs near you",
+    "results": "Nearby climbs",
+    "map": "Map of nearby climbs",
+    "loading": "Looking for climbs…",
+    "empty": {
+      "title": "No climbs around here yet",
+      "hint": "Try a wider radius or fewer filters."
+    }
+  },
+  "facts": {
+    "distanceToStart": "{{distance}} to the start",
+    "length": "Length",
+    "elevationGain": "Elevation gain",
+    "averageGradient": "Average gradient",
+    "maximumGradient": "Maximum gradient",
+    "difficultyScore": "Difficulty score",
+    "category": "Category",
+    "surface": "Surface",
+    "activities": "Activities"
+  },
+  "surfaces": {
+    "paved": "Paved",
+    "gravel": "Gravel",
+    "trail": "Trail"
+  },
+  "activities": {
+    "running": "Running",
+    "trail_running": "Trail running",
+    "road_cycling": "Road cycling",
+    "gravel_cycling": "Gravel cycling",
+    "mountain_biking": "Mountain biking"
+  },
+  "categories": {
+    "uncategorized": "Uncategorized",
+    "cat4": "Cat 4",
+    "cat3": "Cat 3",
+    "cat2": "Cat 2",
+    "cat1": "Cat 1",
+    "hc": "HC"
+  }
+}

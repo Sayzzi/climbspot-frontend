@@ -7,7 +7,7 @@ void i18n.use(initReactI18next).init({
   lng: fallbackLanguage,
   fallbackLng: fallbackLanguage,
   defaultNS,
-  ns: [defaultNS],
+  ns: Object.keys(resources[fallbackLanguage]),
   resources,
   interpolation: {
     // React already escapes rendered values.

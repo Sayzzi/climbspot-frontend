@@ -19,6 +19,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  build: {
+    // maplibre-gl alone is ~1 MB; it ships as its own chunk, loaded with the map.
+    chunkSizeWarningLimit: 1100,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

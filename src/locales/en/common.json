@@ -35,5 +35,10 @@
   },
   "nav": {
     "addAscent": "Add a climb"
+  },
+  "units": {
+    "label": "Units",
+    "metric": "Metric",
+    "imperial": "Imperial"
   }
 }

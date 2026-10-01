@@ -1,6 +1,8 @@
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
+import { UnitsProvider } from '@/shared/units';
+
 interface AppProvidersProps {
   readonly queryClient: QueryClient;
   readonly children: ReactNode;
@@ -8,5 +10,9 @@ interface AppProvidersProps {
 
 /** Application-wide context shared by the app and its tests. */
 export function AppProviders({ queryClient, children }: AppProvidersProps) {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <UnitsProvider>{children}</UnitsProvider>
+    </QueryClientProvider>
+  );
 }

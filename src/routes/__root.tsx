@@ -3,6 +3,7 @@ import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router
 import { useTranslation } from 'react-i18next';
 
 import { buttonVariants } from '@/shared/ui/button-variants';
+import { UnitSwitch } from '@/shared/units';
 
 export interface RouterContext {
   queryClient: QueryClient;
@@ -23,9 +24,15 @@ function RootLayout() {
           <Link to="/" className="text-lg font-semibold text-brand-700">
             {t('app.name')}
           </Link>
-          <Link to="/ascents/new" className={buttonVariants({ variant: 'secondary', size: 'sm' })}>
-            {t('nav.addAscent')}
-          </Link>
+          <div className="flex items-center gap-3">
+            <UnitSwitch />
+            <Link
+              to="/ascents/new"
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
+            >
+              {t('nav.addAscent')}
+            </Link>
+          </div>
         </nav>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">

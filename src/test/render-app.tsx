@@ -15,12 +15,12 @@ export async function renderApp(url = '/') {
   });
   const user = userEvent.setup();
 
-  render(
+  const { unmount } = render(
     <AppProviders queryClient={queryClient}>
       <RouterProvider router={router} />
     </AppProviders>,
   );
   await router.load();
 
-  return { router, user, queryClient };
+  return { router, user, queryClient, unmount };
 }

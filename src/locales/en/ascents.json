@@ -50,5 +50,10 @@
       "unsupported": "This browser cannot share your location."
     },
     "fallback": "Move the map and search that area instead."
+  },
+  "filters": {
+    "radius": "Search radius",
+    "activities": "Activities",
+    "categories": "Categories"
   }
 }

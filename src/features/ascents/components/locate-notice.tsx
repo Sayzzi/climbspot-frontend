@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import type { GeolocationState } from '@/shared/lib/geolocation';
+import type { GeolocationState } from '@/shared/hooks/use-current-position';
 
 /** Tells the Visitor where locating them stands, and what to do when it fails. */
 export function LocateNotice({ state }: { readonly state: GeolocationState }) {

@@ -5,17 +5,12 @@ import { errorMessageKey } from '@/shared/api/error-message';
 import { Button } from '@/shared/ui/button';
 
 import { useCreateAscent } from '../api/create-ascent';
-import {
-  activitiesBySurface,
-  MAXIMUM_GPX_FILE_SIZE,
-  MAXIMUM_NAME_LENGTH,
-  surfaces,
-} from '../domain';
+import { activitiesBySurface, surfaces } from '../domain';
 import { useAscentLabels } from '../hooks/use-ascent-labels';
 import type { Ascent, Surface } from '../types';
+import { findUploadProblems, type UploadField } from '../upload-validation';
 
-type Field = 'name' | 'surface' | 'gpx';
-type FieldErrors = Partial<Record<Field, string>>;
+type FieldErrors = Partial<Record<UploadField, string>>;
 
 interface UploadFormProps {
   readonly onCreated: (ascent: Ascent) => void;
@@ -34,22 +29,19 @@ export function UploadForm({ onCreated }: UploadFormProps) {
   const [gpx, setGpx] = useState<File>();
   const [errors, setErrors] = useState<FieldErrors>({});
 
-  const validate = (): FieldErrors => {
-    const trimmed = name.trim();
-    return {
-      ...(trimmed === '' && { name: t('upload.errors.nameRequired') }),
-      ...(trimmed.length > MAXIMUM_NAME_LENGTH && { name: t('upload.errors.nameTooLong') }),
-      ...(surface === undefined && { surface: t('upload.errors.surfaceRequired') }),
-      ...(gpx === undefined && { gpx: t('upload.errors.fileRequired') }),
-      ...(gpx && gpx.size > MAXIMUM_GPX_FILE_SIZE && { gpx: t('upload.errors.fileTooLarge') }),
-    };
-  };
+  const validate = (): FieldErrors =>
+    Object.fromEntries(
+      Object.entries(findUploadProblems({ name, surface, gpx })).map(([field, problem]) => [
+        field,
+        t(`upload.errors.${problem}`),
+      ]),
+    );
 
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const found = validate();
-    setErrors(found);
-    if (Object.keys(found).length > 0 || !surface || !gpx || createAscent.isPending) {
+    const fieldErrors = validate();
+    setErrors(fieldErrors);
+    if (Object.keys(fieldErrors).length > 0 || !surface || !gpx || createAscent.isPending) {
       return;
     }
     createAscent.mutate({ name: name.trim(), surface, gpx }, { onSuccess: onCreated });
@@ -149,7 +141,7 @@ function FieldError({
   readonly message?: string | undefined;
 }) {
   return message ? (
-    <p id={id} className="text-sm text-red-700">
+    <p id={id} className="text-sm text-danger">
       {message}
     </p>
   ) : null;

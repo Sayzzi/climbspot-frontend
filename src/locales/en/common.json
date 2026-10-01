@@ -3,10 +3,6 @@
     "name": "ClimbSpot",
     "tagline": "Find the hills worth climbing near you."
   },
-  "home": {
-    "title": "Find climbs near you",
-    "description": "Discover ascents for running, trail running and cycling, sorted by how far their start is from you."
-  },
   "notFound": {
     "title": "Page not found",
     "description": "This page does not exist or has moved.",

@@ -10,7 +10,8 @@
     },
     "searchArea": "Search this area",
     "viewDetails": "View {{name}}",
-    "details": "View details →"
+    "details": "View details →",
+    "selected": "Selected climb"
   },
   "facts": {
     "distanceToStart": "{{distance}} to the start",
@@ -68,7 +69,9 @@
     "notFound": "Climb not found",
     "profile": {
       "title": "Elevation profile",
-      "summary": "Elevation profile: {{length}} from {{start}} to {{top}}, steepest stretch at {{steepest}}."
+      "summary": "Elevation profile: {{length}} from {{start}} to {{top}}, steepest stretch at {{steepest}}.",
+      "elevationAxis": "Elevation",
+      "distanceAxis": "Distance from the start"
     }
   },
   "upload": {
@@ -81,7 +84,7 @@
     "submitting": "Adding…",
     "errors": {
       "nameRequired": "Give the climb a name.",
-      "nameTooLong": "Keep the name under 100 characters.",
+      "nameTooLong": "Keep the name to 100 characters or fewer.",
       "surfaceRequired": "Choose a surface.",
       "fileRequired": "Choose a GPX file.",
       "fileTooLarge": "This file is larger than 5 MB."

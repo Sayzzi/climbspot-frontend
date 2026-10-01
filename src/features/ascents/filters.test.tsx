@@ -108,6 +108,16 @@ describe('Search filters', () => {
     expect(url?.searchParams.getAll('category')).toEqual(['cat4']);
   });
 
+  it('shows a shared radius that is not one of the presets', async () => {
+    const sent = nearbyApi();
+
+    await renderApp(`${AT_LE_BOURG}&radius=15000`);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+
+    expect(screen.getByRole('combobox', { name: 'Search radius' })).toHaveDisplayValue('15 km');
+    expect(sent.lastUrl()?.searchParams.get('radius')).toBe('15000');
+  });
+
   it('ignores filters that do not exist', async () => {
     const sent = nearbyApi();
 

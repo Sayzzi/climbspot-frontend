@@ -97,6 +97,19 @@ describe('Locating the Visitor', () => {
     expect(router.state.location.search).toMatchObject({ latitude: 45.92, longitude: 6.87 });
   });
 
+  it('offers to search the visible area as soon as the position is unknown', async () => {
+    const sent = nearbyApi();
+    stubGeolocation({ error: 'denied' });
+    const { user } = await renderApp('/');
+    await screen.findByText('Location access is turned off.');
+
+    await user.click(screen.getByRole('button', { name: 'Search this area' }));
+
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+    expect(sent.lastUrl()?.searchParams.get('latitude')).toBe('46.6');
+    expect(sent.lastUrl()?.searchParams.get('longitude')).toBe('2.5');
+  });
+
   it('does not offer to search an area before the map has moved', async () => {
     nearbyApi();
 

@@ -9,6 +9,7 @@ import { useFormatters } from '@/shared/units';
 import { ascentQuery } from '../api/ascent';
 import { useAscentLabels } from '../hooks/use-ascent-labels';
 import { BackToSearch } from './back-to-search';
+import { FactList } from './fact-list';
 import { ElevationProfileChart } from './elevation-profile-chart';
 
 /** Everything about one Ascent; its data is loaded by the route beforehand. */
@@ -22,15 +23,15 @@ export function AscentDetail({ id }: { readonly id: string }) {
 
   // GeoJSON pairs are [longitude, latitude].
   const path = ascent.path.coordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
-  const facts: [string, string][] = [
-    [t('facts.length'), format.distance(ascent.length)],
-    [t('facts.elevationGain'), format.elevation(ascent.elevationGain)],
-    [t('facts.averageGradient'), format.gradient(ascent.averageGradient)],
-    [t('facts.maximumGradient'), format.gradient(ascent.maximumGradient)],
-    [t('facts.difficultyScore'), format.number(ascent.difficultyScore)],
-    [t('facts.category'), labels.category(ascent.category)],
-    [t('facts.surface'), labels.surface(ascent.surface)],
-    [t('facts.activities'), labels.activities(ascent.activities)],
+  const facts = [
+    { term: t('facts.length'), value: format.distance(ascent.length) },
+    { term: t('facts.elevationGain'), value: format.elevation(ascent.elevationGain) },
+    { term: t('facts.averageGradient'), value: format.gradient(ascent.averageGradient) },
+    { term: t('facts.maximumGradient'), value: format.gradient(ascent.maximumGradient) },
+    { term: t('facts.difficultyScore'), value: format.number(ascent.difficultyScore) },
+    { term: t('facts.category'), value: labels.category(ascent.category) },
+    { term: t('facts.surface'), value: labels.surface(ascent.surface) },
+    { term: t('facts.activities'), value: labels.activities(ascent.activities) },
   ];
 
   return (
@@ -50,6 +51,8 @@ export function AscentDetail({ id }: { readonly id: string }) {
 
       <MapView
         label={t('detail.map', { name: ascent.name })}
+        center={ascent.start}
+        zoom={13}
         fitTo={path}
         line={path}
         markers={[
@@ -64,14 +67,7 @@ export function AscentDetail({ id }: { readonly id: string }) {
           <h2 id={measurementsId} className="mb-3 text-lg font-semibold">
             {t('detail.measurements')}
           </h2>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            {facts.map(([term, value]) => (
-              <div key={term} className="contents">
-                <dt className="text-ink-muted">{term}</dt>
-                <dd className="font-medium">{value}</dd>
-              </div>
-            ))}
-          </dl>
+          <FactList facts={facts} className="grid-cols-2 gap-y-2" />
         </section>
 
         <section aria-labelledby={profileId} className="rounded-xl bg-white p-4">

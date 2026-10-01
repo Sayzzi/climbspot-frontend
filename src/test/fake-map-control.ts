@@ -1,6 +1,7 @@
 import { act } from '@testing-library/react';
 
-import type { MapPosition, MapViewProps } from '@/shared/map/types';
+import type { Position } from '@/shared/lib/position';
+import type { MapViewProps } from '@/shared/map/types';
 
 let current: MapViewProps | undefined;
 
@@ -10,7 +11,7 @@ export const fakeMap = {
     current = props;
   },
   /** Simulates the Visitor panning the map to `center`. */
-  moveTo(center: MapPosition) {
+  moveTo(center: Position) {
     act(() => {
       current?.onAreaChange?.(center);
     });

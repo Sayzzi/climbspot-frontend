@@ -18,9 +18,17 @@
   --color-brand-800: oklch(0.47 0.157 37.3);
   --color-brand-900: oklch(0.408 0.123 38.2);
 
+  --color-start: oklch(0.596 0.145 163.2);
+  --color-danger: oklch(0.505 0.213 27.5);
+
   --color-surface: oklch(0.985 0.002 75);
   --color-ink: oklch(0.21 0.006 56);
   --color-ink-muted: oklch(0.45 0.01 56);
+}
+
+/* Read at runtime by the map, which cannot use utility classes: always emitted. */
+@theme static {
+  --color-route: #c2410c;
 }
 
 @layer base {

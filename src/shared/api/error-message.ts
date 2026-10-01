@@ -1,6 +1,9 @@
 import { ApiRequestError, NetworkError } from './request';
 
-/** Every error code the API may answer with, plus client-side failures. */
+/**
+ * Every error code the API may answer with, plus client-side failures. Written by hand:
+ * the API's schema types `code` as a plain string.
+ */
 export const errorCodes = [
   'BAD_REQUEST',
   'VALIDATION_FAILED',
@@ -27,7 +30,7 @@ export type ErrorMessageKey = `errors.${ErrorCode}`;
 const isKnown = (code: string): code is ErrorCode =>
   (errorCodes as readonly string[]).includes(code);
 
-/** Translation key (common namespace) describing any failure to the user. */
+/** Translation key (common namespace) describing any failure to the Visitor. */
 export function errorMessageKey(error: unknown): ErrorMessageKey {
   if (error instanceof NetworkError) {
     return 'errors.NETWORK_ERROR';

@@ -6,5 +6,13 @@ export { LocateNotice } from './components/locate-notice';
 export { NearbySearch } from './components/nearby-search';
 export { UploadForm } from './components/upload-form';
 export { SearchFilters, type SearchFilterValues } from './components/search-filters';
-export { activities, categories, MAXIMUM_RADIUS } from './domain';
+export { useLocateVisitor } from './hooks/use-locate-visitor';
+export {
+  filtersOf,
+  positionOf,
+  searchParamsSchema,
+  withFilters,
+  withPosition,
+  type SearchParams,
+} from './search-params';
 export type { NearbyCriteria, Position } from './types';

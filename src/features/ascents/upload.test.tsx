@@ -104,6 +104,16 @@ describe('Adding an Ascent', () => {
     expect(await (sent[0]?.gpx as File).text()).toBe('<gpx/>');
   });
 
+  it('leads back to the search page, not to the form, from the new Ascent', async () => {
+    createApi();
+    const { user } = await openForm();
+    await fill(user);
+    await user.click(submit());
+    await screen.findByRole('heading', { level: 1, name: 'Le Mur' });
+
+    expect(screen.getByRole('link', { name: 'Back to search' })).toHaveAttribute('href', '/');
+  });
+
   it('catches missing information before sending anything', async () => {
     const sent = createApi();
     const { user } = await openForm();
@@ -123,7 +133,7 @@ describe('Adding an Ascent', () => {
     await fill(user, { name: 'a'.repeat(101) });
     await user.click(submit());
 
-    expect(screen.getByText('Keep the name under 100 characters.')).toBeInTheDocument();
+    expect(screen.getByText('Keep the name to 100 characters or fewer.')).toBeInTheDocument();
     expect(sent).toHaveLength(0);
   });
 

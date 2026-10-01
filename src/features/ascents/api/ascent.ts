@@ -5,17 +5,32 @@ import { ApiRequestError, unwrap } from '@/shared/api/request';
 
 import type { Ascent } from '../types';
 
-/**
- * openapi-fetch widens the GeoJSON `[longitude, latitude]` tuples of an Ascent's
- * path to `number[][]`; the API contract guarantees pairs, so restore its type.
- */
-export const asAscent = (ascent: unknown) => ascent as Ascent;
+/** An Ascent as openapi-fetch types it: GeoJSON pairs widened to `number[]`. */
+type ReceivedAscent = Omit<Ascent, 'path'> & {
+  readonly path: { readonly type: 'LineString'; readonly coordinates: readonly number[][] };
+};
+
+/** Restores the `[longitude, latitude]` pairs the API contract guarantees, checking each one. */
+export function toAscent(received: ReceivedAscent): Ascent {
+  return {
+    ...received,
+    path: {
+      type: received.path.type,
+      coordinates: received.path.coordinates.map(([longitude, latitude]) => {
+        if (longitude === undefined || latitude === undefined) {
+          throw new TypeError('The API sent a path point without two coordinates.');
+        }
+        return [longitude, latitude];
+      }),
+    },
+  };
+}
 
 export function ascentQuery(id: string) {
   return queryOptions({
     queryKey: ['ascents', id],
     queryFn: async ({ signal }) =>
-      asAscent(await unwrap(apiClient.GET('/ascents/{id}', { params: { path: { id } }, signal }))),
+      toAscent(await unwrap(apiClient.GET('/ascents/{id}', { params: { path: { id } }, signal }))),
   });
 }
 

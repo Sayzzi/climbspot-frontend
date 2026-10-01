@@ -5,13 +5,11 @@ export type ApiError = components['schemas']['ApiError'];
 /** The API answered with an error (`ApiError` body and a 4xx/5xx status). */
 export class ApiRequestError extends Error {
   readonly code: string;
-  readonly status: number;
 
-  constructor(code: string, status: number, message: string) {
+  constructor(code: string, message: string) {
     super(message);
     this.name = 'ApiRequestError';
     this.code = code;
-    this.status = status;
   }
 }
 
@@ -48,7 +46,6 @@ export async function unwrap<R extends ClientResult>(
     const body = isApiError(error) ? error.error : undefined;
     throw new ApiRequestError(
       body?.code ?? 'UNKNOWN_ERROR',
-      response.status,
       body?.message ?? `HTTP ${String(response.status)}`,
     );
   }

@@ -27,6 +27,27 @@ describe('Ascent page', () => {
     expect(router.state.location.pathname).toBe(`/ascents/${ID}`);
   });
 
+  it('opens from a marker on the map', async () => {
+    server.use(
+      handlers.nearby(() =>
+        nearbyResults([
+          anAscentSummary({ id: 'other', name: 'La Bosse' }),
+          anAscentSummary({ id: ID, name: 'Le Mur' }),
+        ]),
+      ),
+    );
+    ascentApi({ name: 'Le Mur' });
+    const { router, user } = await renderApp('/?latitude=45&longitude=6');
+    const map = within(await screen.findByRole('region', { name: 'Map of nearby climbs' }));
+
+    await user.click(await map.findByRole('button', { name: 'Le Mur' }));
+    const selected = within(screen.getByRole('region', { name: 'Selected climb' }));
+    await user.click(selected.getByRole('link', { name: 'View Le Mur' }));
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Le Mur' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(`/ascents/${ID}`);
+  });
+
   it('shows the measurements, Surface and Activities', async () => {
     ascentApi({
       length: 1200,
@@ -82,6 +103,8 @@ describe('Ascent page', () => {
         name: 'Elevation profile: 1.2 km from 200 m to 296 m, steepest stretch at 10.5%.',
       }),
     ).toBeInTheDocument();
+    expect(screen.getByText('Elevation')).toBeInTheDocument();
+    expect(screen.getByText('Distance from the start')).toBeInTheDocument();
   });
 
   it('links to the Start in the maps app', async () => {

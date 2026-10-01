@@ -1,12 +1,8 @@
-/** A point on the map, in WGS 84 decimal degrees. */
-export interface MapPosition {
-  readonly latitude: number;
-  readonly longitude: number;
-}
+import type { Position } from '@/shared/lib/position';
 
 export interface MapMarker {
   readonly id: string;
-  readonly position: MapPosition;
+  readonly position: Position;
   /** Accessible name of the marker. */
   readonly label: string;
   readonly selected?: boolean;
@@ -16,16 +12,16 @@ export interface MapMarker {
 export interface MapViewProps {
   /** Accessible name of the map region. */
   readonly label: string;
-  /** Initial centre, used when there is nothing to frame. */
-  readonly center?: MapPosition;
-  readonly zoom?: number;
+  /** Centre of the map, followed when it changes; ignored while `fitTo` is set. */
+  readonly center: Position;
+  readonly zoom: number;
   /** Positions the map frames when it opens (e.g. a path). */
-  readonly fitTo?: readonly MapPosition[];
+  readonly fitTo?: readonly Position[];
   readonly markers?: readonly MapMarker[];
   /** A line drawn through these positions (e.g. an Ascent's path). */
-  readonly line?: readonly MapPosition[];
+  readonly line?: readonly Position[];
   readonly onMarkerSelect?: (id: string) => void;
-  /** Called with the new centre once the Visitor has moved the map. */
-  readonly onAreaChange?: (center: MapPosition) => void;
+  /** Called with the new centre once the Visitor (not the app) has moved the map. */
+  readonly onAreaChange?: (center: Position) => void;
   readonly className?: string;
 }

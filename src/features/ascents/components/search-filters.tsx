@@ -22,6 +22,9 @@ export function SearchFilters({ value, onChange }: SearchFiltersProps) {
   const { t } = useTranslation('ascents');
   const format = useFormatters();
   const labels = useAscentLabels();
+  const radius = value.radius ?? DEFAULT_RADIUS;
+  // A shared URL may carry any radius: list it so the control shows what is searched.
+  const radii = [...new Set([...SEARCH_RADII, radius])].sort((a, b) => a - b);
 
   return (
     <form
@@ -34,15 +37,15 @@ export function SearchFilters({ value, onChange }: SearchFiltersProps) {
         {t('filters.radius')}
         <select
           className="rounded-lg border border-brand-200 px-2 py-1"
-          value={value.radius ?? DEFAULT_RADIUS}
+          value={radius}
           onChange={(event) => {
-            const radius = Number(event.target.value);
-            onChange({ ...value, radius: radius === DEFAULT_RADIUS ? undefined : radius });
+            const chosen = Number(event.target.value);
+            onChange({ ...value, radius: chosen === DEFAULT_RADIUS ? undefined : chosen });
           }}
         >
-          {SEARCH_RADII.map((radius) => (
-            <option key={radius} value={radius}>
-              {format.distance(radius)}
+          {radii.map((option) => (
+            <option key={option} value={option}>
+              {format.distance(option)}
             </option>
           ))}
         </select>

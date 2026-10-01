@@ -1,13 +1,13 @@
-import { useState, type ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { errorMessageKey } from '@/shared/api/error-message';
-import { MapView, type MapPosition } from '@/shared/map';
+import { MapView } from '@/shared/map';
 import { Button } from '@/shared/ui/button';
+import { ErrorNotice } from '@/shared/ui/error-notice';
 
 import { useNearbyAscents } from '../api/nearby-ascents';
-import type { NearbyCriteria, Position } from '../types';
-import { AscentListItem } from './ascent-list-item';
+import type { NearbyAscent, NearbyCriteria, Position } from '../types';
+import { AscentLink, AscentListItem } from './ascent-list-item';
 
 /** Where the map opens when the Visitor's position is not known yet (mainland France). */
 const OVERVIEW: { center: Position; zoom: number } = {
@@ -29,10 +29,13 @@ interface NearbySearchProps {
 /** Map and list of the Ascents whose Start is closest to a position. */
 export function NearbySearch({ criteria, notice, onSearchArea }: NearbySearchProps) {
   const { t } = useTranslation('ascents');
-  const { t: tCommon } = useTranslation();
   const { data: ascents, error, isFetching, refetch } = useNearbyAscents(criteria);
   const [selectedId, setSelectedId] = useState<string>();
-  const [movedTo, setMovedTo] = useState<MapPosition>();
+  const [movedTo, setMovedTo] = useState<Position>();
+  const selected = ascents?.find((ascent) => ascent.id === selectedId);
+
+  // Without a position, searching the visible area is the way forward, moved or not.
+  const areaToSearch = movedTo ?? (criteria ? undefined : OVERVIEW.center);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -51,18 +54,19 @@ export function NearbySearch({ criteria, notice, onSearchArea }: NearbySearchPro
           onAreaChange={setMovedTo}
           className="h-80 lg:sticky lg:top-6 lg:h-[36rem]"
         />
-        {movedTo && (
+        {areaToSearch && (
           <Button
             size="sm"
             className="absolute top-3 left-1/2 -translate-x-1/2 shadow-md"
             onClick={() => {
-              onSearchArea(movedTo);
+              onSearchArea(areaToSearch);
               setMovedTo(undefined);
             }}
           >
             {t('search.searchArea')}
           </Button>
         )}
+        {selected && <SelectedAscent ascent={selected} />}
       </div>
 
       <div className="flex flex-col gap-4" aria-busy={isFetching}>
@@ -71,17 +75,12 @@ export function NearbySearch({ criteria, notice, onSearchArea }: NearbySearchPro
         {isFetching && <p className="text-sm text-ink-muted">{t('search.loading')}</p>}
 
         {error && (
-          <div role="alert" className="flex flex-col items-start gap-3 rounded-xl bg-brand-50 p-4">
-            <p>{tCommon(errorMessageKey(error))}</p>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                void refetch();
-              }}
-            >
-              {tCommon('actions.retry')}
-            </Button>
-          </div>
+          <ErrorNotice
+            error={error}
+            onRetry={() => {
+              void refetch();
+            }}
+          />
         )}
 
         {ascents?.length === 0 && (
@@ -105,5 +104,24 @@ export function NearbySearch({ criteria, notice, onSearchArea }: NearbySearchPro
         )}
       </div>
     </div>
+  );
+}
+
+/** Card over the map for the Ascent selected there, so it can be opened from the map. */
+function SelectedAscent({ ascent }: { readonly ascent: NearbyAscent }) {
+  const { t } = useTranslation('ascents');
+  const titleId = useId();
+
+  return (
+    <section
+      aria-label={t('search.selected')}
+      aria-describedby={titleId}
+      className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-lg"
+    >
+      <p id={titleId} className="font-semibold">
+        {ascent.name}
+      </p>
+      <AscentLink ascent={ascent} />
+    </section>
   );
 }

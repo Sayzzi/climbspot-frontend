@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 
+import type { Position } from '@/shared/lib/position';
+
 export type GeolocationFailure = 'denied' | 'unavailable' | 'timeout' | 'unsupported';
 
 export type GeolocationState =
   | { readonly status: 'idle' }
   | { readonly status: 'locating' }
-  | {
-      readonly status: 'located';
-      readonly position: { readonly latitude: number; readonly longitude: number };
-    }
+  | { readonly status: 'located'; readonly position: Position }
   | { readonly status: 'failed'; readonly failure: GeolocationFailure };
 
 const failures: Record<number, GeolocationFailure> = {
@@ -23,13 +22,14 @@ const options: PositionOptions = {
   maximumAge: 300_000,
 };
 
-type Answer = Extract<GeolocationState, { status: 'located' | 'failed' }>;
+/** What the browser eventually answers. */
+type BrowserAnswer = Extract<GeolocationState, { status: 'located' | 'failed' }>;
 
 /** Asks the browser for the current position once, while `enabled`. */
 export function useCurrentPosition(enabled: boolean): GeolocationState {
   // Read at render time: `navigator.geolocation` is absent in some browsers (and in jsdom).
   const geolocation = navigator.geolocation as Geolocation | undefined;
-  const [answer, setAnswer] = useState<Answer>();
+  const [answer, setAnswer] = useState<BrowserAnswer>();
 
   useEffect(() => {
     if (!enabled || geolocation === undefined) {

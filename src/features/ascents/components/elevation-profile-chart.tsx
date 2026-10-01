@@ -6,7 +6,7 @@ import type { Ascent } from '../types';
 
 const WIDTH = 640;
 const HEIGHT = 220;
-const PADDING = { top: 16, right: 16, bottom: 28, left: 56 };
+const PADDING = { top: 28, right: 16, bottom: 44, left: 64 };
 
 interface ElevationProfileChartProps {
   readonly ascent: Pick<
@@ -70,11 +70,17 @@ export function ElevationProfileChart({ ascent }: ElevationProfileChartProps) {
         <text x={PADDING.left - 8} y={y(lowest)} textAnchor="end" className="fill-ink-muted">
           {format.elevation(lowest)}
         </text>
-        <text x={PADDING.left} y={HEIGHT - 8} className="fill-ink-muted">
+        <text x={PADDING.left} y={HEIGHT - 26} className="fill-ink-muted">
           {format.distance(0)}
         </text>
-        <text x={x(length)} y={HEIGHT - 8} textAnchor="end" className="fill-ink-muted">
+        <text x={x(length)} y={HEIGHT - 26} textAnchor="end" className="fill-ink-muted">
           {format.distance(length)}
+        </text>
+        <text x={PADDING.left} y={14} className="fill-ink font-medium">
+          {t('detail.profile.elevationAxis')}
+        </text>
+        <text x={x(length)} y={HEIGHT - 6} textAnchor="end" className="fill-ink font-medium">
+          {t('detail.profile.distanceAxis')}
         </text>
       </g>
     </svg>

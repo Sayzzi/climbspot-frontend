@@ -6,6 +6,7 @@ import { useFormatters } from '@/shared/units';
 
 import { useAscentLabels } from '../hooks/use-ascent-labels';
 import type { NearbyAscent } from '../types';
+import { FactList } from './fact-list';
 
 interface AscentListItemProps {
   readonly ascent: NearbyAscent;
@@ -43,36 +44,46 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
             {t('facts.distanceToStart', { distance: format.distance(ascent.distanceToStart) })}
           </span>
         </header>
-        <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-4">
-          <Fact term={t('facts.length')} value={format.distance(ascent.length)} />
-          <Fact term={t('facts.elevationGain')} value={format.elevation(ascent.elevationGain)} />
-          <Fact term={t('facts.averageGradient')} value={format.gradient(ascent.averageGradient)} />
-          <Fact term={t('facts.category')} value={labels.category(ascent.category)} />
-          <Fact term={t('facts.surface')} value={labels.surface(ascent.surface)} />
-          <Fact
-            term={t('facts.activities')}
-            value={labels.activities(ascent.activities)}
-            className="col-span-2 sm:col-span-3"
-          />
-        </dl>
-        <Link
-          to="/ascents/$ascentId"
-          params={{ ascentId: ascent.id }}
-          aria-label={t('search.viewDetails', { name: ascent.name })}
-          className="mt-3 inline-block text-sm font-medium text-brand-700 hover:underline"
-        >
-          {t('search.details')}
-        </Link>
+        <FactList
+          className="mt-3 grid-cols-2 sm:grid-cols-4"
+          facts={[
+            { term: t('facts.length'), value: format.distance(ascent.length) },
+            { term: t('facts.elevationGain'), value: format.elevation(ascent.elevationGain) },
+            { term: t('facts.averageGradient'), value: format.gradient(ascent.averageGradient) },
+            { term: t('facts.category'), value: labels.category(ascent.category) },
+            { term: t('facts.surface'), value: labels.surface(ascent.surface) },
+            {
+              term: t('facts.activities'),
+              value: labels.activities(ascent.activities),
+              className: 'col-span-2 sm:col-span-3',
+            },
+          ]}
+        />
+        <AscentLink ascent={ascent} className="mt-3 inline-block" />
       </article>
     </li>
   );
 }
 
-function Fact({ term, value, className }: { term: string; value: string; className?: string }) {
+/** Opens an Ascent's page, remembering that the Visitor came from the search. */
+export function AscentLink({
+  ascent,
+  className,
+}: {
+  readonly ascent: Pick<NearbyAscent, 'id' | 'name'>;
+  readonly className?: string;
+}) {
+  const { t } = useTranslation('ascents');
+
   return (
-    <div className={className}>
-      <dt className="text-ink-muted">{term}</dt>
-      <dd className="font-medium">{value}</dd>
-    </div>
+    <Link
+      to="/ascents/$ascentId"
+      params={{ ascentId: ascent.id }}
+      state={{ fromSearch: true }}
+      aria-label={t('search.viewDetails', { name: ascent.name })}
+      className={cn('text-sm font-medium text-brand-700 hover:underline', className)}
+    >
+      {t('search.details')}
+    </Link>
   );
 }

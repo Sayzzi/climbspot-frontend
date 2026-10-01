@@ -1,28 +1,20 @@
 import { useRouter } from '@tanstack/react-router';
-import { useTranslation } from 'react-i18next';
 
-import { errorMessageKey } from '@/shared/api/error-message';
-import { Button } from '@/shared/ui/button';
+import { ErrorNotice } from '@/shared/ui/error-notice';
 
-import { BackToSearchLink } from './back-to-search-link';
+import { BackToSearch } from './back-to-search';
 
 export function AscentLoadError({ error }: { readonly error: unknown }) {
-  const { t } = useTranslation();
   const router = useRouter();
 
   return (
-    <section role="alert" className="flex flex-col items-start gap-4">
-      <p>{t(errorMessageKey(error))}</p>
-      <div className="flex gap-3">
-        <Button
-          onClick={() => {
-            void router.invalidate();
-          }}
-        >
-          {t('actions.retry')}
-        </Button>
-        <BackToSearchLink />
-      </div>
-    </section>
+    <ErrorNotice
+      error={error}
+      onRetry={() => {
+        void router.invalidate();
+      }}
+    >
+      <BackToSearch variant="secondary" />
+    </ErrorNotice>
   );
 }

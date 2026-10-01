@@ -4,7 +4,7 @@ import { apiClient } from '@/shared/api/client';
 import { unwrap } from '@/shared/api/request';
 
 import type { Surface } from '../types';
-import { asAscent, ascentQuery } from './ascent';
+import { ascentQuery, toAscent } from './ascent';
 
 export interface NewAscent {
   readonly name: string;
@@ -23,7 +23,7 @@ export function useCreateAscent() {
       form.set('surface', surface);
       form.set('gpx', gpx, gpx.name);
 
-      return asAscent(
+      return toAscent(
         await unwrap(
           apiClient.POST('/ascents', {
             // The typed body only documents the fields; the file travels as multipart.

@@ -42,6 +42,7 @@ export function MapView({
   line,
   onMarkerSelect,
   onAreaChange,
+  onMapClick,
   interactive = true,
   className,
 }: MapViewProps) {
@@ -108,6 +109,9 @@ export function MapView({
             event.target.touchZoomRotate.disable();
             event.target.doubleClickZoom.disable();
           }
+        }}
+        onClick={(event) => {
+          onMapClick?.({ latitude: event.lngLat.lat, longitude: event.lngLat.lng });
         }}
         onMoveEnd={(event) => {
           // Only moves made by the Visitor carry the DOM event that caused them;

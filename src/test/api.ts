@@ -5,6 +5,8 @@ import type { components } from '@/shared/api/schema.gen';
 export type AscentSummary = components['schemas']['NearbyAscents']['ascents'][number];
 export type Ascent = components['schemas']['Ascent'];
 export type ApiError = components['schemas']['ApiError'];
+export type UphillItinerary = components['schemas']['UphillItinerary'];
+export type LoopItinerary = components['schemas']['LoopItinerary'];
 
 const API_URL = 'http://localhost:3000';
 
@@ -71,6 +73,65 @@ export function anAscent(overrides: Partial<Ascent> = {}): Ascent {
   };
 }
 
+export function anUphillItinerary(overrides: Partial<UphillItinerary> = {}): UphillItinerary {
+  return {
+    kind: 'uphill',
+    exact: true,
+    differences: [],
+    path: {
+      type: 'LineString',
+      coordinates: [
+        [6.001, 45.001],
+        [6.001, 45.01],
+        [6.002, 45.02],
+        [6.002, 45.028],
+      ],
+    },
+    elevationProfile: [
+      { distance: 0, elevation: 450 },
+      { distance: 1500, elevation: 520 },
+      { distance: 3000, elevation: 585 },
+    ],
+    length: 3000,
+    heightGained: 135,
+    start: { latitude: 45.001, longitude: 6.001, elevation: 450 },
+    top: { latitude: 45.028, longitude: 6.002, elevation: 585 },
+    elevationGain: 135,
+    averageGradient: 0.045,
+    maximumGradient: 0.08,
+    difficultyScore: 13_500,
+    category: 'cat4',
+    distanceToStart: 800,
+    ...overrides,
+  };
+}
+
+export function aLoopItinerary(overrides: Partial<LoopItinerary> = {}): LoopItinerary {
+  return {
+    kind: 'loop',
+    exact: true,
+    differences: [],
+    path: {
+      type: 'LineString',
+      coordinates: [
+        [6, 45],
+        [6.01, 45.01],
+        [6.02, 45],
+        [6, 45],
+      ],
+    },
+    elevationProfile: [
+      { distance: 0, elevation: 450 },
+      { distance: 2800, elevation: 520 },
+      { distance: 5600, elevation: 450 },
+    ],
+    length: 5600,
+    heightGained: 105,
+    relief: 'rolling',
+    ...overrides,
+  };
+}
+
 export const handlers = {
   nearby: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
@@ -80,6 +141,12 @@ export const handlers = {
     http.get(apiUrl('/ascents/:id'), ({ params }) =>
       params.id === 'nearby' ? undefined : respond(String(params.id)),
     ),
+  uphill: (
+    respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
+  ) => http.post(apiUrl('/itineraries/uphill'), ({ request }) => respond(request)),
+  loops: (
+    respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
+  ) => http.post(apiUrl('/itineraries/loops'), ({ request }) => respond(request)),
   createAscent: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/ascents'), ({ request }) => respond(request)),

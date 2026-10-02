@@ -19,6 +19,7 @@ export const errorCodes = [
   'ASCENT_TOO_LOW',
   'ASCENT_DIP_TOO_LARGE',
   'ELEVATION_UNAVAILABLE',
+  'ROUTING_UNAVAILABLE',
   'NETWORK_ERROR',
   'UNKNOWN_ERROR',
 ] as const;

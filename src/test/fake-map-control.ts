@@ -10,6 +10,12 @@ export const fakeMap = {
   register(props: MapViewProps | undefined) {
     current = props;
   },
+  /** Simulates the Visitor clicking or tapping the map at `position`. */
+  click(position: Position) {
+    act(() => {
+      current?.onMapClick?.(position);
+    });
+  },
   /** Simulates the Visitor panning the map to `center`. */
   moveTo(center: Position) {
     act(() => {

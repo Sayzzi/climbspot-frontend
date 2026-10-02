@@ -1,2 +1,2 @@
 export { MapView } from './map-view';
-export type { MapMarker, MapViewProps } from './types';
+export type { MapMarker, MapOverlay, MapViewProps } from './types';

@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 
 import { apiClient } from '@/shared/api/client';
+import { toPairs } from '@/shared/api/geojson';
 import { ApiRequestError, unwrap } from '@/shared/api/request';
 
 import type { Ascent } from '../types';
@@ -10,19 +11,11 @@ type ReceivedAscent = Omit<Ascent, 'path'> & {
   readonly path: { readonly type: 'LineString'; readonly coordinates: readonly number[][] };
 };
 
-/** Restores the `[longitude, latitude]` pairs the API contract guarantees, checking each one. */
+/** Restores the `[longitude, latitude]` pairs the API contract guarantees. */
 export function toAscent(received: ReceivedAscent): Ascent {
   return {
     ...received,
-    path: {
-      type: received.path.type,
-      coordinates: received.path.coordinates.map(([longitude, latitude]) => {
-        if (longitude === undefined || latitude === undefined) {
-          throw new TypeError('The API sent a path point without two coordinates.');
-        }
-        return [longitude, latitude];
-      }),
-    },
+    path: { type: received.path.type, coordinates: toPairs(received.path.coordinates) },
   };
 }
 

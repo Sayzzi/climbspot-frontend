@@ -24,7 +24,8 @@
     "ASCENT_DIP_TOO_LARGE": "This path goes down too much along the way. Split it into two climbs.",
     "ELEVATION_UNAVAILABLE": "Elevation data is temporarily unavailable. Please try again in a moment.",
     "NETWORK_ERROR": "We could not reach ClimbSpot. Check your connection.",
-    "UNKNOWN_ERROR": "Something unexpected happened. Please try again."
+    "UNKNOWN_ERROR": "Something unexpected happened. Please try again.",
+    "ROUTING_UNAVAILABLE": "Planning is temporarily unavailable. Please try again in a moment."
   },
   "actions": {
     "retry": "Try again"

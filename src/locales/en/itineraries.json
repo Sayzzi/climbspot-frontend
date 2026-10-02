@@ -1,0 +1,41 @@
+{
+  "tab": "Plan",
+  "start": {
+    "hint": "Click or tap the map to place your starting point.",
+    "placed": "Starting point placed. Click the map to move it.",
+    "missing": "Place your starting point on the map first.",
+    "marker": "Starting point"
+  },
+  "uphill": {
+    "minGradient": "Gradient from",
+    "maxGradient": "Gradient to",
+    "length": "Length",
+    "radius": "Within",
+    "submit": "Find uphill itineraries"
+  },
+  "activity": "Activity",
+  "submitting": "Finding itineraries…",
+  "results": "Proposed itineraries",
+  "show": "Show {{name}}",
+  "name": {
+    "uphill": "{{length}} at {{gradient}}"
+  },
+  "exact": "Matches your request",
+  "close": {
+    "gradient": "Close match: {{actual}} instead of {{min}}–{{max}}"
+  },
+  "away": "{{distance}} away",
+  "facts": {
+    "length": "Length",
+    "elevationGain": "Elevation gain",
+    "averageGradient": "Average gradient",
+    "maximumGradient": "Maximum gradient",
+    "category": "Category",
+    "distanceToStart": "From your point"
+  },
+  "profile": "Elevation profile: {{length}} from {{start}} to {{top}}.",
+  "empty": {
+    "title": "No itinerary found around this point.",
+    "hint": "Try another point, another Activity or a wider Gradient range."
+  }
+}

@@ -9,6 +9,13 @@ export interface MapMarker {
   readonly tone?: 'default' | 'start' | 'top';
 }
 
+/** What a panel adds to the map while it is shown: its markers, a line, and clicks. */
+export interface MapOverlay {
+  readonly markers?: readonly MapMarker[];
+  readonly line?: readonly Position[];
+  readonly onMapClick?: (position: Position) => void;
+}
+
 export interface MapViewProps {
   /** Accessible name of the map region. */
   readonly label: string;
@@ -21,6 +28,8 @@ export interface MapViewProps {
   /** A line drawn through these positions (e.g. an Ascent's path). */
   readonly line?: readonly Position[];
   readonly onMarkerSelect?: (id: string) => void;
+  /** Called with the position the Visitor clicked or tapped on the map. */
+  readonly onMapClick?: (position: Position) => void;
   /** When false, the map ignores panning and zooming gestures (default true). */
   readonly interactive?: boolean;
   /** Called with the new centre once the Visitor (not the app) has moved the map. */

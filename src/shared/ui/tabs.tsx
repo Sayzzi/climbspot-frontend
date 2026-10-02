@@ -11,12 +11,18 @@ export interface Tab {
 interface TabsProps {
   readonly label: string;
   readonly tabs: readonly Tab[];
+  /** Called with the id of the tab the Visitor opened. */
+  readonly onSelect?: (id: string) => void;
   readonly className?: string;
 }
 
 /** Tabs following the WAI-ARIA pattern: arrow keys move between tabs. */
-export function Tabs({ label, tabs, className }: TabsProps) {
-  const [selected, setSelected] = useState(tabs[0]?.id);
+export function Tabs({ label, tabs, onSelect, className }: TabsProps) {
+  const [selected, setSelectedState] = useState(tabs[0]?.id);
+  const setSelected = (id: string) => {
+    setSelectedState(id);
+    onSelect?.(id);
+  };
   const prefix = useId();
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
 

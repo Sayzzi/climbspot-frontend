@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import { prefersReducedMotion } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
-import { MapView } from '@/shared/map';
+import { MapView, type MapOverlay } from '@/shared/map';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
-import { Tabs } from '@/shared/ui/tabs';
+import { Tabs, type Tab } from '@/shared/ui/tabs';
 
 import { useNearbyAscents } from '../api/nearby-ascents';
 import type { NearbyAscent, NearbyCriteria, Position } from '../types';
@@ -34,6 +34,8 @@ interface NearbySearchProps {
   readonly onSearchArea: (center: Position) => void;
   /** How far the map has been revealed, from 0 (behind the page's title) to 1. */
   readonly reveal: number;
+  /** More tabs for the panel; each may add markers, a line and clicks to the map while open. */
+  readonly extraTabs?: readonly (Tab & { readonly mapOverlay?: MapOverlay })[];
 }
 
 /**
@@ -46,6 +48,7 @@ export function NearbySearch({
   notice,
   onSearchArea,
   reveal,
+  extraTabs = [],
 }: NearbySearchProps) {
   const { t } = useTranslation('ascents');
   const { data: ascents, error, isFetching, refetch } = useNearbyAscents(criteria);
@@ -54,6 +57,8 @@ export function NearbySearch({
   const selected = ascents?.find((ascent) => ascent.id === selectedId);
   const revealed = reveal >= REVEALED;
   const panelReveal = Math.max(0, reveal * 2 - 1);
+  const [activeTab, setActiveTab] = useState('climbs');
+  const overlay = extraTabs.find((tab) => tab.id === activeTab)?.mapOverlay;
 
   // Without a position, searching the visible area is the way forward, moved or not.
   const areaToSearch = movedTo ?? (criteria ? undefined : OVERVIEW.center);
@@ -97,12 +102,17 @@ export function NearbySearch({
         label={t('search.map')}
         center={criteria?.position ?? OVERVIEW.center}
         zoom={criteria ? SEARCH_ZOOM : OVERVIEW.zoom}
-        markers={(ascents ?? []).map((ascent) => ({
-          id: ascent.id,
-          position: ascent.start,
-          label: ascent.name,
-          selected: ascent.id === selectedId,
-        }))}
+        markers={[
+          ...(ascents ?? []).map((ascent) => ({
+            id: ascent.id,
+            position: ascent.start,
+            label: ascent.name,
+            selected: ascent.id === selectedId,
+          })),
+          ...(overlay?.markers ?? []),
+        ]}
+        {...(overlay?.line && { line: overlay.line })}
+        {...(overlay?.onMapClick && { onMapClick: overlay.onMapClick })}
         onMarkerSelect={setSelectedId}
         onAreaChange={setMovedTo}
         interactive={revealed}
@@ -153,7 +163,9 @@ export function NearbySearch({
           tabs={[
             { id: 'climbs', label: t('search.tabs.climbs'), content: results },
             { id: 'filters', label: t('search.tabs.filters'), content: filters },
+            ...extraTabs,
           ]}
+          onSelect={setActiveTab}
         />
       </aside>
     </div>

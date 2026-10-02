@@ -13,6 +13,7 @@ import {
   type Position,
   type SearchFilterValues,
 } from '@/features/ascents';
+import { useItineraryPlanner } from '@/features/itineraries';
 import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 
 import { HomeHero } from './-components/home-hero';
@@ -28,6 +29,7 @@ function SearchPage() {
   const position = positionOf(search);
   const filters = filtersOf(search);
   const reveal = useScrollProgress();
+  const planner = useItineraryPlanner();
 
   // Searches stay on the map: the router must not scroll back to the title.
   const searchAround = (center: Position, replace = false) => {
@@ -62,6 +64,7 @@ function SearchPage() {
         notice={position ? undefined : <LocateNotice state={located} />}
         onSearchArea={searchAround}
         reveal={reveal}
+        extraTabs={[planner]}
       />
       <HomeHero reveal={reveal} />
       {/* Scroll distance that dissolves the name and reveals the map. */}

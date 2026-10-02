@@ -4,6 +4,7 @@ import '@/shared/i18n/i18n';
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
+import './downloads';
 import './geolocation';
 import './languages';
 import { server } from './server';

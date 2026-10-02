@@ -89,7 +89,7 @@ Principles applied:
 Tests act like a Visitor: they render the whole app at a URL (`renderApp` in `src/test/render-app.tsx`), interact through roles, labels and text with Testing Library, and assert on what is shown or what the URL becomes. Only three boundaries are replaced:
 
 - **The API**, by [MSW](https://mswjs.io/) (`src/test/server.ts`; handlers and fixtures typed from the generated schema in `src/test/api.ts`). A request without a handler fails.
-- **The browser**: geolocation (`stubGeolocation`), preferred languages (`stubLanguages`, en-GB by default) and the APIs jsdom lacks or tests must break: `scrollTo` (not implemented) and `localStorage` (made to fail when testing the fallback).
+- **The browser**: geolocation (`stubGeolocation`), preferred languages (`stubLanguages`, en-GB by default) and the APIs jsdom lacks or tests must break: `scrollTo` (not implemented), file downloads (recorded, read back with `savedFiles`) and `localStorage` (made to fail when testing the fallback).
 - **The map**: MapLibre needs WebGL, which jsdom lacks, so `shared/map` is replaced by a fake that renders markers as buttons; `fakeMap.moveTo()` simulates panning. The real map is checked by hand against a running API.
 
 ## Styling

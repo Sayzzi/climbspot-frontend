@@ -47,6 +47,11 @@
     "heightGained": "Height gained",
     "relief": "Relief"
   },
+  "download": "Download GPX",
+  "file": {
+    "uphill": "ClimbSpot uphill {{length}} at {{gradient}}",
+    "loop": "ClimbSpot loop {{length}}"
+  },
   "profile": {
     "uphill": "Elevation profile: {{length}} from {{start}} to {{top}}.",
     "loop": "Elevation profile: {{length}}, between {{lowest}} and {{highest}}."

@@ -2,9 +2,12 @@ import { useTranslation } from 'react-i18next';
 
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { cn } from '@/shared/lib/cn';
+import { saveFile } from '@/shared/lib/save-file';
+import { Button } from '@/shared/ui/button';
 import { FactList } from '@/shared/ui/fact-list';
 import { useFormatters } from '@/shared/units';
 
+import { GPX_TYPE, gpxFileName, toGpx } from '../gpx';
 import type { Itinerary } from '../types';
 
 interface ProposalCardProps {
@@ -18,6 +21,7 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
   const { t } = useTranslation('itineraries');
   const name = useItineraryName(proposal);
   const facts = useFacts(proposal);
+  const fileName = useFileName(proposal);
 
   return (
     <article
@@ -41,6 +45,19 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
         {proposal.exact ? t('exact') : <Differences proposal={proposal} />}
       </p>
       <FactList className="mt-2 grid-cols-3" facts={facts} />
+      {selected && (
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="mt-3"
+          onClick={() => {
+            saveFile(gpxFileName(fileName), toGpx(proposal, fileName), GPX_TYPE);
+          }}
+        >
+          {t('download')}
+        </Button>
+      )}
     </article>
   );
 }
@@ -55,6 +72,18 @@ function useItineraryName(proposal: Itinerary): string {
         gradient: format.gradient(proposal.averageGradient),
       })
     : t('name.loop', { length: format.distance(proposal.length) });
+}
+
+function useFileName(proposal: Itinerary): string {
+  const { t } = useTranslation('itineraries');
+  const format = useFormatters();
+
+  return proposal.kind === 'uphill'
+    ? t('file.uphill', {
+        length: format.distance(proposal.length),
+        gradient: format.gradient(proposal.averageGradient),
+      })
+    : t('file.loop', { length: format.distance(proposal.length) });
 }
 
 function useFacts(proposal: Itinerary) {

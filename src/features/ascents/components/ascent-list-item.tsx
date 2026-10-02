@@ -23,19 +23,20 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
     <li>
       <article
         className={cn(
-          'rounded-xl border bg-white p-4 transition-colors',
-          selected ? 'border-brand-500 ring-2 ring-brand-200' : 'border-brand-100',
+          // A waymark-red edge marks the Ascent selected on the map.
+          '-mx-4 border-l-4 px-3 py-4 transition-colors',
+          selected ? 'border-blaze bg-lichen/60' : 'border-transparent',
         )}
       >
         <header className="flex items-baseline justify-between gap-4">
-          <h3 className="text-lg font-semibold">
+          <h3 className="text-xl leading-tight font-semibold">
             <button
               type="button"
               aria-pressed={selected}
               onClick={() => {
                 onSelect(ascent.id);
               }}
-              className="text-left hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-brand-600"
+              className="text-left hover:underline focus-visible:outline-2 focus-visible:outline-pine"
             >
               {ascent.name}
             </button>
@@ -45,7 +46,7 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
           </span>
         </header>
         <FactList
-          className="mt-3 grid-cols-2 sm:grid-cols-4"
+          className="mt-2 grid-cols-3"
           facts={[
             { term: t('facts.length'), value: format.distance(ascent.length) },
             { term: t('facts.elevationGain'), value: format.elevation(ascent.elevationGain) },
@@ -55,7 +56,7 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
             {
               term: t('facts.activities'),
               value: labels.activities(ascent.activities),
-              className: 'col-span-2 sm:col-span-3',
+              className: 'col-span-3',
             },
           ]}
         />
@@ -81,7 +82,10 @@ export function AscentLink({
       params={{ ascentId: ascent.id }}
       state={{ fromSearch: true }}
       aria-label={t('search.viewDetails', { name: ascent.name })}
-      className={cn('text-sm font-medium text-brand-700 hover:underline', className)}
+      className={cn(
+        'text-sm font-semibold text-pine underline decoration-pine/30 underline-offset-4 hover:decoration-pine focus-visible:outline-2 focus-visible:outline-pine',
+        className,
+      )}
     >
       {t('search.details')}
     </Link>

@@ -50,10 +50,10 @@ export function ElevationProfileChart({ ascent }: ElevationProfileChartProps) {
       className="h-auto w-full"
     >
       <g aria-hidden="true" className="text-xs">
-        <path d={area} className="fill-brand-100" />
+        <path d={area} className="fill-blaze/10" />
         <polyline
           points={line.join(' ')}
-          className="fill-none stroke-brand-600"
+          className="fill-none stroke-blaze"
           strokeWidth={2.5}
           strokeLinejoin="round"
         />
@@ -62,7 +62,7 @@ export function ElevationProfileChart({ ascent }: ElevationProfileChartProps) {
           x2={WIDTH - PADDING.right}
           y1={baseline}
           y2={baseline}
-          className="stroke-brand-200"
+          className="stroke-pine/20"
         />
         <text x={PADDING.left - 8} y={y(highest)} textAnchor="end" className="fill-ink-muted">
           {format.elevation(highest)}

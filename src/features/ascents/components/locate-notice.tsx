@@ -11,8 +11,8 @@ export function LocateNotice({ state }: { readonly state: GeolocationState }) {
   }
   if (state.status === 'failed') {
     return (
-      <div role="status" className="rounded-xl bg-brand-50 p-4">
-        <p className="font-medium">{t(`locate.failures.${state.failure}`)}</p>
+      <div role="status" className="rounded-lg bg-lichen p-4">
+        <p className="font-semibold">{t(`locate.failures.${state.failure}`)}</p>
         <p className="text-sm text-ink-muted">{t('locate.fallback')}</p>
       </div>
     );

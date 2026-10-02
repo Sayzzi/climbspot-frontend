@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useTranslation } from 'react-i18next';
 
 import {
   filtersOf,
@@ -14,6 +13,9 @@ import {
   type Position,
   type SearchFilterValues,
 } from '@/features/ascents';
+import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
+
+import { HomeHero } from './-components/home-hero';
 
 export const Route = createFileRoute('/')({
   validateSearch: searchParamsSchema,
@@ -21,11 +23,11 @@ export const Route = createFileRoute('/')({
 });
 
 function SearchPage() {
-  const { t } = useTranslation('ascents');
   const navigate = useNavigate({ from: Route.fullPath });
   const search = Route.useSearch();
   const position = positionOf(search);
   const filters = filtersOf(search);
+  const reveal = useScrollProgress();
 
   const searchAround = (center: Position, replace = false) => {
     void navigate({ search: (previous) => withPosition(previous, center), replace });
@@ -37,19 +39,24 @@ function SearchPage() {
   });
 
   return (
-    <section className="flex flex-col gap-6">
-      <h1 className="text-3xl font-bold tracking-tight">{t('search.title')}</h1>
-      <SearchFilters
-        value={filters}
-        onChange={(next: SearchFilterValues) => {
-          void navigate({ search: (previous) => withFilters(previous, next), replace: true });
-        }}
-      />
+    <>
       <NearbySearch
         criteria={position && { position, ...filters }}
+        filters={
+          <SearchFilters
+            value={filters}
+            onChange={(next: SearchFilterValues) => {
+              void navigate({ search: (previous) => withFilters(previous, next), replace: true });
+            }}
+          />
+        }
         notice={position ? undefined : <LocateNotice state={located} />}
         onSearchArea={searchAround}
+        reveal={reveal}
       />
-    </section>
+      <HomeHero reveal={reveal} />
+      {/* Scroll distance that dissolves the name and reveals the map. */}
+      <div aria-hidden="true" className="h-[200vh]" />
+    </>
   );
 }

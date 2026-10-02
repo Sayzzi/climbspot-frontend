@@ -80,6 +80,7 @@ describe('Units', () => {
     expect(result.getByText('0.9 mi to the start')).toBeInTheDocument();
     expect(result.getByText('315 ft')).toBeInTheDocument();
     expect(result.getByText('8%')).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: 'Filters' }));
     expect(screen.getByRole('combobox', { name: 'Search radius' })).toHaveDisplayValue('6.2 mi');
   });
 

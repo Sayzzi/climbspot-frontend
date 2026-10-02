@@ -1,38 +1,47 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens. Components only use these through Tailwind utilities
- * (e.g. `bg-brand-600`, `text-ink-muted`), never raw colour values.
+ * "Balise" theme: trail signposts and waymarks. Components only use these tokens
+ * through Tailwind utilities (e.g. `bg-pine`, `text-ink-muted`), never raw values.
  */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Barlow', ui-sans-serif, system-ui, sans-serif;
+  /* Condensed signpost lettering, for the name and headings. */
+  --font-display: 'Barlow Condensed', 'Barlow', ui-sans-serif, sans-serif;
 
-  --color-brand-50: oklch(0.98 0.016 73.7);
-  --color-brand-100: oklch(0.954 0.038 75.2);
-  --color-brand-200: oklch(0.901 0.076 70.7);
-  --color-brand-300: oklch(0.837 0.128 66.3);
-  --color-brand-400: oklch(0.75 0.183 55.9);
-  --color-brand-500: oklch(0.705 0.213 47.6);
-  --color-brand-600: oklch(0.646 0.222 41.1);
-  --color-brand-700: oklch(0.553 0.195 38.4);
-  --color-brand-800: oklch(0.47 0.157 37.3);
-  --color-brand-900: oklch(0.408 0.123 38.2);
+  /* Stone and lichen: backgrounds. */
+  --color-lichen: #e9ece6;
+  /* Forest: text and dark surfaces. */
+  --color-pine: #1f3a2e;
+  /* Secondary greens: selected filters, the Start of an Ascent. */
+  --color-moss: #5f6d40;
+  /* Muted text, dark enough for 4.5:1 on lichen. */
+  --color-granite: #5c6057;
+  /* Hiking signpost yellow: the main action on a screen. */
+  --color-signpost: #f2c230;
+  /* Red waymark of long-distance trails: routes and Starts on maps. */
+  --color-blaze: #c62f2f;
 
-  --color-start: oklch(0.596 0.145 163.2);
-  --color-danger: oklch(0.505 0.213 27.5);
-
-  --color-surface: oklch(0.985 0.002 75);
-  --color-ink: oklch(0.21 0.006 56);
-  --color-ink-muted: oklch(0.45 0.01 56);
+  --color-surface: var(--color-lichen);
+  --color-ink: var(--color-pine);
+  --color-ink-muted: var(--color-granite);
+  --color-start: var(--color-moss);
+  --color-danger: #a82828;
 }
 
 /* Read at runtime by the map, which cannot use utility classes: always emitted. */
 @theme static {
-  --color-route: #c2410c;
+  --color-route: #c62f2f;
 }
 
 @layer base {
   body {
     @apply bg-surface font-sans text-ink antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
   }
 }

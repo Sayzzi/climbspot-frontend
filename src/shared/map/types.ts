@@ -21,6 +21,8 @@ export interface MapViewProps {
   /** A line drawn through these positions (e.g. an Ascent's path). */
   readonly line?: readonly Position[];
   readonly onMarkerSelect?: (id: string) => void;
+  /** When false, the map ignores panning and zooming gestures (default true). */
+  readonly interactive?: boolean;
   /** Called with the new centre once the Visitor (not the app) has moved the map. */
   readonly onAreaChange?: (center: Position) => void;
   readonly className?: string;

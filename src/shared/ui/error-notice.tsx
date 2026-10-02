@@ -16,7 +16,7 @@ export function ErrorNotice({ error, onRetry, children }: ErrorNoticeProps) {
   const { t } = useTranslation();
 
   return (
-    <div role="alert" className="flex flex-col items-start gap-3 rounded-xl bg-brand-50 p-4">
+    <div role="alert" className="flex flex-col items-start gap-3 rounded-lg bg-lichen p-4">
       <p>{t(errorMessageKey(error))}</p>
       <div className="flex flex-wrap gap-3">
         <Button variant="secondary" onClick={onRetry}>

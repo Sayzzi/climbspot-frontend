@@ -1,9 +1,12 @@
 import { useId, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { prefersReducedMotion } from '@/shared/hooks/use-scroll-progress';
+import { cn } from '@/shared/lib/cn';
 import { MapView } from '@/shared/map';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { Tabs } from '@/shared/ui/tabs';
 
 import { useNearbyAscents } from '../api/nearby-ascents';
 import type { NearbyAscent, NearbyCriteria, Position } from '../types';
@@ -17,92 +20,141 @@ const OVERVIEW: { center: Position; zoom: number } = {
 
 const SEARCH_ZOOM = 11;
 
+/** Above this share of the reveal, the map takes gestures and the panel is fully shown. */
+const REVEALED = 0.98;
+
 interface NearbySearchProps {
   /** Nothing is searched until there is a position. */
   readonly criteria: NearbyCriteria | undefined;
-  /** Shown in place of results, e.g. while locating the Visitor. */
+  /** Content of the Filters tab. */
+  readonly filters: ReactNode;
+  /** Shown above the results, e.g. while locating the Visitor. */
   readonly notice?: ReactNode;
   /** The Visitor asked to search around another position. */
   readonly onSearchArea: (center: Position) => void;
+  /** How far the map has been revealed, from 0 (behind the page's title) to 1. */
+  readonly reveal: number;
 }
 
-/** Map and list of the Ascents whose Start is closest to a position. */
-export function NearbySearch({ criteria, notice, onSearchArea }: NearbySearchProps) {
+/**
+ * Full-screen map of the Ascents whose Start is closest to a position, with the
+ * results and filters in a tabbed panel over it.
+ */
+export function NearbySearch({
+  criteria,
+  filters,
+  notice,
+  onSearchArea,
+  reveal,
+}: NearbySearchProps) {
   const { t } = useTranslation('ascents');
   const { data: ascents, error, isFetching, refetch } = useNearbyAscents(criteria);
   const [selectedId, setSelectedId] = useState<string>();
   const [movedTo, setMovedTo] = useState<Position>();
   const selected = ascents?.find((ascent) => ascent.id === selectedId);
+  const revealed = reveal >= REVEALED;
+  const panelReveal = Math.max(0, reveal * 2 - 1);
 
   // Without a position, searching the visible area is the way forward, moved or not.
   const areaToSearch = movedTo ?? (criteria ? undefined : OVERVIEW.center);
 
-  return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-      <div className="relative">
-        <MapView
-          label={t('search.map')}
-          center={criteria?.position ?? OVERVIEW.center}
-          zoom={criteria ? SEARCH_ZOOM : OVERVIEW.zoom}
-          markers={(ascents ?? []).map((ascent) => ({
-            id: ascent.id,
-            position: ascent.start,
-            label: ascent.name,
-            selected: ascent.id === selectedId,
-          }))}
-          onMarkerSelect={setSelectedId}
-          onAreaChange={setMovedTo}
-          className="h-80 lg:sticky lg:top-6 lg:h-[36rem]"
+  const results = (
+    <div className="flex flex-col gap-4" aria-busy={isFetching}>
+      {notice}
+      {isFetching && <p className="text-sm text-ink-muted">{t('search.loading')}</p>}
+      {error && (
+        <ErrorNotice
+          error={error}
+          onRetry={() => {
+            void refetch();
+          }}
         />
-        {areaToSearch && (
-          <Button
-            size="sm"
-            className="absolute top-3 left-1/2 -translate-x-1/2 shadow-md"
-            onClick={() => {
-              onSearchArea(areaToSearch);
-              setMovedTo(undefined);
-            }}
-          >
-            {t('search.searchArea')}
-          </Button>
+      )}
+      {ascents?.length === 0 && (
+        <div className="rounded-lg bg-lichen p-4">
+          <p className="font-semibold">{t('search.empty.title')}</p>
+          <p className="text-sm text-ink-muted">{t('search.empty.hint')}</p>
+        </div>
+      )}
+      {ascents && ascents.length > 0 && (
+        <ul aria-label={t('search.results')} className="flex flex-col divide-y divide-pine/10">
+          {ascents.map((ascent) => (
+            <AscentListItem
+              key={ascent.id}
+              ascent={ascent}
+              selected={ascent.id === selectedId}
+              onSelect={setSelectedId}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0">
+      <MapView
+        label={t('search.map')}
+        center={criteria?.position ?? OVERVIEW.center}
+        zoom={criteria ? SEARCH_ZOOM : OVERVIEW.zoom}
+        markers={(ascents ?? []).map((ascent) => ({
+          id: ascent.id,
+          position: ascent.start,
+          label: ascent.name,
+          selected: ascent.id === selectedId,
+        }))}
+        onMarkerSelect={setSelectedId}
+        onAreaChange={setMovedTo}
+        interactive={revealed}
+        className="size-full rounded-none"
+      />
+
+      {areaToSearch && (
+        <Button
+          size="sm"
+          className="absolute top-20 left-1/2 z-10 -translate-x-1/2"
+          onClick={() => {
+            onSearchArea(areaToSearch);
+            setMovedTo(undefined);
+          }}
+        >
+          {t('search.searchArea')}
+        </Button>
+      )}
+
+      {selected && <SelectedAscent ascent={selected} />}
+
+      <aside
+        aria-label={t('search.panel')}
+        // Keyboard users tabbing into the panel get the map revealed for them.
+        onFocus={() => {
+          if (!revealed) {
+            window.scrollTo({
+              top: window.innerHeight,
+              behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+            });
+          }
+        }}
+        style={{
+          opacity: panelReveal,
+          transform: prefersReducedMotion()
+            ? undefined
+            : `translateY(${String((1 - panelReveal) * 16)}px)`,
+        }}
+        className={cn(
+          // Above the map's own controls (attribution, zoom).
+          'absolute inset-x-0 bottom-0 z-10 flex max-h-[55vh] flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl',
+          'lg:inset-x-auto lg:top-20 lg:bottom-auto lg:left-4 lg:max-h-[calc(100vh-6rem)] lg:w-[24rem] lg:rounded-xl',
         )}
-        {selected && <SelectedAscent ascent={selected} />}
-      </div>
-
-      <div className="flex flex-col gap-4" aria-busy={isFetching}>
-        {notice}
-
-        {isFetching && <p className="text-sm text-ink-muted">{t('search.loading')}</p>}
-
-        {error && (
-          <ErrorNotice
-            error={error}
-            onRetry={() => {
-              void refetch();
-            }}
-          />
-        )}
-
-        {ascents?.length === 0 && (
-          <div className="rounded-xl bg-brand-50 p-4">
-            <p className="font-medium">{t('search.empty.title')}</p>
-            <p className="text-sm text-ink-muted">{t('search.empty.hint')}</p>
-          </div>
-        )}
-
-        {ascents && ascents.length > 0 && (
-          <ul aria-label={t('search.results')} className="flex flex-col gap-3">
-            {ascents.map((ascent) => (
-              <AscentListItem
-                key={ascent.id}
-                ascent={ascent}
-                selected={ascent.id === selectedId}
-                onSelect={setSelectedId}
-              />
-            ))}
-          </ul>
-        )}
-      </div>
+      >
+        <Tabs
+          label={t('search.panel')}
+          tabs={[
+            { id: 'climbs', label: t('search.tabs.climbs'), content: results },
+            { id: 'filters', label: t('search.tabs.filters'), content: filters },
+          ]}
+        />
+      </aside>
     </div>
   );
 }
@@ -116,9 +168,9 @@ function SelectedAscent({ ascent }: { readonly ascent: NearbyAscent }) {
     <section
       aria-label={t('search.selected')}
       aria-describedby={titleId}
-      className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-xl bg-white p-3 shadow-lg"
+      className="absolute inset-x-4 top-32 z-10 flex items-center justify-between gap-3 rounded-lg bg-white p-3 shadow-lg lg:top-auto lg:right-4 lg:bottom-6 lg:left-[26rem]"
     >
-      <p id={titleId} className="font-semibold">
+      <p id={titleId} className="font-display text-lg font-semibold">
         {ascent.name}
       </p>
       <AscentLink ascent={ascent} />

@@ -19,8 +19,8 @@ describe('Button', () => {
     );
 
     const button = screen.getByRole('button', { name: 'Cancel' });
-    expect(button).toHaveClass('bg-brand-100', 'w-full');
-    expect(button).not.toHaveClass('bg-brand-600');
+    expect(button).toHaveClass('bg-white', 'w-full');
+    expect(button).not.toHaveClass('bg-signpost');
   });
 
   it('calls onClick when pressed', async () => {

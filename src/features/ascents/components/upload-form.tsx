@@ -61,7 +61,7 @@ export function UploadForm({ onCreated }: UploadFormProps) {
           }}
           aria-invalid={errors.name !== undefined}
           aria-describedby={errors.name && `${ids.name}-error`}
-          className="rounded-lg border border-brand-200 px-3 py-2"
+          className="rounded-md border border-pine/25 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-pine"
         />
         <FieldError id={`${ids.name}-error`} message={errors.name} />
       </div>
@@ -78,7 +78,7 @@ export function UploadForm({ onCreated }: UploadFormProps) {
         {surfaces.map((option) => (
           <label
             key={option}
-            className="flex items-start gap-3 rounded-lg border border-brand-100 p-3 has-checked:border-brand-600 has-checked:bg-brand-50"
+            className="flex cursor-pointer items-start gap-3 rounded-lg border border-pine/15 bg-white p-3 has-checked:border-pine has-checked:ring-2 has-checked:ring-pine/15"
           >
             <input
               type="radio"
@@ -88,7 +88,7 @@ export function UploadForm({ onCreated }: UploadFormProps) {
               onChange={() => {
                 setSurface(option);
               }}
-              className="mt-1 accent-brand-600"
+              className="mt-1 accent-pine"
             />
             <span>
               <span className="block font-medium">{labels.surface(option)}</span>{' '}
@@ -119,7 +119,7 @@ export function UploadForm({ onCreated }: UploadFormProps) {
       </div>
 
       {createAscent.isError && (
-        <p role="alert" className="rounded-lg bg-brand-50 p-3">
+        <p role="alert" className="rounded-lg border-l-4 border-blaze bg-white p-3">
           {tCommon(errorMessageKey(createAscent.error))}
         </p>
       )}

@@ -94,7 +94,11 @@ Tests act like a Visitor: they render the whole app at a URL (`renderApp` in `sr
 
 ## Styling
 
-Tailwind CSS v4 with design tokens declared once in `src/app/styles.css` (`@theme`). Components only use token-based utilities (`bg-brand-600`, `text-ink-muted`), never raw colour values. Why Tailwind over the alternatives:
+The **Balise** theme borrows from trail signage: lichen and pine for surfaces and text, moss for selections, hiking-signpost yellow (`signpost`) for the one main action of a screen, and the red waymark of long-distance trails (`blaze`) for routes and Starts on maps. Headings and the app's name use Barlow Condensed (signpost lettering), text uses Barlow; both are self-hosted with `@fontsource`.
+
+The home page opens on the app's name over a veiled map; scrolling dissolves the name in place and reveals the map, with results and filters in a tabbed panel (a bottom sheet on small screens). The map only takes zoom and pan gestures once revealed.
+
+Tailwind CSS v4 with design tokens declared once in `src/app/styles.css` (`@theme`). Components only use token-based utilities (`bg-pine`, `text-ink-muted`), never raw colour values. Why Tailwind over the alternatives:
 
 - **vs. CSS Modules / BEM**: styles live next to the markup they affect, there is no naming to maintain and no dead CSS. Tokens prevent the one-off values that utilities are often blamed for.
 - **vs. styled-components / CSS-in-JS**: no runtime cost, no extra bundle and no server-rendering pitfalls. Most CSS-in-JS libraries are in maintenance mode.

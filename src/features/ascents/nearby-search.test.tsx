@@ -11,6 +11,32 @@ const AT_LE_BOURG = '/?latitude=45&longitude=6';
 const results = () => screen.findByRole('list', { name: 'Nearby climbs' });
 
 describe('Nearby search', () => {
+  it('opens on the app name, over the map', async () => {
+    server.use(handlers.nearby(() => nearbyResults([])));
+
+    await renderApp(AT_LE_BOURG);
+
+    expect(screen.getByRole('heading', { level: 1, name: 'ClimbSpot' })).toBeInTheDocument();
+    expect(screen.getByText('Find the hills worth climbing near you.')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Map of nearby climbs' })).toBeInTheDocument();
+  });
+
+  it('shows results and filters in tabs, reachable with the arrow keys', async () => {
+    server.use(handlers.nearby(() => nearbyResults([anAscentSummary({ name: 'Le Mur' })])));
+    const { user } = await renderApp(AT_LE_BOURG);
+    await results();
+    const climbsTab = screen.getByRole('tab', { name: 'Climbs' });
+    expect(climbsTab).toHaveAttribute('aria-selected', 'true');
+    expect(screen.queryByRole('group', { name: 'Activities' })).not.toBeInTheDocument();
+
+    climbsTab.focus();
+    await user.keyboard('{ArrowRight}');
+
+    expect(screen.getByRole('tab', { name: 'Filters' })).toHaveFocus();
+    expect(screen.getByRole('group', { name: 'Activities' })).toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Nearby climbs' })).not.toBeInTheDocument();
+  });
+
   it('lists the Ascents near the position in the URL, nearest Start first', async () => {
     const sent = recorder();
     server.use(

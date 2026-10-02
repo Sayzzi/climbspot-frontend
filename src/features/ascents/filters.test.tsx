@@ -18,6 +18,13 @@ function nearbyApi() {
   return sent;
 }
 
+type User = Awaited<ReturnType<typeof renderApp>>['user'];
+
+/** Filters live in their own tab of the search panel. */
+async function showFilters(user: User) {
+  await user.click(screen.getByRole('tab', { name: 'Filters' }));
+}
+
 const activities = () => within(screen.getByRole('group', { name: 'Activities' }));
 const categories = () => within(screen.getByRole('group', { name: 'Categories' }));
 
@@ -26,6 +33,7 @@ describe('Search filters', () => {
     const sent = nearbyApi();
     const { router, user } = await renderApp(AT_LE_BOURG);
     await screen.findByRole('list', { name: 'Nearby climbs' });
+    await showFilters(user);
 
     await user.click(activities().getByRole('checkbox', { name: 'Road cycling' }));
     await user.click(activities().getByRole('checkbox', { name: 'Gravel cycling' }));
@@ -47,6 +55,7 @@ describe('Search filters', () => {
     const sent = nearbyApi();
     const { user } = await renderApp(AT_LE_BOURG);
     await screen.findByRole('list', { name: 'Nearby climbs' });
+    await showFilters(user);
 
     await user.click(categories().getByRole('checkbox', { name: 'Cat 3' }));
     await user.click(categories().getByRole('checkbox', { name: 'HC' }));
@@ -60,6 +69,7 @@ describe('Search filters', () => {
     const sent = nearbyApi();
     const { router, user } = await renderApp(`${AT_LE_BOURG}&activity=["running"]`);
     await screen.findByRole('list', { name: 'Nearby climbs' });
+    await showFilters(user);
 
     await user.click(activities().getByRole('checkbox', { name: 'Running' }));
 
@@ -73,6 +83,7 @@ describe('Search filters', () => {
     const sent = nearbyApi();
     const { router, user } = await renderApp(AT_LE_BOURG);
     await screen.findByRole('list', { name: 'Nearby climbs' });
+    await showFilters(user);
 
     await user.selectOptions(screen.getByRole('combobox', { name: 'Search radius' }), '25 km');
 
@@ -85,8 +96,9 @@ describe('Search filters', () => {
   it('uses a 10 km radius by default', async () => {
     const sent = nearbyApi();
 
-    await renderApp(AT_LE_BOURG);
+    const { user } = await renderApp(AT_LE_BOURG);
     await screen.findByRole('list', { name: 'Nearby climbs' });
+    await showFilters(user);
 
     expect(screen.getByRole('combobox', { name: 'Search radius' })).toHaveDisplayValue('10 km');
     expect(sent.lastUrl()?.searchParams.get('radius')).toBeNull();
@@ -95,8 +107,11 @@ describe('Search filters', () => {
   it('restores a shared search from its URL', async () => {
     const sent = nearbyApi();
 
-    await renderApp(`${AT_LE_BOURG}&radius=5000&activity=["trail_running"]&category=["cat4"]`);
+    const { user } = await renderApp(
+      `${AT_LE_BOURG}&radius=5000&activity=["trail_running"]&category=["cat4"]`,
+    );
     await screen.findByRole('list', { name: 'Nearby climbs' });
+    await showFilters(user);
 
     expect(activities().getByRole('checkbox', { name: 'Trail running' })).toBeChecked();
     expect(activities().getByRole('checkbox', { name: 'Running' })).not.toBeChecked();
@@ -111,8 +126,9 @@ describe('Search filters', () => {
   it('shows a shared radius that is not one of the presets', async () => {
     const sent = nearbyApi();
 
-    await renderApp(`${AT_LE_BOURG}&radius=15000`);
+    const { user } = await renderApp(`${AT_LE_BOURG}&radius=15000`);
     await screen.findByRole('list', { name: 'Nearby climbs' });
+    await showFilters(user);
 
     expect(screen.getByRole('combobox', { name: 'Search radius' })).toHaveDisplayValue('15 km');
     expect(sent.lastUrl()?.searchParams.get('radius')).toBe('15000');

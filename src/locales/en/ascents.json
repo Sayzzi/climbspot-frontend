@@ -1,6 +1,5 @@
 {
   "search": {
-    "title": "Climbs near you",
     "results": "Nearby climbs",
     "map": "Map of nearby climbs",
     "loading": "Looking for climbs…",
@@ -11,7 +10,12 @@
     "searchArea": "Search this area",
     "viewDetails": "View {{name}}",
     "details": "View details →",
-    "selected": "Selected climb"
+    "selected": "Selected climb",
+    "panel": "Search",
+    "tabs": {
+      "climbs": "Climbs",
+      "filters": "Filters"
+    }
   },
   "facts": {
     "distanceToStart": "{{distance}} to the start",

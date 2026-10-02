@@ -26,9 +26,9 @@ maplibre.setWorkerUrl(maplibreWorkerUrl);
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 
 const markerTones: Record<NonNullable<MapMarker['tone']>, string> = {
-  default: 'bg-brand-600',
+  default: 'bg-blaze',
   start: 'bg-start',
-  top: 'bg-brand-800',
+  top: 'bg-pine',
 };
 
 /** The only component allowed to know about the map library. */
@@ -41,6 +41,7 @@ export function MapView({
   line,
   onMarkerSelect,
   onAreaChange,
+  interactive = true,
   className,
 }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
@@ -60,6 +61,21 @@ export function MapView({
       mapRef.current?.flyTo({ center: [center.longitude, center.latitude], zoom });
     }
   }, [center.latitude, center.longitude, zoom, fitTo]);
+
+  // Let the page take scroll and drag gestures until the map is meant to be used.
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map) {
+      return;
+    }
+    for (const handler of [map.scrollZoom, map.dragPan, map.touchZoomRotate, map.doubleClickZoom]) {
+      if (interactive) {
+        handler.enable();
+      } else {
+        handler.disable();
+      }
+    }
+  }, [interactive]);
 
   const lineData = useMemo(
     () =>
@@ -82,6 +98,14 @@ export function MapView({
         initialViewState={initialViewState}
         mapStyle={MAP_STYLE}
         style={{ width: '100%', height: '100%' }}
+        onLoad={(event) => {
+          if (!interactive) {
+            event.target.scrollZoom.disable();
+            event.target.dragPan.disable();
+            event.target.touchZoomRotate.disable();
+            event.target.doubleClickZoom.disable();
+          }
+        }}
         onMoveEnd={(event) => {
           // Only moves made by the Visitor carry the DOM event that caused them;
           // `flyTo` and framing do not, so they never offer to search that area.
@@ -116,7 +140,7 @@ export function MapView({
               aria-pressed={marker.selected ?? false}
               onClick={() => onMarkerSelect?.(marker.id)}
               className={cn(
-                'size-4 rounded-full border-2 border-white shadow-md transition-transform',
+                'size-4 rounded-full border-[3px] border-white shadow-md transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine',
                 markerTones[marker.tone ?? 'default'],
                 marker.selected && 'scale-150',
               )}

@@ -2,24 +2,27 @@ import { useTranslation } from 'react-i18next';
 
 import { useFormatters } from '@/shared/units';
 
-import type { Ascent } from '../types';
-
 const WIDTH = 640;
 const HEIGHT = 220;
 const PADDING = { top: 28, right: 16, bottom: 44, left: 64 };
 
 interface ElevationProfileChartProps {
-  readonly ascent: Pick<
-    Ascent,
-    'elevationProfile' | 'length' | 'start' | 'top' | 'maximumGradient'
-  >;
+  /** Elevations along the path, distances from its beginning (metres). */
+  readonly profile: readonly { readonly distance: number; readonly elevation: number }[];
+  /** Metres along the path. */
+  readonly length: number;
+  /** Text alternative summarising the profile. */
+  readonly description: string;
 }
 
-/** Elevation against distance from the Start, with a text alternative. */
-export function ElevationProfileChart({ ascent }: ElevationProfileChartProps) {
-  const { t } = useTranslation('ascents');
+/** Elevation against distance from the beginning of a path. */
+export function ElevationProfileChart({
+  profile,
+  length,
+  description,
+}: ElevationProfileChartProps) {
+  const { t } = useTranslation();
   const format = useFormatters();
-  const { elevationProfile: profile, length } = ascent;
 
   const elevations = profile.map((point) => point.elevation);
   const lowest = Math.floor(Math.min(...elevations) / 10) * 10;
@@ -40,12 +43,7 @@ export function ElevationProfileChart({ ascent }: ElevationProfileChartProps) {
   return (
     <svg
       role="img"
-      aria-label={t('detail.profile.summary', {
-        length: format.distance(length),
-        start: format.elevation(ascent.start.elevation),
-        top: format.elevation(ascent.top.elevation),
-        steepest: format.gradient(ascent.maximumGradient),
-      })}
+      aria-label={description}
       viewBox={`0 0 ${String(WIDTH)} ${String(HEIGHT)}`}
       className="h-auto w-full"
     >
@@ -77,10 +75,10 @@ export function ElevationProfileChart({ ascent }: ElevationProfileChartProps) {
           {format.distance(length)}
         </text>
         <text x={PADDING.left} y={14} className="fill-ink font-medium">
-          {t('detail.profile.elevationAxis')}
+          {t('profile.elevationAxis')}
         </text>
         <text x={x(length)} y={HEIGHT - 6} textAnchor="end" className="fill-ink font-medium">
-          {t('detail.profile.distanceAxis')}
+          {t('profile.distanceAxis')}
         </text>
       </g>
     </svg>

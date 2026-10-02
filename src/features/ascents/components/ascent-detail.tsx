@@ -7,16 +7,16 @@ import { buttonVariants } from '@/shared/ui/button-variants';
 import { useFormatters } from '@/shared/units';
 
 import { ascentQuery } from '../api/ascent';
-import { useAscentLabels } from '../hooks/use-ascent-labels';
+import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { BackToSearch } from './back-to-search';
-import { FactList } from './fact-list';
-import { ElevationProfileChart } from './elevation-profile-chart';
+import { FactList } from '@/shared/ui/fact-list';
+import { ElevationProfileChart } from '@/shared/ui/elevation-profile-chart';
 
 /** Everything about one Ascent; its data is loaded by the route beforehand. */
 export function AscentDetail({ id }: { readonly id: string }) {
   const { t } = useTranslation('ascents');
   const format = useFormatters();
-  const labels = useAscentLabels();
+  const labels = useDomainLabels();
   const { data: ascent } = useSuspenseQuery(ascentQuery(id));
   const measurementsId = useId();
   const profileId = useId();
@@ -74,7 +74,16 @@ export function AscentDetail({ id }: { readonly id: string }) {
           <h2 id={profileId} className="mb-3 text-lg font-semibold">
             {t('detail.profile.title')}
           </h2>
-          <ElevationProfileChart ascent={ascent} />
+          <ElevationProfileChart
+            profile={ascent.elevationProfile}
+            length={ascent.length}
+            description={t('detail.profile.summary', {
+              length: format.distance(ascent.length),
+              start: format.elevation(ascent.start.elevation),
+              top: format.elevation(ascent.top.elevation),
+              steepest: format.gradient(ascent.maximumGradient),
+            })}
+          />
         </section>
       </div>
     </article>

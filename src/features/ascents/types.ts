@@ -1,11 +1,9 @@
 import type { components } from '@/shared/api/schema.gen';
 import type { Position } from '@/shared/lib/position';
+import type { Activity, Category } from '@/shared/domain/values';
 
 export type NearbyAscent = components['schemas']['NearbyAscents']['ascents'][number];
 export type Ascent = components['schemas']['Ascent'];
-export type Surface = components['schemas']['Surface'];
-export type Activity = components['schemas']['Activity'];
-export type Category = components['schemas']['Category'];
 
 export type { Position } from '@/shared/lib/position';
 

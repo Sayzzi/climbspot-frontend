@@ -1,35 +1,4 @@
-import type { Activity, Category, Surface } from './types';
-
-/**
- * Checks at compile time that `values` lists every member of the union `T`,
- * so a value the API adds or removes becomes a type error here.
- */
-const everyOf =
-  <T extends string>() =>
-  <const V extends readonly T[]>(
-    values: V & ([Exclude<T, V[number]>] extends [never] ? unknown : 'missing values'),
-  ): V =>
-    values;
-
-/* Runtime lists of the API's enums, in display order. */
-export const surfaces = everyOf<Surface>()(['paved', 'gravel', 'trail']);
-
-export const activities = everyOf<Activity>()([
-  'running',
-  'trail_running',
-  'road_cycling',
-  'gravel_cycling',
-  'mountain_biking',
-]);
-
-export const categories = everyOf<Category>()([
-  'uncategorized',
-  'cat4',
-  'cat3',
-  'cat2',
-  'cat1',
-  'hc',
-]);
+import type { Activity, Surface } from '@/shared/domain/values';
 
 /**
  * Activities each Surface allows, so Contributors know what they choose before

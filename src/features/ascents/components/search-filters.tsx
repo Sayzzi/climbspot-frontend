@@ -2,9 +2,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useFormatters } from '@/shared/units';
 
-import { activities, categories, DEFAULT_RADIUS, SEARCH_RADII } from '../domain';
-import { useAscentLabels } from '../hooks/use-ascent-labels';
-import type { Activity, Category } from '../types';
+import { activities, categories } from '@/shared/domain/values';
+
+import { DEFAULT_RADIUS, SEARCH_RADII } from '../domain';
+import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
+import type { Activity, Category } from '@/shared/domain/values';
 
 export interface SearchFilterValues {
   readonly radius?: number | undefined;
@@ -21,7 +23,7 @@ interface SearchFiltersProps {
 export function SearchFilters({ value, onChange }: SearchFiltersProps) {
   const { t } = useTranslation('ascents');
   const format = useFormatters();
-  const labels = useAscentLabels();
+  const labels = useDomainLabels();
   const radius = value.radius ?? DEFAULT_RADIUS;
   // A shared URL may carry any radius: list it so the control shows what is searched.
   const radii = [...new Set([...SEARCH_RADII, radius])].sort((a, b) => a - b);

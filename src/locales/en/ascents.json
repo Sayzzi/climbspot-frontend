@@ -28,26 +28,6 @@
     "surface": "Surface",
     "activities": "Activities"
   },
-  "surfaces": {
-    "paved": "Paved",
-    "gravel": "Gravel",
-    "trail": "Trail"
-  },
-  "activities": {
-    "running": "Running",
-    "trail_running": "Trail running",
-    "road_cycling": "Road cycling",
-    "gravel_cycling": "Gravel cycling",
-    "mountain_biking": "Mountain biking"
-  },
-  "categories": {
-    "uncategorized": "Uncategorized",
-    "cat4": "Cat 4",
-    "cat3": "Cat 3",
-    "cat2": "Cat 2",
-    "cat1": "Cat 1",
-    "hc": "HC"
-  },
   "locate": {
     "locating": "Finding your location…",
     "failures": {
@@ -73,9 +53,7 @@
     "notFound": "Climb not found",
     "profile": {
       "title": "Elevation profile",
-      "summary": "Elevation profile: {{length}} from {{start}} to {{top}}, steepest stretch at {{steepest}}.",
-      "elevationAxis": "Elevation",
-      "distanceAxis": "Distance from the start"
+      "summary": "Elevation profile: {{length}} from {{start}} to {{top}}, steepest stretch at {{steepest}}."
     }
   },
   "upload": {

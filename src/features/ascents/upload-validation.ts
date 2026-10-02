@@ -1,5 +1,5 @@
 import { MAXIMUM_GPX_FILE_SIZE, MAXIMUM_NAME_LENGTH } from './domain';
-import type { Surface } from './types';
+import type { Surface } from '@/shared/domain/values';
 
 export interface UploadValues {
   readonly name: string;

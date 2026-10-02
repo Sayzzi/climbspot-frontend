@@ -72,6 +72,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/itineraries/loops": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate Loops from a point
+         * @description Up to three Loops starting and ending at `start`, never shorter than `distance` and at most 20 % longer, matching Relief first. Close proposals list their `differences`.
+         */
+        post: operations["generateLoops"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/itineraries/uphill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Find Uphill Itineraries near a point
+         * @description Up to three proposals going up near `start`, never shorter than `length` and at most 20 % longer, best first. Close proposals list their `differences`.
+         */
+        post: operations["findUphillItineraries"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -174,6 +214,128 @@ export interface components {
                 /** @description Geodesic distance from the searched position to the Start, in metres. */
                 distanceToStart: number;
             }[];
+        };
+        LoopItineraries: {
+            itineraries: components["schemas"]["LoopItinerary"][];
+        };
+        LoopItinerary: {
+            /** @enum {string} */
+            kind: "loop";
+            /** @description True when the proposal matches the request. */
+            exact: boolean;
+            differences: components["schemas"]["ItineraryDifference"][];
+            /** @description GeoJSON LineString of the routed geometry ([longitude, latitude] pairs). */
+            path: {
+                /** @enum {string} */
+                type: "LineString";
+                coordinates: [
+                    number,
+                    number
+                ][];
+            };
+            elevationProfile: {
+                /** @description Distance from the beginning, in metres. */
+                distance: number;
+                /** @description Elevation, in metres. */
+                elevation: number;
+            }[];
+            /** @description Length along the path, in metres. */
+            length: number;
+            /** @description Sum of every rise along the path, in metres. */
+            heightGained: number;
+            relief: components["schemas"]["Relief"];
+        };
+        ItineraryDifference: {
+            /** @enum {string} */
+            kind: "gradient";
+            min: number;
+            max: number;
+            /** @description Average Gradient of the proposal, as a ratio (0.08 = 8 %). */
+            actual: number;
+        } | {
+            /** @enum {string} */
+            kind: "relief";
+            /** @enum {string} */
+            wanted: "flat" | "rolling" | "hilly";
+            /** @enum {string} */
+            actual: "flat" | "rolling" | "hilly";
+        };
+        /** @enum {string} */
+        Relief: "flat" | "rolling" | "hilly";
+        LoopRequest: {
+            start: {
+                latitude: number;
+                longitude: number;
+            };
+            /** @description Metres; Loops are never shorter and at most 20 % longer. */
+            distance: number;
+            relief: components["schemas"]["Relief"];
+            activity: components["schemas"]["Activity"];
+        };
+        UphillItineraries: {
+            itineraries: components["schemas"]["UphillItinerary"][];
+        };
+        UphillItinerary: {
+            /** @enum {string} */
+            kind: "uphill";
+            /** @description True when the proposal matches the request. */
+            exact: boolean;
+            differences: components["schemas"]["ItineraryDifference"][];
+            /** @description GeoJSON LineString of the routed geometry ([longitude, latitude] pairs). */
+            path: {
+                /** @enum {string} */
+                type: "LineString";
+                coordinates: [
+                    number,
+                    number
+                ][];
+            };
+            elevationProfile: {
+                /** @description Distance from the beginning, in metres. */
+                distance: number;
+                /** @description Elevation, in metres. */
+                elevation: number;
+            }[];
+            /** @description Length along the path, in metres. */
+            length: number;
+            /** @description Sum of every rise along the path, in metres. */
+            heightGained: number;
+            start: components["schemas"]["ItineraryPoint"];
+            top: components["schemas"]["ItineraryPoint"];
+            /** @description Top elevation minus start elevation, in metres. */
+            elevationGain: number;
+            /** @description Average Gradient, as a ratio (0.08 = 8 %). */
+            averageGradient: number;
+            /** @description Steepest Gradient over at least 100 m, as a ratio (0.08 = 8 %). */
+            maximumGradient: number;
+            difficultyScore: number;
+            category: components["schemas"]["Category"];
+            /** @description Distance from the Visitor's point to the start, in metres. */
+            distanceToStart: number;
+        };
+        ItineraryPoint: {
+            latitude: number;
+            longitude: number;
+            /** @description Elevation, in metres. */
+            elevation: number;
+        };
+        UphillRequest: {
+            start: {
+                latitude: number;
+                longitude: number;
+            };
+            /**
+             * @description The Itinerary starts within this distance of `start`, in metres.
+             * @default 10000
+             */
+            radius: number;
+            /** @description Metres; proposals are never shorter and at most 20 % longer. */
+            length: number;
+            /** @description Lowest average Gradient wanted, as a ratio (0.08 = 8 %). */
+            minGradient: number;
+            /** @description Highest average Gradient wanted, as a ratio (0.08 = 8 %). */
+            maxGradient: number;
+            activity: components["schemas"]["Activity"];
         };
     };
     responses: never;
@@ -351,6 +513,90 @@ export interface operations {
             };
             /** @description `ASCENT_NOT_FOUND`: no Ascent has this id. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    generateLoops: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoopRequest"];
+            };
+        };
+        responses: {
+            /** @description Proposals, possibly none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoopItineraries"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: the request is invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `ROUTING_UNAVAILABLE`: routing is temporarily unavailable; retry later. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    findUphillItineraries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UphillRequest"];
+            };
+        };
+        responses: {
+            /** @description Proposals, possibly none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UphillItineraries"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: the request is invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `ROUTING_UNAVAILABLE`: routing is temporarily unavailable; retry later. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

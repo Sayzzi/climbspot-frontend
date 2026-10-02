@@ -5,9 +5,12 @@ import { errorMessageKey } from '@/shared/api/error-message';
 import { Button } from '@/shared/ui/button';
 
 import { useCreateAscent } from '../api/create-ascent';
-import { activitiesBySurface, surfaces } from '../domain';
-import { useAscentLabels } from '../hooks/use-ascent-labels';
-import type { Ascent, Surface } from '../types';
+import { surfaces } from '@/shared/domain/values';
+
+import { activitiesBySurface } from '../domain';
+import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
+import type { Surface } from '@/shared/domain/values';
+import type { Ascent } from '../types';
 import { findUploadProblems, type UploadField } from '../upload-validation';
 
 type FieldErrors = Partial<Record<UploadField, string>>;
@@ -20,7 +23,7 @@ interface UploadFormProps {
 export function UploadForm({ onCreated }: UploadFormProps) {
   const { t } = useTranslation('ascents');
   const { t: tCommon } = useTranslation();
-  const labels = useAscentLabels();
+  const labels = useDomainLabels();
   const createAscent = useCreateAscent();
   const ids = { name: useId(), surface: useId(), gpx: useId() };
 

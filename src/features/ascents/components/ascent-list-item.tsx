@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/lib/cn';
 import { useFormatters } from '@/shared/units';
 
-import { useAscentLabels } from '../hooks/use-ascent-labels';
+import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import type { NearbyAscent } from '../types';
-import { FactList } from './fact-list';
+import { FactList } from '@/shared/ui/fact-list';
 
 interface AscentListItemProps {
   readonly ascent: NearbyAscent;
@@ -17,7 +17,7 @@ interface AscentListItemProps {
 export function AscentListItem({ ascent, selected, onSelect }: AscentListItemProps) {
   const { t } = useTranslation('ascents');
   const format = useFormatters();
-  const labels = useAscentLabels();
+  const labels = useDomainLabels();
 
   return (
     <li>

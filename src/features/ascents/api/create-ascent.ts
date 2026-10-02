@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api/client';
 import { unwrap } from '@/shared/api/request';
 
-import type { Surface } from '../types';
+import type { Surface } from '@/shared/domain/values';
 import { ascentQuery, toAscent } from './ascent';
 
 export interface NewAscent {

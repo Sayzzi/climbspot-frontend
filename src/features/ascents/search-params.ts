@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
 import type { SearchFilterValues } from './components/search-filters';
-import { activities, categories, MAXIMUM_RADIUS } from './domain';
+import { activities, categories } from '@/shared/domain/values';
+
+import { MAXIMUM_RADIUS } from './domain';
 import type { Position } from './types';
 
 /**

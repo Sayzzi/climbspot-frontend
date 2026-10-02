@@ -5,6 +5,7 @@ import { anAscentSummary, handlers, nearbyResults, recorder } from '@/test/api';
 import { fakeMap } from '@/test/fake-map-control';
 import { stubGeolocation } from '@/test/geolocation';
 import { renderApp } from '@/test/render-app';
+import { watchScrollToTop } from '@/test/scroll';
 import { server } from '@/test/server';
 
 function nearbyApi() {
@@ -108,6 +109,19 @@ describe('Locating the Visitor', () => {
     await screen.findByRole('list', { name: 'Nearby climbs' });
     expect(sent.lastUrl()?.searchParams.get('latitude')).toBe('46.6');
     expect(sent.lastUrl()?.searchParams.get('longitude')).toBe('2.5');
+  });
+
+  it('stays on the map instead of scrolling back to the title when searching an area', async () => {
+    nearbyApi();
+    const { user } = await renderApp('/?latitude=45&longitude=6');
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+    const scroll = watchScrollToTop();
+
+    fakeMap.moveTo({ latitude: 45.92, longitude: 6.87 });
+    await user.click(screen.getByRole('button', { name: 'Search this area' }));
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+
+    expect(scroll.scrolledToTop()).toBe(false);
   });
 
   it('does not offer to search an area before the map has moved', async () => {

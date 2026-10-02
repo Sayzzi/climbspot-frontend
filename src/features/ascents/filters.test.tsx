@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { anAscentSummary, handlers, nearbyResults, recorder } from '@/test/api';
 import { renderApp } from '@/test/render-app';
+import { watchScrollToTop } from '@/test/scroll';
 import { server } from '@/test/server';
 
 const AT_LE_BOURG = '/?latitude=45&longitude=6';
@@ -49,6 +50,19 @@ describe('Search filters', () => {
       longitude: 6,
       activity: ['road_cycling', 'gravel_cycling'],
     });
+  });
+
+  it('keeps the map in view when a filter changes', async () => {
+    nearbyApi();
+    const { user } = await renderApp(AT_LE_BOURG);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+    await showFilters(user);
+    const scroll = watchScrollToTop();
+
+    await user.click(activities().getByRole('checkbox', { name: 'Running' }));
+    await screen.findByRole('checkbox', { name: 'Running', checked: true });
+
+    expect(scroll.scrolledToTop()).toBe(false);
   });
 
   it('sends the chosen Categories to the API', async () => {

@@ -29,8 +29,13 @@ function SearchPage() {
   const filters = filtersOf(search);
   const reveal = useScrollProgress();
 
+  // Searches stay on the map: the router must not scroll back to the title.
   const searchAround = (center: Position, replace = false) => {
-    void navigate({ search: (previous) => withPosition(previous, center), replace });
+    void navigate({
+      search: (previous) => withPosition(previous, center),
+      replace,
+      resetScroll: false,
+    });
   };
 
   // Replace the position-less entry: going back should not ask for the location again.
@@ -46,7 +51,11 @@ function SearchPage() {
           <SearchFilters
             value={filters}
             onChange={(next: SearchFilterValues) => {
-              void navigate({ search: (previous) => withFilters(previous, next), replace: true });
+              void navigate({
+                search: (previous) => withFilters(previous, next),
+                replace: true,
+                resetScroll: false,
+              });
             }}
           />
         }

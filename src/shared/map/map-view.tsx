@@ -10,6 +10,7 @@ import {
   Layer,
   Map,
   Marker,
+  NavigationControl,
   Source,
   type LngLatBoundsLike,
   type MapRef,
@@ -95,6 +96,8 @@ export function MapView({
       <Map
         ref={mapRef}
         mapLib={maplibre}
+        // The page keeps the scroll wheel: zooming takes Ctrl/⌘ + scroll, or two fingers.
+        cooperativeGestures
         initialViewState={initialViewState}
         mapStyle={MAP_STYLE}
         style={{ width: '100%', height: '100%' }}
@@ -117,6 +120,7 @@ export function MapView({
           }
         }}
       >
+        <NavigationControl position="top-right" showCompass={false} />
         {lineData && (
           <Source id="line" type="geojson" data={lineData}>
             <Layer

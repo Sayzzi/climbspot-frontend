@@ -106,7 +106,8 @@ export function NearbySearch({
         onMarkerSelect={setSelectedId}
         onAreaChange={setMovedTo}
         interactive={revealed}
-        className="size-full rounded-none"
+        // Zoom buttons sit below the floating header (beating MapLibre's own stylesheet).
+        className="size-full rounded-none [&_.maplibregl-ctrl-top-right]:top-16!"
       />
 
       {areaToSearch && (

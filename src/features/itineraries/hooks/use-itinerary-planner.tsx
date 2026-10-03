@@ -5,11 +5,14 @@ import type { Position } from '@/shared/lib/position';
 import type { MapOverlay } from '@/shared/map';
 import type { Tab } from '@/shared/ui/tabs';
 
+import { isRunning } from '@/shared/domain/values';
+
 import { usePlanLoops } from '../api/plan-loops';
+import { usePlanSessions } from '../api/plan-sessions';
 import { usePlanUphill } from '../api/plan-uphill';
 import { PlanPanel } from '../components/plan-panel';
 import { DEFAULT_PLAN, type PlanForm } from '../domain';
-import type { Itinerary } from '../types';
+import type { Proposal } from '../types';
 
 /**
  * The Plan tab and what it adds to the map: the starting point the Visitor places,
@@ -23,8 +26,9 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
   const [selected, setSelected] = useState(0);
   const uphill = usePlanUphill();
   const loops = usePlanLoops();
-  const planning = form.kind === 'uphill' ? uphill : loops;
-  const proposals: readonly Itinerary[] | undefined = planning.data;
+  const sessions = usePlanSessions();
+  const planning = { uphill, loop: loops, session: sessions }[form.kind];
+  const proposals: readonly Proposal[] | undefined = planning.data;
   const shown = proposals?.[selected];
 
   const ask = () => {
@@ -35,8 +39,14 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
     setSelected(0);
     if (form.kind === 'uphill') {
       uphill.mutate({ start, ...form.uphill, activity: form.activity });
-    } else {
+    } else if (form.kind === 'loop') {
       loops.mutate({ start, ...form.loop, activity: form.activity });
+    } else {
+      sessions.mutate({
+        start,
+        ...form.session,
+        activity: isRunning(form.activity) ? form.activity : 'running',
+      });
     }
   };
 
@@ -44,7 +54,12 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
     if (next.kind !== form.kind) {
       setSelected(0);
     }
-    setForm(next);
+    // Hill Sessions are running workouts: a cycling Activity becomes running.
+    setForm(
+      next.kind === 'session' && !isRunning(next.activity)
+        ? { ...next, activity: 'running' }
+        : next,
+    );
   };
 
   return {
@@ -68,9 +83,15 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
       markers: start
         ? [{ id: 'plan-start', position: start, label: t('start.marker'), tone: 'start' }]
         : [],
-      ...(shown && { line: positionsOf(shown) }),
+      ...(shown && { line: positionsOf(drawnPathOf(shown)) }),
       ...(proposals && {
-        alternatives: proposals.filter((proposal) => proposal !== shown).map(positionsOf),
+        alternatives: [
+          // A session's Warm-up, then the other proposals.
+          ...(shown?.kind === 'session' ? [positionsOf(shown.warmUp.path)] : []),
+          ...proposals
+            .filter((proposal) => proposal !== shown)
+            .map((proposal) => positionsOf(drawnPathOf(proposal))),
+        ],
       }),
       onMapClick: (position) => {
         setStart(position);
@@ -80,7 +101,11 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
   };
 }
 
+/** What stands for a proposal on the map: its path, or a session's Repeat. */
+const drawnPathOf = (proposal: Proposal) =>
+  proposal.kind === 'session' ? proposal.repeat.path : proposal.path;
+
 /** GeoJSON pairs are [longitude, latitude]. */
-function positionsOf(itinerary: Itinerary): Position[] {
-  return itinerary.path.coordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
+function positionsOf(path: { readonly coordinates: readonly [number, number][] }): Position[] {
+  return path.coordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
 }

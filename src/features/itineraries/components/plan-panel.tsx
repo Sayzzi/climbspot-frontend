@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { activities, type Activity } from '@/shared/domain/values';
+import { activities, runningActivities, type Activity } from '@/shared/domain/values';
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
@@ -11,8 +11,8 @@ import { SegmentedControl } from '@/shared/ui/segmented-control';
 import { useFormatters } from '@/shared/units';
 
 import { itineraryKinds, type PlanForm } from '../domain';
-import type { Itinerary } from '../types';
-import { LoopFields, UphillFields } from './criteria-fields';
+import type { Proposal } from '../types';
+import { LoopFields, SessionFields, UphillFields } from './criteria-fields';
 import { Field, selectClassName } from './fields';
 import { ProposalCard } from './proposal-card';
 
@@ -24,7 +24,7 @@ interface PlanPanelProps {
   readonly onSubmit: () => void;
   readonly pending: boolean;
   readonly error: unknown;
-  readonly proposals: readonly Itinerary[] | undefined;
+  readonly proposals: readonly Proposal[] | undefined;
   readonly selected: number;
   readonly onSelect: (index: number) => void;
 }
@@ -72,7 +72,7 @@ export function PlanPanel(props: PlanPanelProps) {
       </p>
 
       <form noValidate onSubmit={submit} className="flex flex-col gap-3">
-        {form.kind === 'uphill' ? (
+        {form.kind === 'uphill' && (
           <UphillFields
             criteria={form.uphill}
             onChange={(uphill) => {
@@ -81,13 +81,24 @@ export function PlanPanel(props: PlanPanelProps) {
             onValidityChange={validityOf('uphill')}
             showProblems={triedToSend}
           />
-        ) : (
+        )}
+        {form.kind === 'loop' && (
           <LoopFields
             criteria={form.loop}
             onChange={(loop) => {
               onFormChange({ ...form, loop });
             }}
             onValidityChange={validityOf('loop')}
+            showProblems={triedToSend}
+          />
+        )}
+        {form.kind === 'session' && (
+          <SessionFields
+            criteria={form.session}
+            onChange={(session) => {
+              onFormChange({ ...form, session });
+            }}
+            onValidityChange={validityOf('session')}
             showProblems={triedToSend}
           />
         )}
@@ -101,7 +112,8 @@ export function PlanPanel(props: PlanPanelProps) {
               }}
               className={selectClassName}
             >
-              {activities.map((activity) => (
+              {/* Hill Sessions are running workouts. */}
+              {(form.kind === 'session' ? runningActivities : activities).map((activity) => (
                 <option key={activity} value={activity}>
                   {labels.activity(activity)}
                 </option>
@@ -148,31 +160,33 @@ export function PlanPanel(props: PlanPanelProps) {
         </ul>
       )}
 
-      {shown && <Profile itinerary={shown} />}
+      {shown && <Profile proposal={shown} />}
     </div>
   );
 }
 
-function Profile({ itinerary }: { readonly itinerary: Itinerary }) {
+/** The Elevation Profile of a proposal: the path of an Itinerary, the Repeat of a session. */
+function Profile({ proposal }: { readonly proposal: Proposal }) {
   const { t } = useTranslation('itineraries');
   const format = useFormatters();
-  const elevations = itinerary.elevationProfile.map((point) => point.elevation);
+  const { elevationProfile, length } = proposal.kind === 'session' ? proposal.repeat : proposal;
+  const elevations = elevationProfile.map((point) => point.elevation);
 
   return (
     <ElevationProfileChart
-      profile={itinerary.elevationProfile}
-      length={itinerary.length}
+      profile={elevationProfile}
+      length={length}
       description={
-        itinerary.kind === 'uphill'
-          ? t('profile.uphill', {
-              length: format.distance(itinerary.length),
-              start: format.elevation(elevations[0] ?? 0),
-              top: format.elevation(elevations.at(-1) ?? 0),
-            })
-          : t('profile.loop', {
-              length: format.distance(itinerary.length),
+        proposal.kind === 'loop'
+          ? t('profile.loop', {
+              length: format.distance(length),
               lowest: format.elevation(Math.min(...elevations)),
               highest: format.elevation(Math.max(...elevations)),
+            })
+          : t('profile.uphill', {
+              length: format.distance(length),
+              start: format.elevation(elevations[0] ?? 0),
+              top: format.elevation(elevations.at(-1) ?? 0),
             })
       }
     />

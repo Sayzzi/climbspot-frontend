@@ -9,10 +9,10 @@ import { useEffortFacts } from '@/shared/pace';
 import { useFormatters } from '@/shared/units';
 
 import { GPX_TYPE, gpxFileName, toGpx } from '../gpx';
-import type { Itinerary } from '../types';
+import type { Proposal } from '../types';
 
 interface ProposalCardProps {
-  readonly proposal: Itinerary;
+  readonly proposal: Proposal;
   readonly selected: boolean;
   readonly onSelect: () => void;
 }
@@ -46,7 +46,8 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
         {proposal.exact ? t('exact') : <Differences proposal={proposal} />}
       </p>
       <FactList className="mt-2 grid-cols-3" facts={facts} />
-      {selected && (
+      {/* Hill Sessions are exported with their own files. */}
+      {selected && proposal.kind !== 'session' && (
         <Button
           type="button"
           variant="secondary"
@@ -63,61 +64,93 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
   );
 }
 
-function useItineraryName(proposal: Itinerary): string {
+function useItineraryName(proposal: Proposal): string {
   const { t } = useTranslation('itineraries');
   const format = useFormatters();
 
-  return proposal.kind === 'uphill'
-    ? t('name.uphill', {
+  switch (proposal.kind) {
+    case 'uphill':
+      return t('name.uphill', {
         length: format.distance(proposal.length),
         gradient: format.gradient(proposal.averageGradient),
-      })
-    : t('name.loop', { length: format.distance(proposal.length) });
+      });
+    case 'loop':
+      return t('name.loop', { length: format.distance(proposal.length) });
+    case 'session':
+      return t('name.session', {
+        repeats: proposal.repeats,
+        length: format.distance(proposal.repeat.length),
+        gradient: format.gradient(proposal.repeat.averageGradient),
+      });
+  }
 }
 
-function useFileName(proposal: Itinerary): string {
+function useFileName(proposal: Proposal): string {
   const { t } = useTranslation('itineraries');
   const format = useFormatters();
 
-  return proposal.kind === 'uphill'
-    ? t('file.uphill', {
+  switch (proposal.kind) {
+    case 'uphill':
+      return t('file.uphill', {
         length: format.distance(proposal.length),
         gradient: format.gradient(proposal.averageGradient),
-      })
-    : t('file.loop', { length: format.distance(proposal.length) });
+      });
+    case 'loop':
+      return t('file.loop', { length: format.distance(proposal.length) });
+    case 'session':
+      return t('file.session', {
+        repeats: proposal.repeats,
+        length: format.distance(proposal.repeat.length),
+        gradient: format.gradient(proposal.repeat.averageGradient),
+      });
+  }
 }
 
-function useFacts(proposal: Itinerary) {
+function useFacts(proposal: Proposal) {
   const { t } = useTranslation('itineraries');
   const format = useFormatters();
   const labels = useDomainLabels();
-  const length = { term: t('facts.length'), value: format.distance(proposal.length) };
-  // Only running proposals carry an effort.
-  const effort = useEffortFacts(proposal.effort);
+  // Only running proposals carry an effort; a session's covers the whole session.
+  const effort = useEffortFacts(
+    proposal.kind === 'session' ? proposal.totals.effort : proposal.effort,
+  );
 
-  if (proposal.kind === 'loop') {
-    return [
-      length,
-      { term: t('facts.heightGained'), value: format.elevation(proposal.heightGained) },
-      { term: t('facts.relief'), value: labels.relief(proposal.relief) },
-      ...effort,
-    ];
+  switch (proposal.kind) {
+    case 'session':
+      return [
+        { term: t('facts.totalLength'), value: format.distance(proposal.totals.length) },
+        { term: t('facts.heightGained'), value: format.elevation(proposal.totals.heightGained) },
+        ...effort,
+        {
+          term: t('facts.repeatGradient'),
+          value: format.gradient(proposal.repeat.averageGradient),
+        },
+        { term: t('facts.warmUp'), value: format.distance(proposal.warmUp.length) },
+      ];
+    case 'loop':
+      return [
+        { term: t('facts.length'), value: format.distance(proposal.length) },
+        { term: t('facts.heightGained'), value: format.elevation(proposal.heightGained) },
+        { term: t('facts.relief'), value: labels.relief(proposal.relief) },
+        ...effort,
+      ];
+    case 'uphill':
+      return [
+        { term: t('facts.length'), value: format.distance(proposal.length) },
+        ...effort,
+        { term: t('facts.elevationGain'), value: format.elevation(proposal.elevationGain) },
+        { term: t('facts.averageGradient'), value: format.gradient(proposal.averageGradient) },
+        { term: t('facts.maximumGradient'), value: format.gradient(proposal.maximumGradient) },
+        { term: t('facts.category'), value: labels.category(proposal.category) },
+        {
+          term: t('facts.distanceToStart'),
+          value: t('away', { distance: format.distance(proposal.distanceToStart) }),
+        },
+      ];
   }
-  return [
-    length,
-    ...effort,
-    { term: t('facts.elevationGain'), value: format.elevation(proposal.elevationGain) },
-    { term: t('facts.averageGradient'), value: format.gradient(proposal.averageGradient) },
-    { term: t('facts.maximumGradient'), value: format.gradient(proposal.maximumGradient) },
-    { term: t('facts.category'), value: labels.category(proposal.category) },
-    {
-      term: t('facts.distanceToStart'),
-      value: t('away', { distance: format.distance(proposal.distanceToStart) }),
-    },
-  ];
 }
 
-function Differences({ proposal }: { readonly proposal: Itinerary }) {
+function Differences({ proposal }: { readonly proposal: Proposal }) {
   const { t } = useTranslation('itineraries');
   const format = useFormatters();
   const labels = useDomainLabels();

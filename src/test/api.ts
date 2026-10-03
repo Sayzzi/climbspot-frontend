@@ -7,6 +7,7 @@ export type Ascent = components['schemas']['Ascent'];
 export type ApiError = components['schemas']['ApiError'];
 export type UphillItinerary = components['schemas']['UphillItinerary'];
 export type LoopItinerary = components['schemas']['LoopItinerary'];
+export type HillSession = components['schemas']['HillSession'];
 
 const API_URL = 'http://localhost:3000';
 
@@ -136,6 +137,51 @@ export function aLoopItinerary(overrides: Partial<LoopItinerary> = {}): LoopItin
   };
 }
 
+export function aHillSession(overrides: Partial<HillSession> = {}): HillSession {
+  return {
+    kind: 'session',
+    exact: true,
+    differences: [],
+    repeats: 8,
+    repeat: {
+      path: {
+        type: 'LineString',
+        coordinates: [
+          [6.01, 45.01],
+          [6.01, 45.0127],
+        ],
+      },
+      elevationProfile: [
+        { distance: 0, elevation: 450 },
+        { distance: 150, elevation: 461 },
+        { distance: 300, elevation: 472 },
+      ],
+      length: 300,
+      averageGradient: 0.075,
+      maximumGradient: 0.075,
+      start: { latitude: 45.01, longitude: 6.01, elevation: 450 },
+      top: { latitude: 45.0127, longitude: 6.01, elevation: 472 },
+    },
+    warmUp: {
+      path: {
+        type: 'LineString',
+        coordinates: [
+          [6, 45],
+          [6.005, 45.005],
+          [6.01, 45.01],
+        ],
+      },
+      length: 1800,
+    },
+    totals: {
+      length: 8400,
+      heightGained: 245,
+      effort: { kmEffort: 10.8, flatEquivalentDistance: 10_200 },
+    },
+    ...overrides,
+  };
+}
+
 export const handlers = {
   nearby: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
@@ -151,6 +197,9 @@ export const handlers = {
   loops: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/itineraries/loops'), ({ request }) => respond(request)),
+  sessions: (
+    respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
+  ) => http.post(apiUrl('/itineraries/sessions'), ({ request }) => respond(request)),
   createAscent: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/ascents'), ({ request }) => respond(request)),

@@ -3,7 +3,8 @@
   "kind": {
     "label": "Itinerary",
     "uphill": "Uphill",
-    "loop": "Loop"
+    "loop": "Loop",
+    "session": "Hill session"
   },
   "start": {
     "hint": "Click or tap the map to place your starting point.",
@@ -23,13 +24,19 @@
     "relief": "Relief",
     "submit": "Find loops"
   },
+  "session": {
+    "repeats": "Repeats",
+    "repeatLength": "Repeat length",
+    "submit": "Find hill sessions"
+  },
   "activity": "Activity",
   "submitting": "Finding itineraries…",
   "results": "Proposed itineraries",
   "show": "Show {{name}}",
   "name": {
     "uphill": "{{length}} at {{gradient}}",
-    "loop": "{{length}} loop"
+    "loop": "{{length}} loop",
+    "session": "{{repeats}} × {{length}} at {{gradient}}"
   },
   "exact": "Matches your request",
   "close": {
@@ -45,12 +52,16 @@
     "category": "Category",
     "distanceToStart": "From your point",
     "heightGained": "Height gained",
-    "relief": "Relief"
+    "relief": "Relief",
+    "totalLength": "Total length",
+    "repeatGradient": "Repeat gradient",
+    "warmUp": "Warm-up"
   },
   "download": "Download GPX",
   "file": {
     "uphill": "ClimbSpot uphill {{length}} at {{gradient}}",
-    "loop": "ClimbSpot loop {{length}}"
+    "loop": "ClimbSpot loop {{length}}",
+    "session": "ClimbSpot hill session {{repeats}} × {{length}} at {{gradient}}"
   },
   "profile": {
     "uphill": "Elevation profile: {{length}} from {{start}} to {{top}}.",
@@ -59,6 +70,7 @@
   "empty": {
     "title": "No itinerary found around this point.",
     "uphill": "Try another point, another Activity or a wider Gradient range.",
-    "loop": "Try another point, another Activity or another Relief."
+    "loop": "Try another point, another Activity or another Relief.",
+    "session": "Try another point, a wider Gradient range or a wider radius."
   }
 }

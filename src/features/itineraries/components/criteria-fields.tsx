@@ -9,8 +9,11 @@ import {
   GRADIENT_CHOICES,
   LOOP_DISTANCE,
   RADII,
+  REPEAT_COUNTS,
+  REPEAT_LENGTH,
   UPHILL_LENGTH,
   type LoopCriteria,
+  type SessionCriteria,
   type UphillCriteria,
 } from '../domain';
 import { Choice, DistanceField } from './fields';
@@ -31,10 +34,79 @@ export function UphillFields({
   showProblems,
 }: CriteriaFieldsProps<UphillCriteria>) {
   const { t } = useTranslation('itineraries');
-  const format = useFormatters();
 
   return (
     <div className="grid grid-cols-2 gap-3">
+      <GradientRange criteria={criteria} onChange={onChange} />
+      <DistanceField
+        label={t('uphill.length')}
+        value={criteria.length}
+        bounds={UPHILL_LENGTH}
+        onChange={(length) => {
+          onChange({ ...criteria, length });
+        }}
+        onValidityChange={onValidityChange}
+        showProblem={showProblems}
+      />
+      <Within criteria={criteria} onChange={onChange} />
+    </div>
+  );
+}
+
+/** How many Repeats, how long, how steep, and how far from the starting point to look. */
+export function SessionFields({
+  criteria,
+  onChange,
+  onValidityChange,
+  showProblems,
+}: CriteriaFieldsProps<SessionCriteria>) {
+  const { t } = useTranslation('itineraries');
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <Choice
+        label={t('session.repeats')}
+        value={criteria.repeats}
+        options={REPEAT_COUNTS}
+        format={String}
+        onChange={(repeats) => {
+          onChange({ ...criteria, repeats });
+        }}
+      />
+      <DistanceField
+        label={t('session.repeatLength')}
+        value={criteria.repeatLength}
+        bounds={REPEAT_LENGTH}
+        onChange={(repeatLength) => {
+          onChange({ ...criteria, repeatLength });
+        }}
+        onValidityChange={onValidityChange}
+        showProblem={showProblems}
+      />
+      <GradientRange criteria={criteria} onChange={onChange} />
+      <Within criteria={criteria} onChange={onChange} />
+    </div>
+  );
+}
+
+interface GradientRangeCriteria {
+  readonly minGradient: number;
+  readonly maxGradient: number;
+}
+
+/** The average Gradient range asked for; each bound keeps the other consistent. */
+function GradientRange<Criteria extends GradientRangeCriteria>({
+  criteria,
+  onChange,
+}: {
+  readonly criteria: Criteria;
+  readonly onChange: (criteria: Criteria) => void;
+}) {
+  const { t } = useTranslation('itineraries');
+  const format = useFormatters();
+
+  return (
+    <>
       <Choice
         label={t('uphill.minGradient')}
         value={criteria.minGradient}
@@ -61,26 +133,31 @@ export function UphillFields({
           });
         }}
       />
-      <DistanceField
-        label={t('uphill.length')}
-        value={criteria.length}
-        bounds={UPHILL_LENGTH}
-        onChange={(length) => {
-          onChange({ ...criteria, length });
-        }}
-        onValidityChange={onValidityChange}
-        showProblem={showProblems}
-      />
-      <Choice
-        label={t('uphill.radius')}
-        value={criteria.radius}
-        options={RADII}
-        format={(value) => format.distance(value)}
-        onChange={(radius) => {
-          onChange({ ...criteria, radius });
-        }}
-      />
-    </div>
+    </>
+  );
+}
+
+/** How far from the starting point to look. */
+function Within<Criteria extends { readonly radius: number }>({
+  criteria,
+  onChange,
+}: {
+  readonly criteria: Criteria;
+  readonly onChange: (criteria: Criteria) => void;
+}) {
+  const { t } = useTranslation('itineraries');
+  const format = useFormatters();
+
+  return (
+    <Choice
+      label={t('uphill.radius')}
+      value={criteria.radius}
+      options={RADII}
+      format={(value) => format.distance(value)}
+      onChange={(radius) => {
+        onChange({ ...criteria, radius });
+      }}
+    />
   );
 }
 

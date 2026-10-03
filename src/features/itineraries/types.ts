@@ -5,3 +5,7 @@ export type LoopItinerary = components['schemas']['LoopItinerary'];
 export type Itinerary = UphillItinerary | LoopItinerary;
 export type UphillRequest = components['schemas']['UphillRequest'];
 export type LoopRequest = components['schemas']['LoopRequest'];
+export type HillSession = components['schemas']['HillSession'];
+export type HillSessionRequest = components['schemas']['HillSessionRequest'];
+/** Whatever the Plan tab proposes: an Itinerary or a Hill Session. */
+export type Proposal = Itinerary | HillSession;

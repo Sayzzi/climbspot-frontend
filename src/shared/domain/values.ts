@@ -37,3 +37,15 @@ export const categories = everyOf<Category>()([
 ]);
 
 export const reliefs = everyOf<Relief>()(['flat', 'rolling', 'hilly']);
+
+/** Activities that are running: Hill Sessions, effort and times only make sense for them. */
+export const runningActivities = [
+  'running',
+  'trail_running',
+] as const satisfies readonly Activity[];
+
+export type RunningActivity = (typeof runningActivities)[number];
+
+export function isRunning(activity: Activity): activity is RunningActivity {
+  return (runningActivities as readonly Activity[]).includes(activity);
+}

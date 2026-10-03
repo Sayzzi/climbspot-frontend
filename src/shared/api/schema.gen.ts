@@ -112,6 +112,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/itineraries/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Plan Hill Sessions from a point
+         * @description Up to three Hill Sessions near `start`: Repeats of exactly `repeatLength` within the Gradient range, with a Warm-up from `start` to their foot and the same way back, best first (exact, steady, shortest Warm-up). Running Activities only.
+         */
+        post: operations["planHillSessions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -354,6 +374,89 @@ export interface components {
             /** @description Highest average Gradient wanted, as a ratio (0.08 = 8 %). */
             maxGradient: number;
             activity: components["schemas"]["Activity"];
+        };
+        HillSessions: {
+            sessions: components["schemas"]["HillSession"][];
+        };
+        HillSession: {
+            /** @enum {string} */
+            kind: "session";
+            /** @description True when the proposal matches the request. */
+            exact: boolean;
+            differences: components["schemas"]["ItineraryDifference"][];
+            repeats: number;
+            /** @description The Uphill Itinerary run up for each Repeat. */
+            repeat: {
+                /** @description GeoJSON LineString ([longitude, latitude] pairs). */
+                path: {
+                    /** @enum {string} */
+                    type: "LineString";
+                    coordinates: [
+                        number,
+                        number
+                    ][];
+                };
+                elevationProfile: {
+                    /** @description Distance from the beginning, in metres. */
+                    distance: number;
+                    /** @description Elevation, in metres. */
+                    elevation: number;
+                }[];
+                /** @description Length of one Repeat, in metres. */
+                length: number;
+                /** @description Average Gradient of the Repeat, as a ratio (0.08 = 8 %). */
+                averageGradient: number;
+                /** @description Steepest Gradient of the Repeat, as a ratio (0.08 = 8 %). */
+                maximumGradient: number;
+                start: components["schemas"]["ItineraryPoint"];
+                top: components["schemas"]["ItineraryPoint"];
+            };
+            /** @description From `start` to the foot of the Repeat; the Cool-down is the same way back. */
+            warmUp: {
+                /** @description GeoJSON LineString ([longitude, latitude] pairs). */
+                path: {
+                    /** @enum {string} */
+                    type: "LineString";
+                    coordinates: [
+                        number,
+                        number
+                    ][];
+                };
+                /** @description Length of the Warm-up, in metres. */
+                length: number;
+            };
+            /** @description Warm-up, Repeats and Recoveries, and Cool-down together. */
+            totals: {
+                /** @description Length of the whole session, in metres. */
+                length: number;
+                /** @description Every rise over the whole session, in metres. */
+                heightGained: number;
+                effort: components["schemas"]["Effort"];
+            };
+        };
+        HillSessionRequest: {
+            start: {
+                latitude: number;
+                longitude: number;
+            };
+            /**
+             * @description The Repeats start within this distance of `start`, in metres.
+             * @default 10000
+             */
+            radius: number;
+            /** @description Number of Repeats. */
+            repeats: number;
+            /** @description Metres; every Repeat is exactly this long. */
+            repeatLength: number;
+            /** @description Lowest average Gradient of the Repeat, as a ratio (0.08 = 8 %). */
+            minGradient: number;
+            /** @description Highest average Gradient of the Repeat, as a ratio (0.08 = 8 %). */
+            maxGradient: number;
+            /**
+             * @description A running Activity.
+             * @enum {string}
+             */
+            activity: "running" | "trail_running";
         };
     };
     responses: never;
@@ -602,6 +705,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UphillItineraries"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: the request is invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `ROUTING_UNAVAILABLE`: routing is temporarily unavailable; retry later. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    planHillSessions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HillSessionRequest"];
+            };
+        };
+        responses: {
+            /** @description Sessions, possibly none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HillSessions"];
                 };
             };
             /** @description `VALIDATION_FAILED`: the request is invalid. */

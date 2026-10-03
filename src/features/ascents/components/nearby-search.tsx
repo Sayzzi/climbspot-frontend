@@ -57,7 +57,7 @@ export function NearbySearch({
   const selected = ascents?.find((ascent) => ascent.id === selectedId);
   const revealed = reveal >= REVEALED;
   const panelReveal = Math.max(0, reveal * 2 - 1);
-  const [activeTab, setActiveTab] = useState('climbs');
+  const [activeTab, setActiveTab] = useState('ascents');
   const overlay = extraTabs.find((tab) => tab.id === activeTab)?.mapOverlay;
 
   // Without a position, searching the visible area is the way forward, moved or not.
@@ -161,7 +161,7 @@ export function NearbySearch({
         <Tabs
           label={t('search.panel')}
           tabs={[
-            { id: 'climbs', label: t('search.tabs.climbs'), content: results },
+            { id: 'ascents', label: t('search.tabs.ascents'), content: results },
             { id: 'filters', label: t('search.tabs.filters'), content: filters },
             ...extraTabs,
           ]}

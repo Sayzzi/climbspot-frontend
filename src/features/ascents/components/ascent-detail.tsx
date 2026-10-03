@@ -26,6 +26,9 @@ export function AscentDetail({ id }: { readonly id: string }) {
   const facts = [
     { term: t('facts.length'), value: format.distance(ascent.length) },
     { term: t('facts.elevationGain'), value: format.elevation(ascent.elevationGain) },
+    ...(ascent.effort
+      ? [{ term: t('facts.kmEffort'), value: format.kmEffort(ascent.effort.kmEffort) }]
+      : []),
     { term: t('facts.averageGradient'), value: format.gradient(ascent.averageGradient) },
     { term: t('facts.maximumGradient'), value: format.gradient(ascent.maximumGradient) },
     { term: t('facts.difficultyScore'), value: format.number(ascent.difficultyScore) },

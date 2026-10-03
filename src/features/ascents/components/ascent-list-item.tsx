@@ -51,6 +51,9 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
             { term: t('facts.length'), value: format.distance(ascent.length) },
             { term: t('facts.elevationGain'), value: format.elevation(ascent.elevationGain) },
             { term: t('facts.averageGradient'), value: format.gradient(ascent.averageGradient) },
+            ...(ascent.effort
+              ? [{ term: t('facts.kmEffort'), value: format.kmEffort(ascent.effort.kmEffort) }]
+              : []),
             { term: t('facts.category'), value: labels.category(ascent.category) },
             { term: t('facts.surface'), value: labels.surface(ascent.surface) },
             {

@@ -21,6 +21,7 @@
     "distanceToStart": "{{distance}} to the start",
     "length": "Length",
     "elevationGain": "Elevation gain",
+    "kmEffort": "Km-effort",
     "averageGradient": "Average gradient",
     "maximumGradient": "Maximum gradient",
     "difficultyScore": "Difficulty score",

@@ -140,6 +140,8 @@ export interface components {
             length: number;
             /** @description Top elevation minus Start elevation, in metres. */
             elevationGain: number;
+            /** @description Every rise along the path, Dips included, in metres. */
+            heightGained: number;
             /**
              * @description Average Gradient, as a ratio (0.08 = 8 %).
              * @example 0.072
@@ -153,6 +155,7 @@ export interface components {
             /** @description Length in metres × average Gradient in percent. */
             difficultyScore: number;
             category: components["schemas"]["Category"];
+            effort?: components["schemas"]["Effort"];
             /** Format: date-time */
             createdAt: string;
             /** @description GeoJSON LineString from Start to Top ([longitude, latitude] pairs). */
@@ -183,6 +186,16 @@ export interface components {
         };
         /** @enum {string} */
         Category: "uncategorized" | "cat4" | "cat3" | "cat2" | "cat1" | "hc";
+        /** @description How hard the path is to run; only given for running. */
+        Effort: {
+            /**
+             * @description Length in km plus one per 100 m of Height Gained, rounded to 0.1.
+             * @example 4.8
+             */
+            kmEffort: number;
+            /** @description Distance on the flat costing a runner as much as the path (Minetti, descents at best 10 % faster), in metres. */
+            flatEquivalentDistance: number;
+        };
         NearbyAscents: {
             ascents: {
                 /** Format: uuid */
@@ -196,6 +209,8 @@ export interface components {
                 length: number;
                 /** @description Top elevation minus Start elevation, in metres. */
                 elevationGain: number;
+                /** @description Every rise along the path, Dips included, in metres. */
+                heightGained: number;
                 /**
                  * @description Average Gradient, as a ratio (0.08 = 8 %).
                  * @example 0.072
@@ -209,6 +224,7 @@ export interface components {
                 /** @description Length in metres × average Gradient in percent. */
                 difficultyScore: number;
                 category: components["schemas"]["Category"];
+                effort?: components["schemas"]["Effort"];
                 /** Format: date-time */
                 createdAt: string;
                 /** @description Geodesic distance from the searched position to the Start, in metres. */
@@ -243,6 +259,7 @@ export interface components {
             length: number;
             /** @description Sum of every rise along the path, in metres. */
             heightGained: number;
+            effort?: components["schemas"]["Effort"];
             relief: components["schemas"]["Relief"];
         };
         ItineraryDifference: {
@@ -300,6 +317,7 @@ export interface components {
             length: number;
             /** @description Sum of every rise along the path, in metres. */
             heightGained: number;
+            effort?: components["schemas"]["Effort"];
             start: components["schemas"]["ItineraryPoint"];
             top: components["schemas"]["ItineraryPoint"];
             /** @description Top elevation minus start elevation, in metres. */

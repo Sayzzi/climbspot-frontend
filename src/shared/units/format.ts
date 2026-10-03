@@ -12,6 +12,8 @@ export interface Formatters {
   gradient(ratio: number): string;
   /** A plain number, e.g. a Difficulty Score. */
   number(value: number): string;
+  /** A Km-Effort, with one decimal; a named unit, the same in every unit system. */
+  kmEffort(value: number): string;
 }
 
 export function createFormatters(system: UnitSystem, locale: string): Formatters {
@@ -19,11 +21,16 @@ export function createFormatters(system: UnitSystem, locale: string): Formatters
     new Intl.NumberFormat(locale, { style: 'unit', unit: name, maximumFractionDigits });
   const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 });
   const plain = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  const oneDecimal = new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
 
   return {
     ...(system === 'imperial' ? imperial(unit) : metric(unit)),
     gradient: (ratio) => percent.format(ratio),
     number: (value) => plain.format(value),
+    kmEffort: (value) => oneDecimal.format(value),
   };
 }
 

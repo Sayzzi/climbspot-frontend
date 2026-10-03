@@ -64,6 +64,8 @@
     "file": "GPX file",
     "submit": "Add the climb",
     "submitting": "Adding…",
+    "signInNeeded": "Sign in to add a climb: it will be shared under your account.",
+    "signIn": "Sign in",
     "errors": {
       "nameRequired": "Give the climb a name.",
       "nameTooLong": "Keep the name to 100 characters or fewer.",

@@ -14,7 +14,7 @@
     "ROUTE_NOT_FOUND": "This resource does not exist.",
     "INTERNAL_ERROR": "Something went wrong on our side. Please try again.",
     "ASCENT_NOT_FOUND": "This climb does not exist or has been removed.",
-    "ASCENT_CREATION_DISABLED": "Adding climbs is not open yet. Check back soon!",
+    "AUTHENTICATION_REQUIRED": "Sign in again to continue.",
     "GPX_INVALID": "This file is not a valid GPX file.",
     "GPX_EMPTY": "This file has no track or route with at least two points.",
     "GPX_TOO_LARGE": "This file is too large. Use a file under 5 MB with at most 20,000 points.",

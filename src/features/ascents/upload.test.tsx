@@ -1,8 +1,9 @@
 import { screen, within } from '@testing-library/react';
 import { delay, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-import { anAscent, apiErrorResponse, handlers } from '@/test/api';
+import { anAccount, anAscent, apiErrorResponse, handlers } from '@/test/api';
+import { FAKE_TOKEN, fakeAuth } from '@/test/fake-auth';
 import { renderApp } from '@/test/render-app';
 import { server } from '@/test/server';
 
@@ -17,6 +18,7 @@ interface SentUpload {
   name: FormDataEntryValue | null;
   surface: FormDataEntryValue | null;
   gpx: FormDataEntryValue | null;
+  authorization: string | null;
 }
 
 function createApi(
@@ -27,10 +29,16 @@ function createApi(
   server.use(
     handlers.createAscent(async (request) => {
       const form = await request.formData();
-      sent.push({ name: form.get('name'), surface: form.get('surface'), gpx: form.get('gpx') });
+      sent.push({
+        name: form.get('name'),
+        surface: form.get('surface'),
+        gpx: form.get('gpx'),
+        authorization: request.headers.get('Authorization'),
+      });
       return (await respond()) as never;
     }),
     handlers.ascent(() => HttpResponse.json(anAscent({ id: NEW_ID, name: 'Le Mur' }))),
+    handlers.me(() => HttpResponse.json(anAccount())),
   );
   return sent;
 }
@@ -61,6 +69,10 @@ async function fill(
 const submit = () => screen.getByRole('button', { name: 'Add the climb' });
 
 describe('Adding an Ascent', () => {
+  beforeEach(() => {
+    fakeAuth.signIn();
+  });
+
   it('is reachable from the header', async () => {
     const { router, user } = await renderApp('/does-not-exist');
 
@@ -101,6 +113,7 @@ describe('Adding an Ascent', () => {
     expect(sent).toHaveLength(1);
     expect(sent[0]?.name).toBe('Le Mur');
     expect(sent[0]?.surface).toBe('gravel');
+    expect(sent[0]?.authorization).toBe(`Bearer ${FAKE_TOKEN}`);
     expect(await (sent[0]?.gpx as File).text()).toBe('<gpx/>');
   });
 
@@ -187,7 +200,6 @@ describe('Adding an Ascent', () => {
       'Elevation data is temporarily unavailable. Please try again in a moment.',
     ],
     [400, 'VALIDATION_FAILED', 'Some information is missing or invalid.'],
-    [403, 'ASCENT_CREATION_DISABLED', 'Adding climbs is not open yet. Check back soon!'],
   ])('explains a %s %s refusal and keeps the form filled', async (status, code, message) => {
     createApi(() => apiErrorResponse(status, code));
     const { router, user } = await openForm();
@@ -212,5 +224,37 @@ describe('Adding an Ascent', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'We could not reach ClimbSpot. Check your connection.',
     );
+  });
+});
+
+describe('Adding an Ascent signed out', () => {
+  it('explains that signing in is needed and leads there', async () => {
+    createApi();
+    const { router, user } = await renderApp('/ascents/new');
+
+    expect(
+      await screen.findByText('Sign in to add a climb: it will be shared under your account.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument();
+
+    await user.click(within(screen.getByRole('main')).getByRole('link', { name: 'Sign in' }));
+
+    expect(router.state.location.pathname).toBe('/sign-in');
+  });
+
+  it('asks to sign in again when the API no longer accepts the session', async () => {
+    createApi(() => apiErrorResponse(401, 'AUTHENTICATION_REQUIRED'));
+    fakeAuth.signIn();
+    const { user } = await openForm();
+    await fill(user);
+
+    await user.click(submit());
+
+    expect(
+      await screen.findByText('Your session has ended. Sign in again to use your account.'),
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('main')).getByRole('link', { name: 'Sign in' }),
+    ).toBeInTheDocument();
   });
 });

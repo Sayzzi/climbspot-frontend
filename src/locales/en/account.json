@@ -31,5 +31,13 @@
     "displayName": "Display name",
     "save": "Save",
     "saved": "Saved."
+  },
+  "deletion": {
+    "title": "Delete my account",
+    "explanation": "Deleting your account erases your e-mail, display name, Flat Pace and saved itineraries. The climbs you added stay on ClimbSpot, without your name.",
+    "confirm": "Delete your account for good? This cannot be undone.",
+    "yes": "Yes, delete my account",
+    "cancel": "Cancel",
+    "done": "Your account has been deleted."
   }
 }

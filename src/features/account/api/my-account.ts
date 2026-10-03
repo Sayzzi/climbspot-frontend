@@ -1,7 +1,7 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiClient } from '@/shared/api/client';
-import { unwrap } from '@/shared/api/request';
+import { unwrap, unwrapEmpty } from '@/shared/api/request';
 import { useAuth } from '@/shared/auth';
 
 import type { AccountChanges } from '../types';
@@ -31,5 +31,17 @@ export function useUpdateMyAccount() {
     onSuccess: (account) => {
       queryClient.setQueryData(myAccountQuery(session?.accessToken ?? '').queryKey, account);
     },
+  });
+}
+
+/**
+ * Deletes the signed-in Visitor's account and everything kept for it, then signs them
+ * out. A refusal changes nothing, and the Visitor stays signed in.
+ */
+export function useDeleteMyAccount() {
+  const { signOut } = useAuth();
+  return useMutation({
+    mutationFn: () => unwrapEmpty(apiClient.DELETE('/me')),
+    onSuccess: () => signOut(),
   });
 }

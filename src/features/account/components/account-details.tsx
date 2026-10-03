@@ -6,14 +6,24 @@ import { useAuth } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
 
-import { useMyAccount, useUpdateMyAccount } from '../api/my-account';
+import { useDeleteMyAccount, useMyAccount, useUpdateMyAccount } from '../api/my-account';
+import { AccountDeletion } from './account-deletion';
 
 /** The signed-in Visitor's account; an invitation to sign in otherwise. */
 export function AccountDetails() {
   const { t } = useTranslation('account');
   const { session } = useAuth();
   const account = useMyAccount();
+  // Kept here, above the signed-out view, so that the Visitor is told once signed out.
+  const deletion = useDeleteMyAccount();
 
+  if (deletion.isSuccess) {
+    return (
+      <p role="status" className="rounded-lg bg-lichen p-4">
+        {t('deletion.done')}
+      </p>
+    );
+  }
   if (!session) {
     return (
       <p className="text-ink-muted">
@@ -37,6 +47,7 @@ export function AccountDetails() {
         <dd className="font-medium">{account.data.email}</dd>
       </dl>
       <DisplayNameForm current={account.data.displayName} />
+      <AccountDeletion deletion={deletion} />
     </div>
   );
 }

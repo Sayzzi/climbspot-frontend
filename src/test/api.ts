@@ -216,6 +216,9 @@ export const handlers = {
   updateMe: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.patch(apiUrl('/me'), ({ request }) => respond(request)),
+  deleteMe: (
+    respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
+  ) => http.delete(apiUrl('/me'), ({ request }) => respond(request)),
   sessions: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/itineraries/sessions'), ({ request }) => respond(request)),

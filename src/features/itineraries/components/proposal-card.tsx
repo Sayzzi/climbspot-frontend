@@ -5,6 +5,7 @@ import { cn } from '@/shared/lib/cn';
 import { saveFile } from '@/shared/lib/save-file';
 import { Button } from '@/shared/ui/button';
 import { FactList } from '@/shared/ui/fact-list';
+import { EstimatedTime } from '@/shared/pace';
 import { useFormatters } from '@/shared/units';
 
 import { GPX_TYPE, gpxFileName, toGpx } from '../gpx';
@@ -91,16 +92,28 @@ function useFacts(proposal: Itinerary) {
   const format = useFormatters();
   const labels = useDomainLabels();
   const length = { term: t('facts.length'), value: format.distance(proposal.length) };
+  // Only running proposals carry an effort.
+  const effort = proposal.effort
+    ? [
+        { term: t('facts.kmEffort'), value: format.kmEffort(proposal.effort.kmEffort) },
+        {
+          term: t('facts.estimatedTime'),
+          value: <EstimatedTime flatEquivalentDistance={proposal.effort.flatEquivalentDistance} />,
+        },
+      ]
+    : [];
 
   if (proposal.kind === 'loop') {
     return [
       length,
       { term: t('facts.heightGained'), value: format.elevation(proposal.heightGained) },
       { term: t('facts.relief'), value: labels.relief(proposal.relief) },
+      ...effort,
     ];
   }
   return [
     length,
+    ...effort,
     { term: t('facts.elevationGain'), value: format.elevation(proposal.elevationGain) },
     { term: t('facts.averageGradient'), value: format.gradient(proposal.averageGradient) },
     { term: t('facts.maximumGradient'), value: format.gradient(proposal.maximumGradient) },

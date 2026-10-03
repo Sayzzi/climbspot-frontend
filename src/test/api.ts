@@ -96,6 +96,7 @@ export function anUphillItinerary(overrides: Partial<UphillItinerary> = {}): Uph
     ],
     length: 3000,
     heightGained: 135,
+    effort: { kmEffort: 4.4, flatEquivalentDistance: 4520 },
     start: { latitude: 45.001, longitude: 6.001, elevation: 450 },
     top: { latitude: 45.028, longitude: 6.002, elevation: 585 },
     elevationGain: 135,
@@ -129,6 +130,7 @@ export function aLoopItinerary(overrides: Partial<LoopItinerary> = {}): LoopItin
     ],
     length: 5600,
     heightGained: 105,
+    effort: { kmEffort: 6.7, flatEquivalentDistance: 6300 },
     relief: 'rolling',
     ...overrides,
   };

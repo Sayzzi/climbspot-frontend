@@ -45,7 +45,9 @@
     "category": "Category",
     "distanceToStart": "From your point",
     "heightGained": "Height gained",
-    "relief": "Relief"
+    "relief": "Relief",
+    "kmEffort": "Km-effort",
+    "estimatedTime": "Estimated time"
   },
   "download": "Download GPX",
   "file": {

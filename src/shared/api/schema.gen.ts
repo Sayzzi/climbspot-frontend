@@ -146,7 +146,7 @@ export interface components {
              */
             averageGradient: number;
             /**
-             * @description Steepest Gradient over at least 100 m, as a ratio (0.08 = 8 %).
+             * @description Steepest Gradient over at least 500 m, as a ratio (0.08 = 8 %).
              * @example 0.072
              */
             maximumGradient: number;
@@ -202,7 +202,7 @@ export interface components {
                  */
                 averageGradient: number;
                 /**
-                 * @description Steepest Gradient over at least 100 m, as a ratio (0.08 = 8 %).
+                 * @description Steepest Gradient over at least 500 m, as a ratio (0.08 = 8 %).
                  * @example 0.072
                  */
                 maximumGradient: number;

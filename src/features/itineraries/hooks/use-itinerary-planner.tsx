@@ -68,9 +68,9 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
       markers: start
         ? [{ id: 'plan-start', position: start, label: t('start.marker'), tone: 'start' }]
         : [],
-      ...(shown && {
-        // GeoJSON pairs are [longitude, latitude].
-        line: shown.path.coordinates.map(([longitude, latitude]) => ({ latitude, longitude })),
+      ...(shown && { line: positionsOf(shown) }),
+      ...(proposals && {
+        alternatives: proposals.filter((proposal) => proposal !== shown).map(positionsOf),
       }),
       onMapClick: (position) => {
         setStart(position);
@@ -78,4 +78,9 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
       },
     },
   };
+}
+
+/** GeoJSON pairs are [longitude, latitude]. */
+function positionsOf(itinerary: Itinerary): Position[] {
+  return itinerary.path.coordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
 }

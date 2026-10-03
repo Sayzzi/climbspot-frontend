@@ -47,6 +47,7 @@ export function MapView({
   fitTo,
   markers = [],
   line,
+  alternatives,
   onMarkerSelect,
   onAreaChange,
   onMapClick,
@@ -99,6 +100,22 @@ export function MapView({
     [line],
   );
 
+  const alternativesData = useMemo(
+    () =>
+      alternatives &&
+      alternatives.length > 0 && {
+        type: 'Feature' as const,
+        properties: {},
+        geometry: {
+          type: 'MultiLineString' as const,
+          coordinates: alternatives.map((other) =>
+            other.map(({ longitude, latitude }) => [longitude, latitude]),
+          ),
+        },
+      },
+    [alternatives],
+  );
+
   return (
     <section aria-label={label} className={cn('overflow-hidden rounded-xl', className)}>
       <Map
@@ -133,6 +150,16 @@ export function MapView({
         }}
       >
         <NavigationControl position="top-right" showCompass={false} />
+        {alternativesData && (
+          <Source id="alternatives" type="geojson" data={alternativesData}>
+            <Layer
+              id="alternatives"
+              type="line"
+              paint={{ 'line-color': routeColour, 'line-width': 4, 'line-opacity': 0.35 }}
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+            />
+          </Source>
+        )}
         {lineData && (
           <Source id="line" type="geojson" data={lineData}>
             <Layer

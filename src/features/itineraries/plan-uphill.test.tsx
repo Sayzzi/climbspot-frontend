@@ -184,7 +184,7 @@ describe('Plan tab: Uphill Itineraries', () => {
     expect(within(secondItem).getByText('Close match: 1.7% instead of 2%–5%')).toBeInTheDocument();
   });
 
-  it('draws the selected proposal on the map with its Elevation Profile', async () => {
+  it('draws every proposal on the map, the selected one with its Elevation Profile', async () => {
     uphillApi(() =>
       HttpResponse.json({
         itineraries: [
@@ -208,6 +208,7 @@ describe('Plan tab: Uphill Itineraries', () => {
     const list = within(await plan().findByRole('list', { name: 'Proposed itineraries' }));
 
     expect(screen.getByText('Line through 4 points')).toBeInTheDocument();
+    expect(screen.getByText('Other lines through 2 points')).toBeInTheDocument();
     expect(
       plan().getByRole('img', { name: 'Elevation profile: 3 km from 450 m to 585 m.' }),
     ).toBeInTheDocument();
@@ -219,6 +220,7 @@ describe('Plan tab: Uphill Itineraries', () => {
     await user.click(showSecond);
 
     expect(screen.getByText('Line through 2 points')).toBeInTheDocument();
+    expect(screen.getByText('Other lines through 4 points')).toBeInTheDocument();
   });
 
   it('uses the Visitor’s units', async () => {

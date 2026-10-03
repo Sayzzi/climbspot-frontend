@@ -112,6 +112,7 @@ export function NearbySearch({
           ...(overlay?.markers ?? []),
         ]}
         {...(overlay?.line && { line: overlay.line })}
+        {...(overlay?.alternatives && { alternatives: overlay.alternatives })}
         {...(overlay?.onMapClick && { onMapClick: overlay.onMapClick })}
         onMarkerSelect={setSelectedId}
         onAreaChange={setMovedTo}

@@ -9,10 +9,11 @@ export interface MapMarker {
   readonly tone?: 'default' | 'start' | 'top';
 }
 
-/** What a panel adds to the map while it is shown: its markers, a line, and clicks. */
+/** What a panel adds to the map while it is shown: its markers, lines, and clicks. */
 export interface MapOverlay {
   readonly markers?: readonly MapMarker[];
   readonly line?: readonly Position[];
+  readonly alternatives?: readonly (readonly Position[])[];
   readonly onMapClick?: (position: Position) => void;
 }
 
@@ -27,6 +28,8 @@ export interface MapViewProps {
   readonly markers?: readonly MapMarker[];
   /** A line drawn through these positions (e.g. an Ascent's path). */
   readonly line?: readonly Position[];
+  /** Lines drawn faded beneath `line` (e.g. the proposals not selected). */
+  readonly alternatives?: readonly (readonly Position[])[];
   readonly onMarkerSelect?: (id: string) => void;
   /** Called with the position the Visitor clicked or tapped on the map. */
   readonly onMapClick?: (position: Position) => void;

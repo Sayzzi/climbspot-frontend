@@ -2,7 +2,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Link, Outlet, useLocation } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
-import { AccountMenu, SessionNotice } from '@/features/account';
+import { AccountMenu, FlatPaceSync, SessionNotice } from '@/features/account';
 import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
 import { buttonVariants } from '@/shared/ui/button-variants';
@@ -58,6 +58,7 @@ function RootLayout() {
           </div>
         </nav>
         <SessionNotice />
+        <FlatPaceSync />
       </header>
       <main className={cn('flex-1', !isHome && 'mx-auto w-full max-w-5xl px-4 pt-24 pb-12')}>
         <Outlet />

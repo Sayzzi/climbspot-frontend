@@ -1,7 +1,11 @@
 export type UnitSystem = 'metric' | 'imperial';
 
 const METRES_PER_FOOT = 0.3048;
-const METRES_PER_MILE = 1609.344;
+export const METRES_PER_MILE = 1609.344;
+
+/** The distance a pace is given per: a kilometre, or a mile with imperial units. */
+export const metresPerPaceUnit = (system: UnitSystem) =>
+  system === 'imperial' ? METRES_PER_MILE : 1000;
 
 export interface Formatters {
   /** A distance along the ground (length, distance to the Start), from metres. */
@@ -14,6 +18,10 @@ export interface Formatters {
   number(value: number): string;
   /** A Km-Effort, with one decimal; a named unit, the same in every unit system. */
   kmEffort(value: number): string;
+  /** A pace as minutes and seconds per km, or per mile with imperial units ("5:30"). */
+  pace(secondsPerKm: number): string;
+  /** A duration in whole minutes: "23 min", or hours and minutes beyond an hour. */
+  duration(minutes: number): string;
 }
 
 export function createFormatters(system: UnitSystem, locale: string): Formatters {
@@ -26,8 +34,19 @@ export function createFormatters(system: UnitSystem, locale: string): Formatters
     maximumFractionDigits: 1,
   });
 
+  const twoDigits = new Intl.NumberFormat(locale, { minimumIntegerDigits: 2 });
+  const [hours, minutes] = [unit('hour', 0), unit('minute', 0)];
+
   return {
     ...(system === 'imperial' ? imperial(unit) : metric(unit)),
+    pace: (secondsPerKm) => {
+      const seconds = Math.round((secondsPerKm * metresPerPaceUnit(system)) / 1000);
+      return `${plain.format(Math.floor(seconds / 60))}:${twoDigits.format(seconds % 60)}`;
+    },
+    duration: (total) =>
+      total <= 60
+        ? minutes.format(total)
+        : `${hours.format(Math.floor(total / 60))} ${minutes.format(total % 60)}`,
     gradient: (ratio) => percent.format(ratio),
     number: (value) => plain.format(value),
     kmEffort: (value) => oneDecimal.format(value),

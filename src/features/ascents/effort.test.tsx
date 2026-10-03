@@ -109,6 +109,25 @@ describe('Estimated Time of Ascents', () => {
     expect(sent.requests).toHaveLength(asked);
   });
 
+  it('keeps an hour exactly in minutes', async () => {
+    // 12,000 m flat-equivalent at 5:00/km: 60 min.
+    server.use(
+      handlers.nearby(() =>
+        nearbyResults([
+          anAscentSummary({ effort: { kmEffort: 12.5, flatEquivalentDistance: 12_000 } }),
+        ]),
+      ),
+    );
+    const { user } = await renderApp('/?latitude=45&longitude=6');
+    await firstResult();
+
+    await setFlatPace(user, '5:00');
+
+    expect((await firstResult()).getByText('Estimated time').nextSibling).toHaveTextContent(
+      '≈ 60 min',
+    );
+  });
+
   it('shows hours and minutes on the Ascent page beyond an hour', async () => {
     // 14,167 m flat-equivalent at 5:30/km: 4,675 s, 78 min.
     server.use(
@@ -124,6 +143,6 @@ describe('Estimated Time of Ascents', () => {
 
     await setFlatPace(user, '5:30');
 
-    expect(measurements.getByText('Estimated time').nextSibling).toHaveTextContent('≈ 1 h 18');
+    expect(measurements.getByText('Estimated time').nextSibling).toHaveTextContent('≈ 1 hr 18 min');
   });
 });

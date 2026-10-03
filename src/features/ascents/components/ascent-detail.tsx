@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { MapView } from '@/shared/map';
 import { buttonVariants } from '@/shared/ui/button-variants';
-import { EstimatedTime } from '@/shared/pace';
+import { useEffortFacts } from '@/shared/pace';
 import { useFormatters } from '@/shared/units';
 
 import { ascentQuery } from '../api/ascent';
@@ -19,6 +19,7 @@ export function AscentDetail({ id }: { readonly id: string }) {
   const format = useFormatters();
   const labels = useDomainLabels();
   const { data: ascent } = useSuspenseQuery(ascentQuery(id));
+  const effortFacts = useEffortFacts(ascent.effort);
   const measurementsId = useId();
   const profileId = useId();
 
@@ -27,15 +28,7 @@ export function AscentDetail({ id }: { readonly id: string }) {
   const facts = [
     { term: t('facts.length'), value: format.distance(ascent.length) },
     { term: t('facts.elevationGain'), value: format.elevation(ascent.elevationGain) },
-    ...(ascent.effort
-      ? [
-          { term: t('facts.kmEffort'), value: format.kmEffort(ascent.effort.kmEffort) },
-          {
-            term: t('facts.estimatedTime'),
-            value: <EstimatedTime flatEquivalentDistance={ascent.effort.flatEquivalentDistance} />,
-          },
-        ]
-      : []),
+    ...effortFacts,
     { term: t('facts.averageGradient'), value: format.gradient(ascent.averageGradient) },
     { term: t('facts.maximumGradient'), value: format.gradient(ascent.maximumGradient) },
     { term: t('facts.difficultyScore'), value: format.number(ascent.difficultyScore) },

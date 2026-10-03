@@ -1,6 +1,4 @@
-import type { UnitSystem } from '@/shared/units';
-
-const METRES_PER_MILE = 1609.344;
+import { metresPerPaceUnit, type UnitSystem } from '@/shared/units';
 
 /** Flat Paces accepted, in seconds per kilometre (3:00 to 12:00 per km). */
 export const FASTEST_PACE = 180;
@@ -8,19 +6,25 @@ export const SLOWEST_PACE = 720;
 
 export type PaceProblem = 'format' | 'range';
 
-/** Seconds per km or per mile, depending on the unit system. */
+const perKm = (secondsPerUnit: number, system: UnitSystem) =>
+  (secondsPerUnit * 1000) / metresPerPaceUnit(system);
+
 const perUnit = (secondsPerKm: number, system: UnitSystem) =>
-  system === 'imperial' ? (secondsPerKm * METRES_PER_MILE) / 1000 : secondsPerKm;
+  (secondsPerKm * metresPerPaceUnit(system)) / 1000;
 
-/** "5:30" from seconds. */
-function minutesAndSeconds(seconds: number): string {
-  const rounded = Math.round(seconds);
-  return `${String(Math.floor(rounded / 60))}:${String(rounded % 60).padStart(2, '0')}`;
-}
+/** Whether a Flat Pace in seconds per km is within the accepted range. */
+export const isAcceptedPace = (secondsPerKm: number) =>
+  secondsPerKm >= FASTEST_PACE && secondsPerKm <= SLOWEST_PACE;
 
-/** The pace as typed ("5:30"), in the Visitor's unit, for a Flat Pace in seconds per km. */
-export function paceText(secondsPerKm: number, system: UnitSystem): string {
-  return minutesAndSeconds(perUnit(secondsPerKm, system));
+/**
+ * The accepted range as the Visitor types it, in whole seconds per km or per mile,
+ * kept inside 3:00–12:00 per km; given back in seconds per km.
+ */
+export function paceBounds(system: UnitSystem): { fastest: number; slowest: number } {
+  return {
+    fastest: perKm(Math.ceil(perUnit(FASTEST_PACE, system)), system),
+    slowest: perKm(Math.floor(perUnit(SLOWEST_PACE, system)), system),
+  };
 }
 
 /** Reads a typed pace (min:s per km or per mile) into seconds per km, or says what is wrong. */
@@ -32,13 +36,8 @@ export function parsePace(
   if (!match) {
     return { problem: 'format' };
   }
-  const seconds = Number(match[1]) * 60 + Number(match[2]);
-  const secondsPerKm = system === 'imperial' ? (seconds * 1000) / METRES_PER_MILE : seconds;
-  // Half a second of slack: a pace per mile converts to fractions of a second per km.
-  if (secondsPerKm < FASTEST_PACE - 0.5 || secondsPerKm > SLOWEST_PACE + 0.5) {
-    return { problem: 'range' };
-  }
-  return { secondsPerKm };
+  const secondsPerKm = perKm(Number(match[1]) * 60 + Number(match[2]), system);
+  return isAcceptedPace(secondsPerKm) ? { secondsPerKm } : { problem: 'range' };
 }
 
 /** Estimated Time in whole minutes (at least one): Flat-Equivalent Distance at the Flat Pace. */

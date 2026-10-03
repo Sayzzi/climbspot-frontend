@@ -1,4 +1,4 @@
-import { FASTEST_PACE, SLOWEST_PACE } from './pace';
+import { isAcceptedPace } from './pace';
 
 const STORAGE_KEY = 'climbspot.flatPace';
 
@@ -6,7 +6,7 @@ const STORAGE_KEY = 'climbspot.flatPace';
 export function readStoredFlatPace(): number | undefined {
   try {
     const stored = Number(localStorage.getItem(STORAGE_KEY) ?? Number.NaN);
-    return stored >= FASTEST_PACE - 0.5 && stored <= SLOWEST_PACE + 0.5 ? stored : undefined;
+    return isAcceptedPace(stored) ? stored : undefined;
   } catch {
     return undefined;
   }

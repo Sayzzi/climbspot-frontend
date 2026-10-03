@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
+import { useFormatters } from '@/shared/units';
+
 import { estimatedMinutes } from './pace';
 import { useFlatPace } from './use-flat-pace';
 
@@ -10,6 +12,7 @@ export function EstimatedTime({
   readonly flatEquivalentDistance: number;
 }) {
   const { t } = useTranslation();
+  const format = useFormatters();
   const { secondsPerKm, openSetting } = useFlatPace();
 
   if (secondsPerKm === undefined) {
@@ -24,11 +27,7 @@ export function EstimatedTime({
     );
   }
 
-  const minutes = estimatedMinutes(flatEquivalentDistance, secondsPerKm);
-  return minutes < 60
-    ? t('time.minutes', { minutes })
-    : t('time.hours', {
-        hours: Math.floor(minutes / 60),
-        minutes: String(minutes % 60).padStart(2, '0'),
-      });
+  return t('time.approximately', {
+    time: format.duration(estimatedMinutes(flatEquivalentDistance, secondsPerKm)),
+  });
 }

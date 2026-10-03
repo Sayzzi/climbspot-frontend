@@ -8,18 +8,18 @@ import { renderApp } from '@/test/render-app';
 import { server } from '@/test/server';
 
 const open = () => renderApp('/?latitude=45&longitude=6');
-const paceButton = () => screen.getByRole('button', { name: /^(Set your pace|Flat pace: .+)$/ });
+const paceButton = () => screen.getByRole('button', { name: /^(Set pace|Flat pace: .+)$/ });
 
 describe('Flat Pace', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('invites the Visitor to set their pace until they do', async () => {
+  it('invites the Visitor to set their pace until they do, in words they can see', async () => {
     server.use(handlers.nearby(() => nearbyResults([])));
     await open();
 
-    expect(await screen.findByRole('button', { name: 'Set your pace' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Set pace' })).toBeInTheDocument();
   });
 
   it('takes a pace per km and shows it in the header', async () => {
@@ -67,7 +67,28 @@ describe('Flat Pace', () => {
 
     const dialog = within(screen.getByRole('dialog', { name: 'Flat pace' }));
     expect(dialog.getByRole('alert')).toHaveTextContent(message);
-    expect(paceButton()).toHaveAccessibleName('Set your pace');
+    expect(paceButton()).toHaveAccessibleName('Set pace');
+  });
+
+  it.each([
+    ['4:49', false],
+    ['4:50', true],
+    ['19:18', true],
+    ['19:19', false],
+  ])('keeps to 3:00–12:00 per km with imperial units: %s per mile', async (pace, accepted) => {
+    stubLanguages('en-US');
+    server.use(handlers.nearby(() => nearbyResults([])));
+    const { user } = await open();
+
+    await setFlatPace(user, pace);
+
+    if (accepted) {
+      expect(paceButton()).toHaveAccessibleName(`Flat pace: ${pace}/mi`);
+    } else {
+      expect(
+        within(screen.getByRole('dialog', { name: 'Flat pace' })).getByRole('alert'),
+      ).toHaveTextContent('Enter a pace between 4:50 and 19:18 per mile.');
+    }
   });
 
   it('remembers the pace for the next visit', async () => {

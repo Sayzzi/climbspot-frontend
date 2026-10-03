@@ -75,30 +75,34 @@
     "distanceAxis": "Distance from the start"
   },
   "pace": {
-    "unset": "Set your pace",
-    "short": "Pace",
+    "unset": "Set pace",
     "current": "Flat pace: {{pace}}",
     "dialog": "Flat pace",
     "per": {
       "metric": "{{pace}}/km",
       "imperial": "{{pace}}/mi"
     },
+    "unit": {
+      "metric": "km",
+      "imperial": "mile"
+    },
     "input": {
       "metric": "Your pace on the flat (min:s per km)",
       "imperial": "Your pace on the flat (min:s per mile)"
     },
+    "placeholder": "5:30",
     "save": "Save",
     "errors": {
       "format": "Enter a pace as minutes and seconds, like 5:30.",
-      "range": {
-        "metric": "Enter a pace between 3:00 and 12:00 per km.",
-        "imperial": "Enter a pace between 4:50 and 19:19 per mile."
-      }
+      "range": "Enter a pace between {{fastest}} and {{slowest}} per {{unit}}."
     },
     "invite": "Set your pace to see the time"
   },
   "time": {
-    "minutes": "≈ {{minutes}} min",
-    "hours": "≈ {{hours}} h {{minutes}}"
+    "approximately": "≈ {{time}}"
+  },
+  "effort": {
+    "kmEffort": "Km-effort",
+    "estimatedTime": "Estimated time"
   }
 }

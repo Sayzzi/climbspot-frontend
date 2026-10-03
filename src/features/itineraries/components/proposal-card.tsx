@@ -5,7 +5,7 @@ import { cn } from '@/shared/lib/cn';
 import { saveFile } from '@/shared/lib/save-file';
 import { Button } from '@/shared/ui/button';
 import { FactList } from '@/shared/ui/fact-list';
-import { EstimatedTime } from '@/shared/pace';
+import { useEffortFacts } from '@/shared/pace';
 import { useFormatters } from '@/shared/units';
 
 import { GPX_TYPE, gpxFileName, toGpx } from '../gpx';
@@ -93,15 +93,7 @@ function useFacts(proposal: Itinerary) {
   const labels = useDomainLabels();
   const length = { term: t('facts.length'), value: format.distance(proposal.length) };
   // Only running proposals carry an effort.
-  const effort = proposal.effort
-    ? [
-        { term: t('facts.kmEffort'), value: format.kmEffort(proposal.effort.kmEffort) },
-        {
-          term: t('facts.estimatedTime'),
-          value: <EstimatedTime flatEquivalentDistance={proposal.effort.flatEquivalentDistance} />,
-        },
-      ]
-    : [];
+  const effort = useEffortFacts(proposal.effort);
 
   if (proposal.kind === 'loop') {
     return [

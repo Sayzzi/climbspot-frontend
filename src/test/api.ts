@@ -187,6 +187,12 @@ export function aHillSession(overrides: Partial<HillSession> = {}): HillSession 
   };
 }
 
+export type Account = components['schemas']['Account'];
+
+export function anAccount(overrides: Partial<Account> = {}): Account {
+  return { displayName: 'Ada', email: 'ada@example.com', flatPace: null, ...overrides };
+}
+
 export const handlers = {
   nearby: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
@@ -202,6 +208,12 @@ export const handlers = {
   loops: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/itineraries/loops'), ({ request }) => respond(request)),
+  me: (
+    respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
+  ) => http.get(apiUrl('/me'), ({ request }) => respond(request)),
+  updateMe: (
+    respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
+  ) => http.patch(apiUrl('/me'), ({ request }) => respond(request)),
   sessions: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/itineraries/sessions'), ({ request }) => respond(request)),

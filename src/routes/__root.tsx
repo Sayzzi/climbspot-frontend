@@ -2,6 +2,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Link, Outlet, useLocation } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
+import { AccountMenu, SessionNotice } from '@/features/account';
 import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
 import { buttonVariants } from '@/shared/ui/button-variants';
@@ -43,21 +44,20 @@ function RootLayout() {
           <div className="flex items-center gap-1.5 sm:gap-2">
             <FlatPaceSetting />
             <UnitSwitch />
+            {/* On phones, adding a climb lives in the account menu. */}
             <Link
               to="/ascents/new"
-              aria-label={t('nav.addAscent')}
-              className={cn(buttonVariants({ size: 'sm' }), 'whitespace-nowrap')}
+              className={cn(
+                buttonVariants({ size: 'sm' }),
+                'hidden whitespace-nowrap sm:inline-flex',
+              )}
             >
-              {/* The narrowest phones get the short form, the name stays the full one. */}
-              <span aria-hidden="true" className="min-[400px]:hidden">
-                {t('nav.addAscentShort')}
-              </span>
-              <span aria-hidden="true" className="hidden min-[400px]:inline">
-                {t('nav.addAscent')}
-              </span>
+              {t('nav.addAscent')}
             </Link>
+            <AccountMenu />
           </div>
         </nav>
+        <SessionNotice />
       </header>
       <main className={cn('flex-1', !isHome && 'mx-auto w-full max-w-5xl px-4 pt-24 pb-12')}>
         <Outlet />

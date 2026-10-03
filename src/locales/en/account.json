@@ -1,0 +1,34 @@
+{
+  "signIn": {
+    "title": "Sign in",
+    "intro": "Save your itineraries and add climbs. No password: we send you a link.",
+    "email": "E-mail",
+    "sendLink": "Send me a sign-in link",
+    "sent": "Check your inbox: we sent a sign-in link to {{email}}.",
+    "or": "or",
+    "google": "Continue with Google",
+    "unavailable": "Signing in is not available on this server yet.",
+    "problems": {
+      "email": "Enter an e-mail address.",
+      "failed": "The link could not be sent. Please try again in a moment."
+    }
+  },
+  "menu": {
+    "label": "{{name}}’s menu",
+    "addAscent": "Add a climb",
+    "account": "Account",
+    "signOut": "Sign out"
+  },
+  "session": {
+    "expired": "Your session has ended. Sign in again to use your account."
+  },
+  "account": {
+    "title": "Your account",
+    "signedOut": "Sign in to see your account.",
+    "loading": "Loading your account…",
+    "email": "E-mail",
+    "displayName": "Display name",
+    "save": "Save",
+    "saved": "Saved."
+  }
+}

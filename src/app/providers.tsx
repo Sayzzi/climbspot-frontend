@@ -1,6 +1,7 @@
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
+import { AuthProvider } from '@/shared/auth';
 import { FlatPaceProvider } from '@/shared/pace';
 import { UnitsProvider } from '@/shared/units';
 
@@ -13,9 +14,11 @@ interface AppProvidersProps {
 export function AppProviders({ queryClient, children }: AppProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <UnitsProvider>
-        <FlatPaceProvider>{children}</FlatPaceProvider>
-      </UnitsProvider>
+      <AuthProvider>
+        <UnitsProvider>
+          <FlatPaceProvider>{children}</FlatPaceProvider>
+        </UnitsProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

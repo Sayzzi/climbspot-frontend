@@ -21,6 +21,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The signed-in Visitor's account
+         * @description Created on first use, named after the identity.
+         */
+        get: operations["getMyAccount"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete the signed-in Visitor's account
+         * @description Deletes their identity, then everything kept about them; the Ascents they added stay, without any link to them.
+         */
+        delete: operations["deleteMyAccount"];
+        options?: never;
+        head?: never;
+        /** Change the signed-in Visitor's display name or Flat Pace */
+        patch: operations["updateMyAccount"];
+        trace?: never;
+    };
+    "/saved-itineraries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in Visitor's Saved Itineraries, newest first */
+        get: operations["listSavedItineraries"];
+        put?: never;
+        /**
+         * Keep a proposal as a Saved Itinerary
+         * @description A frozen copy of a Loop, Uphill Itinerary or Hill Session, as proposed.
+         */
+        post: operations["saveItinerary"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/saved-itineraries/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A Saved Itinerary with its proposal */
+        get: operations["getSavedItinerary"];
+        put?: never;
+        post?: never;
+        /** Delete a Saved Itinerary */
+        delete: operations["deleteSavedItinerary"];
+        options?: never;
+        head?: never;
+        /** Rename a Saved Itinerary */
+        patch: operations["renameSavedItinerary"];
+        trace?: never;
+    };
     "/ascents": {
         parameters: {
             query?: never;
@@ -148,119 +213,46 @@ export interface components {
             /** @enum {string} */
             status: "ok";
         };
-        Ascent: {
+        Account: {
+            /** @description Private to the Visitor. */
+            displayName: string;
+            email: string | null;
+            /**
+             * @description Flat Pace in seconds per kilometre (180 to 720).
+             * @example 330
+             */
+            flatPace: number | null;
+        };
+        AccountChanges: {
+            displayName?: string;
+            /**
+             * @description Flat Pace in seconds per kilometre (180 to 720).
+             * @example 330
+             */
+            flatPace?: number | null;
+        };
+        SavedItinerary: {
             /** Format: uuid */
             id: string;
             name: string;
-            surface: components["schemas"]["Surface"];
-            activities: components["schemas"]["Activity"][];
-            start: components["schemas"]["AscentPoint"];
-            top: components["schemas"]["AscentPoint"];
-            /** @description Length along the path, in metres. */
+            /** @enum {string} */
+            kind: "loop" | "uphill" | "session";
+            /** @description Metres; the whole session for a Hill Session. */
             length: number;
-            /** @description Top elevation minus Start elevation, in metres. */
-            elevationGain: number;
-            /** @description Every rise along the path, Dips included, in metres. */
-            heightGained: number;
-            /**
-             * @description Average Gradient, as a ratio (0.08 = 8 %).
-             * @example 0.072
-             */
-            averageGradient: number;
-            /**
-             * @description Steepest Gradient over at least 500 m, as a ratio (0.08 = 8 %).
-             * @example 0.072
-             */
-            maximumGradient: number;
-            /** @description Length in metres × average Gradient in percent. */
-            difficultyScore: number;
-            category: components["schemas"]["Category"];
-            effort?: components["schemas"]["Effort"];
             /** Format: date-time */
-            createdAt: string;
-            /** @description GeoJSON LineString from Start to Top ([longitude, latitude] pairs). */
-            path: {
-                /** @enum {string} */
-                type: "LineString";
-                coordinates: [
-                    number,
-                    number
-                ][];
-            };
-            elevationProfile: {
-                /** @description Distance from the Start along the path, in metres. */
-                distance: number;
-                /** @description Elevation, in metres. */
-                elevation: number;
-            }[];
-        };
-        /** @enum {string} */
-        Surface: "paved" | "gravel" | "trail";
-        /** @enum {string} */
-        Activity: "running" | "trail_running" | "road_cycling" | "gravel_cycling" | "mountain_biking";
-        AscentPoint: {
-            latitude: number;
-            longitude: number;
-            /** @description Elevation, in metres. */
-            elevation: number;
-        };
-        /** @enum {string} */
-        Category: "uncategorized" | "cat4" | "cat3" | "cat2" | "cat1" | "hc";
-        /** @description How hard the path is to run; only given for running. */
-        Effort: {
-            /**
-             * @description Length in km plus one per 100 m of Height Gained, rounded to 0.1.
-             * @example 4.8
-             */
-            kmEffort: number;
-            /** @description Distance on the flat costing a runner as much as the path (Minetti, descents at best 10 % faster), in metres. */
-            flatEquivalentDistance: number;
-        };
-        NearbyAscents: {
-            ascents: {
-                /** Format: uuid */
-                id: string;
-                name: string;
-                surface: components["schemas"]["Surface"];
-                activities: components["schemas"]["Activity"][];
-                start: components["schemas"]["AscentPoint"];
-                top: components["schemas"]["AscentPoint"];
-                /** @description Length along the path, in metres. */
-                length: number;
-                /** @description Top elevation minus Start elevation, in metres. */
-                elevationGain: number;
-                /** @description Every rise along the path, Dips included, in metres. */
-                heightGained: number;
-                /**
-                 * @description Average Gradient, as a ratio (0.08 = 8 %).
-                 * @example 0.072
-                 */
-                averageGradient: number;
-                /**
-                 * @description Steepest Gradient over at least 500 m, as a ratio (0.08 = 8 %).
-                 * @example 0.072
-                 */
-                maximumGradient: number;
-                /** @description Length in metres × average Gradient in percent. */
-                difficultyScore: number;
-                category: components["schemas"]["Category"];
-                effort?: components["schemas"]["Effort"];
-                /** Format: date-time */
-                createdAt: string;
-                /** @description Geodesic distance from the searched position to the Start, in metres. */
-                distanceToStart: number;
-            }[];
-        };
-        LoopItineraries: {
-            itineraries: components["schemas"]["LoopItinerary"][];
+            savedAt: string;
+            proposal: components["schemas"]["LoopItinerary"] | components["schemas"]["UphillItinerary"] | components["schemas"]["HillSession"];
         };
         LoopItinerary: {
-            /** @enum {string} */
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
             kind: "loop";
             /** @description True when the proposal matches the request. */
             exact: boolean;
             differences: components["schemas"]["ItineraryDifference"][];
-            /** @description GeoJSON LineString of the routed geometry ([longitude, latitude] pairs). */
+            /** @description GeoJSON LineString ([longitude, latitude] pairs). */
             path: {
                 /** @enum {string} */
                 type: "LineString";
@@ -297,28 +289,28 @@ export interface components {
             /** @enum {string} */
             actual: "flat" | "rolling" | "hilly";
         };
+        /** @description How hard the path is to run; only given for running. */
+        Effort: {
+            /**
+             * @description Length in km plus one per 100 m of Height Gained, rounded to 0.1.
+             * @example 4.8
+             */
+            kmEffort: number;
+            /** @description Distance on the flat costing a runner as much as the path (Minetti, descents at best 10 % faster), in metres. */
+            flatEquivalentDistance: number;
+        };
         /** @enum {string} */
         Relief: "flat" | "rolling" | "hilly";
-        LoopRequest: {
-            start: {
-                latitude: number;
-                longitude: number;
-            };
-            /** @description Metres; Loops are never shorter and at most 20 % longer. */
-            distance: number;
-            relief: components["schemas"]["Relief"];
-            activity: components["schemas"]["Activity"];
-        };
-        UphillItineraries: {
-            itineraries: components["schemas"]["UphillItinerary"][];
-        };
         UphillItinerary: {
-            /** @enum {string} */
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
             kind: "uphill";
             /** @description True when the proposal matches the request. */
             exact: boolean;
             differences: components["schemas"]["ItineraryDifference"][];
-            /** @description GeoJSON LineString of the routed geometry ([longitude, latitude] pairs). */
+            /** @description GeoJSON LineString ([longitude, latitude] pairs). */
             path: {
                 /** @enum {string} */
                 type: "LineString";
@@ -357,29 +349,13 @@ export interface components {
             /** @description Elevation, in metres. */
             elevation: number;
         };
-        UphillRequest: {
-            start: {
-                latitude: number;
-                longitude: number;
-            };
-            /**
-             * @description The Itinerary starts within this distance of `start`, in metres.
-             * @default 10000
-             */
-            radius: number;
-            /** @description Metres; proposals are never shorter and at most 20 % longer. */
-            length: number;
-            /** @description Lowest average Gradient wanted, as a ratio (0.08 = 8 %). */
-            minGradient: number;
-            /** @description Highest average Gradient wanted, as a ratio (0.08 = 8 %). */
-            maxGradient: number;
-            activity: components["schemas"]["Activity"];
-        };
-        HillSessions: {
-            sessions: components["schemas"]["HillSession"][];
-        };
+        /** @enum {string} */
+        Category: "uncategorized" | "cat4" | "cat3" | "cat2" | "cat1" | "hc";
         HillSession: {
-            /** @enum {string} */
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
             kind: "session";
             /** @description True when the proposal matches the request. */
             exact: boolean;
@@ -440,6 +416,155 @@ export interface components {
                 effort: components["schemas"]["Effort"];
             };
         };
+        NewSavedItinerary: {
+            name: string;
+            proposal: components["schemas"]["LoopItinerary"] | components["schemas"]["UphillItinerary"] | components["schemas"]["HillSession"];
+        };
+        SavedItineraries: {
+            savedItineraries: components["schemas"]["SavedItinerarySummary"][];
+        };
+        SavedItinerarySummary: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            kind: "loop" | "uphill" | "session";
+            /** @description Metres; the whole session for a Hill Session. */
+            length: number;
+            /** Format: date-time */
+            savedAt: string;
+        };
+        SavedItineraryChanges: {
+            name: string;
+        };
+        Ascent: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            surface: components["schemas"]["Surface"];
+            activities: components["schemas"]["Activity"][];
+            start: components["schemas"]["AscentPoint"];
+            top: components["schemas"]["AscentPoint"];
+            /** @description Length along the path, in metres. */
+            length: number;
+            /** @description Top elevation minus Start elevation, in metres. */
+            elevationGain: number;
+            /** @description Every rise along the path, Dips included, in metres. */
+            heightGained: number;
+            /**
+             * @description Average Gradient, as a ratio (0.08 = 8 %).
+             * @example 0.072
+             */
+            averageGradient: number;
+            /**
+             * @description Steepest Gradient over at least 500 m, as a ratio (0.08 = 8 %).
+             * @example 0.072
+             */
+            maximumGradient: number;
+            /** @description Length in metres × average Gradient in percent. */
+            difficultyScore: number;
+            category: components["schemas"]["Category"];
+            effort?: components["schemas"]["Effort"];
+            /** Format: date-time */
+            createdAt: string;
+            /** @description GeoJSON LineString from Start to Top ([longitude, latitude] pairs). */
+            path: {
+                /** @enum {string} */
+                type: "LineString";
+                coordinates: [
+                    number,
+                    number
+                ][];
+            };
+            elevationProfile: {
+                /** @description Distance from the Start along the path, in metres. */
+                distance: number;
+                /** @description Elevation, in metres. */
+                elevation: number;
+            }[];
+        };
+        /** @enum {string} */
+        Surface: "paved" | "gravel" | "trail";
+        /** @enum {string} */
+        Activity: "running" | "trail_running" | "road_cycling" | "gravel_cycling" | "mountain_biking";
+        AscentPoint: {
+            latitude: number;
+            longitude: number;
+            /** @description Elevation, in metres. */
+            elevation: number;
+        };
+        NearbyAscents: {
+            ascents: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                surface: components["schemas"]["Surface"];
+                activities: components["schemas"]["Activity"][];
+                start: components["schemas"]["AscentPoint"];
+                top: components["schemas"]["AscentPoint"];
+                /** @description Length along the path, in metres. */
+                length: number;
+                /** @description Top elevation minus Start elevation, in metres. */
+                elevationGain: number;
+                /** @description Every rise along the path, Dips included, in metres. */
+                heightGained: number;
+                /**
+                 * @description Average Gradient, as a ratio (0.08 = 8 %).
+                 * @example 0.072
+                 */
+                averageGradient: number;
+                /**
+                 * @description Steepest Gradient over at least 500 m, as a ratio (0.08 = 8 %).
+                 * @example 0.072
+                 */
+                maximumGradient: number;
+                /** @description Length in metres × average Gradient in percent. */
+                difficultyScore: number;
+                category: components["schemas"]["Category"];
+                effort?: components["schemas"]["Effort"];
+                /** Format: date-time */
+                createdAt: string;
+                /** @description Geodesic distance from the searched position to the Start, in metres. */
+                distanceToStart: number;
+            }[];
+        };
+        LoopItineraries: {
+            itineraries: components["schemas"]["LoopItinerary"][];
+        };
+        LoopRequest: {
+            start: {
+                latitude: number;
+                longitude: number;
+            };
+            /** @description Metres; Loops are never shorter and at most 20 % longer. */
+            distance: number;
+            relief: components["schemas"]["Relief"];
+            activity: components["schemas"]["Activity"];
+        };
+        UphillItineraries: {
+            itineraries: components["schemas"]["UphillItinerary"][];
+        };
+        UphillRequest: {
+            start: {
+                latitude: number;
+                longitude: number;
+            };
+            /**
+             * @description The Itinerary starts within this distance of `start`, in metres.
+             * @default 10000
+             */
+            radius: number;
+            /** @description Metres; proposals are never shorter and at most 20 % longer. */
+            length: number;
+            /** @description Lowest average Gradient wanted, as a ratio (0.08 = 8 %). */
+            minGradient: number;
+            /** @description Highest average Gradient wanted, as a ratio (0.08 = 8 %). */
+            maxGradient: number;
+            activity: components["schemas"]["Activity"];
+        };
+        HillSessions: {
+            sessions: components["schemas"]["HillSession"][];
+        };
         HillSessionRequest: {
             start: {
                 latitude: number;
@@ -493,6 +618,324 @@ export interface operations {
             };
         };
     };
+    getMyAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    deleteMyAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `ACCOUNT_DELETION_UNAVAILABLE`: the identity could not be deleted; nothing was erased. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    updateMyAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountChanges"];
+            };
+        };
+        responses: {
+            /** @description The account. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: the changes are invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    listSavedItineraries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Their summaries. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedItineraries"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    saveItinerary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewSavedItinerary"];
+            };
+        };
+        responses: {
+            /** @description The Saved Itinerary. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedItinerary"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: the name or the proposal is invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `SAVED_ITINERARY_TOO_LARGE`: the proposal is too large to keep. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    getSavedItinerary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Saved Itinerary. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedItinerary"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `SAVED_ITINERARY_NOT_FOUND`: the signed-in Visitor has no such Saved Itinerary. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    deleteSavedItinerary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `SAVED_ITINERARY_NOT_FOUND`: the signed-in Visitor has no such Saved Itinerary. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    renameSavedItinerary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SavedItineraryChanges"];
+            };
+        };
+        responses: {
+            /** @description The Saved Itinerary. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedItinerary"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: the name is invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `SAVED_ITINERARY_NOT_FOUND`: the signed-in Visitor has no such Saved Itinerary. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     createAscent: {
         parameters: {
             query?: never;
@@ -532,8 +975,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `ASCENT_CREATION_DISABLED`: creating Ascents is disabled on this server. */
-            403: {
+            /** @description `AUTHENTICATION_REQUIRED`: only signed-in Visitors add Ascents. */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

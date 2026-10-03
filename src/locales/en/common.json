@@ -31,8 +31,7 @@
     "retry": "Try again"
   },
   "nav": {
-    "addAscent": "Add a climb",
-    "addAscentShort": "Add"
+    "addAscent": "Add a climb"
   },
   "units": {
     "label": "Units",

@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react';
+
 import { cn } from '@/shared/lib/cn';
 
 export interface Fact {
   readonly term: string;
-  readonly value: string;
+  readonly value: ReactNode;
   /** Lets a long value span several columns. */
   readonly className?: string;
 }

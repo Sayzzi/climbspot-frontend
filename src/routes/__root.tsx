@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
 import { buttonVariants } from '@/shared/ui/button-variants';
+import { FlatPaceSetting } from '@/shared/pace';
 import { UnitSwitch } from '@/shared/units';
 
 export interface RouterContext {
@@ -39,10 +40,21 @@ function RootLayout() {
           >
             {t('app.name')}
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <FlatPaceSetting />
             <UnitSwitch />
-            <Link to="/ascents/new" className={buttonVariants({ size: 'sm' })}>
-              {t('nav.addAscent')}
+            <Link
+              to="/ascents/new"
+              aria-label={t('nav.addAscent')}
+              className={cn(buttonVariants({ size: 'sm' }), 'whitespace-nowrap')}
+            >
+              {/* The narrowest phones get the short form, the name stays the full one. */}
+              <span aria-hidden="true" className="min-[400px]:hidden">
+                {t('nav.addAscentShort')}
+              </span>
+              <span aria-hidden="true" className="hidden min-[400px]:inline">
+                {t('nav.addAscent')}
+              </span>
             </Link>
           </div>
         </nav>

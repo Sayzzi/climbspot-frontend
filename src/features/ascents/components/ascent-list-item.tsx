@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/shared/lib/cn';
+import { EstimatedTime } from '@/shared/pace';
 import { useFormatters } from '@/shared/units';
 
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
@@ -52,7 +53,17 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
             { term: t('facts.elevationGain'), value: format.elevation(ascent.elevationGain) },
             { term: t('facts.averageGradient'), value: format.gradient(ascent.averageGradient) },
             ...(ascent.effort
-              ? [{ term: t('facts.kmEffort'), value: format.kmEffort(ascent.effort.kmEffort) }]
+              ? [
+                  { term: t('facts.kmEffort'), value: format.kmEffort(ascent.effort.kmEffort) },
+                  {
+                    term: t('facts.estimatedTime'),
+                    value: (
+                      <EstimatedTime
+                        flatEquivalentDistance={ascent.effort.flatEquivalentDistance}
+                      />
+                    ),
+                  },
+                ]
               : []),
             { term: t('facts.category'), value: labels.category(ascent.category) },
             { term: t('facts.surface'), value: labels.surface(ascent.surface) },

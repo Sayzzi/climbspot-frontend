@@ -22,7 +22,7 @@ export function UnitSwitch() {
         {systems.map((option) => (
           <label
             key={option}
-            className="cursor-pointer rounded-full px-3 py-1 has-checked:bg-pine has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-pine"
+            className="cursor-pointer rounded-full px-2.5 py-1 has-checked:bg-pine has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-pine sm:px-3"
           >
             <input
               type="radio"
@@ -34,7 +34,11 @@ export function UnitSwitch() {
               }}
               className="sr-only"
             />
-            {t(`units.${option}`)}
+            {/* Phones get the short form; the accessible name stays the full one. */}
+            <span aria-hidden="true" className="sm:hidden">
+              {t(`units.short.${option}`)}
+            </span>
+            <span className="sr-only sm:not-sr-only">{t(`units.${option}`)}</span>
           </label>
         ))}
       </div>

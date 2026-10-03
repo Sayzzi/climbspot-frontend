@@ -22,6 +22,7 @@
     "length": "Length",
     "elevationGain": "Elevation gain",
     "kmEffort": "Km-effort",
+    "estimatedTime": "Estimated time",
     "averageGradient": "Average gradient",
     "maximumGradient": "Maximum gradient",
     "difficultyScore": "Difficulty score",

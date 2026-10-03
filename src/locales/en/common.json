@@ -31,12 +31,17 @@
     "retry": "Try again"
   },
   "nav": {
-    "addAscent": "Add a climb"
+    "addAscent": "Add a climb",
+    "addAscentShort": "Add"
   },
   "units": {
     "label": "Units",
     "metric": "Metric",
-    "imperial": "Imperial"
+    "imperial": "Imperial",
+    "short": {
+      "metric": "km",
+      "imperial": "mi"
+    }
   },
   "domain": {
     "surfaces": {
@@ -68,5 +73,32 @@
   "profile": {
     "elevationAxis": "Elevation",
     "distanceAxis": "Distance from the start"
+  },
+  "pace": {
+    "unset": "Set your pace",
+    "short": "Pace",
+    "current": "Flat pace: {{pace}}",
+    "dialog": "Flat pace",
+    "per": {
+      "metric": "{{pace}}/km",
+      "imperial": "{{pace}}/mi"
+    },
+    "input": {
+      "metric": "Your pace on the flat (min:s per km)",
+      "imperial": "Your pace on the flat (min:s per mile)"
+    },
+    "save": "Save",
+    "errors": {
+      "format": "Enter a pace as minutes and seconds, like 5:30.",
+      "range": {
+        "metric": "Enter a pace between 3:00 and 12:00 per km.",
+        "imperial": "Enter a pace between 4:50 and 19:19 per mile."
+      }
+    },
+    "invite": "Set your pace to see the time"
+  },
+  "time": {
+    "minutes": "≈ {{minutes}} min",
+    "hours": "≈ {{hours}} h {{minutes}}"
   }
 }

@@ -104,5 +104,9 @@
   "effort": {
     "kmEffort": "Km-effort",
     "estimatedTime": "Estimated time"
+  },
+  "distance": {
+    "label": "{{label}} ({{unit}})",
+    "range": "Enter a distance between {{minimum}} and {{maximum}} {{unit}}."
   }
 }

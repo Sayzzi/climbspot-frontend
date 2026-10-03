@@ -23,13 +23,11 @@ export interface PlanForm {
   readonly activity: Activity;
 }
 
-/** Choices offered in the Plan tab, in metres or ratios; they mirror the API's bounds. */
-export const GRADIENT_CHOICES = Array.from({ length: 16 }, (_, percent) => percent / 100);
-export const UPHILL_LENGTHS = [500, 1000, 2000, 3000, 5000, 8000, 10_000, 15_000, 20_000, 30_000];
+/** Choices and bounds of the Plan tab, in metres or ratios; they mirror the API's bounds. */
+export const GRADIENT_CHOICES = Array.from({ length: 31 }, (_, percent) => percent / 100);
 export const RADII = [2000, 5000, 10_000, 25_000];
-export const LOOP_DISTANCES = [
-  2000, 3000, 5000, 8000, 10_000, 15_000, 20_000, 30_000, 50_000, 80_000, 100_000,
-];
+export const UPHILL_LENGTH = { minimum: 500, maximum: 30_000 } as const;
+export const LOOP_DISTANCE = { minimum: 1000, maximum: 100_000 } as const;
 
 export const DEFAULT_PLAN: PlanForm = {
   kind: 'uphill',

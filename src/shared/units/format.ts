@@ -3,8 +3,8 @@ export type UnitSystem = 'metric' | 'imperial';
 const METRES_PER_FOOT = 0.3048;
 export const METRES_PER_MILE = 1609.344;
 
-/** The distance a pace is given per: a kilometre, or a mile with imperial units. */
-export const metresPerPaceUnit = (system: UnitSystem) =>
+/** The long unit distances and paces are typed in: a kilometre, or a mile with imperial units. */
+export const metresPerDistanceUnit = (system: UnitSystem) =>
   system === 'imperial' ? METRES_PER_MILE : 1000;
 
 export interface Formatters {
@@ -22,6 +22,10 @@ export interface Formatters {
   pace(secondsPerKm: number): string;
   /** A duration in whole minutes: "23 min", or hours and minutes beyond an hour. */
   duration(minutes: number): string;
+  /** A distance as typed in a field, in km or miles, up to two decimals and no unit. */
+  distanceInput(metres: number): string;
+  /** A bound of a typed distance, in km or miles, up to one decimal. */
+  distanceBound(value: number): string;
 }
 
 export function createFormatters(system: UnitSystem, locale: string): Formatters {
@@ -35,14 +39,18 @@ export function createFormatters(system: UnitSystem, locale: string): Formatters
   });
 
   const twoDigits = new Intl.NumberFormat(locale, { minimumIntegerDigits: 2 });
+  const typed = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: false });
+  const bound = new Intl.NumberFormat(locale, { maximumFractionDigits: 1, useGrouping: false });
   const [hours, minutes] = [unit('hour', 0), unit('minute', 0)];
 
   return {
     ...(system === 'imperial' ? imperial(unit) : metric(unit)),
     pace: (secondsPerKm) => {
-      const seconds = Math.round((secondsPerKm * metresPerPaceUnit(system)) / 1000);
+      const seconds = Math.round((secondsPerKm * metresPerDistanceUnit(system)) / 1000);
       return `${plain.format(Math.floor(seconds / 60))}:${twoDigits.format(seconds % 60)}`;
     },
+    distanceInput: (metres) => typed.format(metres / metresPerDistanceUnit(system)),
+    distanceBound: (value) => bound.format(value),
     duration: (total) =>
       total <= 60
         ? minutes.format(total)
@@ -72,4 +80,41 @@ function imperial(unit: UnitFormat): Pick<Formatters, 'distance' | 'elevation'> 
     },
     elevation: (value) => feet.format(value / METRES_PER_FOOT),
   };
+}
+
+/**
+ * The range a distance may be typed in, in km or miles, from bounds in metres; rounded
+ * inwards to a tenth, so that what the Visitor reads is exactly what is accepted.
+ */
+export function distanceBounds(
+  minimum: number,
+  maximum: number,
+  system: UnitSystem,
+): { readonly minimum: number; readonly maximum: number } {
+  const unit = metresPerDistanceUnit(system);
+  return {
+    minimum: Math.ceil((minimum / unit) * 10 - 1e-9) / 10,
+    maximum: Math.floor((maximum / unit) * 10 + 1e-9) / 10,
+  };
+}
+
+/**
+ * Reads a distance typed in km or miles ("7.5" or "7,5") into whole metres, if it is a
+ * number within the bounds (in metres).
+ */
+export function parseDistance(
+  text: string,
+  system: UnitSystem,
+  minimum: number,
+  maximum: number,
+): number | undefined {
+  const normalised = text.trim().replace(',', '.');
+  if (!/^\d+(\.\d+)?$/.test(normalised)) {
+    return undefined;
+  }
+  const typed = Number(normalised);
+  const bounds = distanceBounds(minimum, maximum, system);
+  return typed >= bounds.minimum && typed <= bounds.maximum
+    ? Math.round(typed * metresPerDistanceUnit(system))
+    : undefined;
 }

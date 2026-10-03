@@ -1,4 +1,4 @@
-import { metresPerPaceUnit, type UnitSystem } from '@/shared/units';
+import { metresPerDistanceUnit, type UnitSystem } from '@/shared/units';
 
 /** Flat Paces accepted, in seconds per kilometre (3:00 to 12:00 per km). */
 export const FASTEST_PACE = 180;
@@ -7,10 +7,10 @@ export const SLOWEST_PACE = 720;
 export type PaceProblem = 'format' | 'range';
 
 const perKm = (secondsPerUnit: number, system: UnitSystem) =>
-  (secondsPerUnit * 1000) / metresPerPaceUnit(system);
+  (secondsPerUnit * 1000) / metresPerDistanceUnit(system);
 
 const perUnit = (secondsPerKm: number, system: UnitSystem) =>
-  (secondsPerKm * metresPerPaceUnit(system)) / 1000;
+  (secondsPerKm * metresPerDistanceUnit(system)) / 1000;
 
 /** Whether a Flat Pace in seconds per km is within the accepted range. */
 export const isAcceptedPace = (secondsPerKm: number) =>

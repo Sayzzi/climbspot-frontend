@@ -1,4 +1,4 @@
-import type { SubmitEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { activities, type Activity } from '@/shared/domain/values';
@@ -35,10 +35,22 @@ export function PlanPanel(props: PlanPanelProps) {
   const { form, onFormChange, proposals, selected } = props;
   const labels = useDomainLabels();
   const shown = proposals?.[selected];
+  // Typed distances that cannot be sent, per kind, and whether to say so.
+  const [invalidKinds, setInvalidKinds] = useState<ReadonlySet<string>>(new Set());
+  const [triedToSend, setTriedToSend] = useState(false);
+  const validityOf = (kind: string) => (valid: boolean) => {
+    setInvalidKinds((current) => {
+      const next = new Set(current);
+      if (valid) next.delete(kind);
+      else next.add(kind);
+      return next;
+    });
+  };
 
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!props.pending) {
+    setTriedToSend(true);
+    if (!props.pending && !invalidKinds.has(form.kind)) {
       props.onSubmit();
     }
   };
@@ -66,6 +78,8 @@ export function PlanPanel(props: PlanPanelProps) {
             onChange={(uphill) => {
               onFormChange({ ...form, uphill });
             }}
+            onValidityChange={validityOf('uphill')}
+            showProblems={triedToSend}
           />
         ) : (
           <LoopFields
@@ -73,6 +87,8 @@ export function PlanPanel(props: PlanPanelProps) {
             onChange={(loop) => {
               onFormChange({ ...form, loop });
             }}
+            onValidityChange={validityOf('loop')}
+            showProblems={triedToSend}
           />
         )}
         <Field label={t('activity')}>

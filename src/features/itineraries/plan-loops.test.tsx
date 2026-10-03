@@ -67,7 +67,8 @@ describe('Plan tab: Loops', () => {
     const { user } = await openLoops();
     fakeMap.click(POINT);
 
-    await user.selectOptions(plan().getByRole('combobox', { name: 'Distance' }), '10 km');
+    await user.clear(plan().getByRole('textbox', { name: 'Distance (km)' }));
+    await user.type(plan().getByRole('textbox', { name: 'Distance (km)' }), '10');
     await user.click(plan().getByRole('radio', { name: 'Hilly' }));
     await user.selectOptions(plan().getByRole('combobox', { name: 'Activity' }), 'Trail running');
     await submit(user);

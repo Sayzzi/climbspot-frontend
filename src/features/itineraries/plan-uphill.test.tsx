@@ -94,7 +94,8 @@ describe('Plan tab: Uphill Itineraries', () => {
 
     await user.selectOptions(plan().getByRole('combobox', { name: 'Gradient from' }), '3%');
     await user.selectOptions(plan().getByRole('combobox', { name: 'Gradient to' }), '7%');
-    await user.selectOptions(plan().getByRole('combobox', { name: 'Length' }), '5 km');
+    await user.clear(plan().getByRole('textbox', { name: 'Length (km)' }));
+    await user.type(plan().getByRole('textbox', { name: 'Length (km)' }), '5');
     await user.selectOptions(plan().getByRole('combobox', { name: 'Within' }), '25 km');
     await user.selectOptions(plan().getByRole('combobox', { name: 'Activity' }), 'Road cycling');
     await submit(user);
@@ -252,13 +253,14 @@ describe('Plan tab: Uphill Itineraries', () => {
     uphillApi(() => apiErrorResponse(503, 'ROUTING_UNAVAILABLE'));
     const { user } = await openPlan();
     fakeMap.click(POINT);
-    await user.selectOptions(plan().getByRole('combobox', { name: 'Length' }), '5 km');
+    await user.clear(plan().getByRole('textbox', { name: 'Length (km)' }));
+    await user.type(plan().getByRole('textbox', { name: 'Length (km)' }), '5');
 
     await submit(user);
 
     expect(await plan().findByRole('alert')).toHaveTextContent(
       'Planning is temporarily unavailable. Please try again in a moment.',
     );
-    expect(plan().getByRole('combobox', { name: 'Length' })).toHaveDisplayValue('5 km');
+    expect(plan().getByRole('textbox', { name: 'Length (km)' })).toHaveDisplayValue('5');
   });
 });

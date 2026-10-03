@@ -7,21 +7,29 @@ import { useFormatters } from '@/shared/units';
 
 import {
   GRADIENT_CHOICES,
-  LOOP_DISTANCES,
+  LOOP_DISTANCE,
   RADII,
-  UPHILL_LENGTHS,
+  UPHILL_LENGTH,
   type LoopCriteria,
   type UphillCriteria,
 } from '../domain';
-import { Choice } from './fields';
+import { Choice, DistanceField } from './fields';
 
 interface CriteriaFieldsProps<Criteria> {
   readonly criteria: Criteria;
   readonly onChange: (criteria: Criteria) => void;
+  /** Whether every typed distance is valid, so that the request may be sent. */
+  readonly onValidityChange: (valid: boolean) => void;
+  readonly showProblems: boolean;
 }
 
 /** Gradient range, length and how far from the starting point to look. */
-export function UphillFields({ criteria, onChange }: CriteriaFieldsProps<UphillCriteria>) {
+export function UphillFields({
+  criteria,
+  onChange,
+  onValidityChange,
+  showProblems,
+}: CriteriaFieldsProps<UphillCriteria>) {
   const { t } = useTranslation('itineraries');
   const format = useFormatters();
 
@@ -53,14 +61,15 @@ export function UphillFields({ criteria, onChange }: CriteriaFieldsProps<UphillC
           });
         }}
       />
-      <Choice
+      <DistanceField
         label={t('uphill.length')}
         value={criteria.length}
-        options={UPHILL_LENGTHS}
-        format={(value) => format.distance(value)}
+        bounds={UPHILL_LENGTH}
         onChange={(length) => {
           onChange({ ...criteria, length });
         }}
+        onValidityChange={onValidityChange}
+        showProblem={showProblems}
       />
       <Choice
         label={t('uphill.radius')}
@@ -76,21 +85,26 @@ export function UphillFields({ criteria, onChange }: CriteriaFieldsProps<UphillC
 }
 
 /** Distance and Relief of a Loop. */
-export function LoopFields({ criteria, onChange }: CriteriaFieldsProps<LoopCriteria>) {
+export function LoopFields({
+  criteria,
+  onChange,
+  onValidityChange,
+  showProblems,
+}: CriteriaFieldsProps<LoopCriteria>) {
   const { t } = useTranslation('itineraries');
-  const format = useFormatters();
   const labels = useDomainLabels();
 
   return (
     <div className="flex flex-col gap-3">
-      <Choice
+      <DistanceField
         label={t('loop.distance')}
         value={criteria.distance}
-        options={LOOP_DISTANCES}
-        format={(value) => format.distance(value)}
+        bounds={LOOP_DISTANCE}
         onChange={(distance) => {
           onChange({ ...criteria, distance });
         }}
+        onValidityChange={onValidityChange}
+        showProblem={showProblems}
       />
       <SegmentedControl
         label={t('loop.relief')}

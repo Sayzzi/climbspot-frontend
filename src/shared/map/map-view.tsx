@@ -26,6 +26,13 @@ maplibre.setWorkerUrl(maplibreWorkerUrl);
 /** OpenFreeMap vector style: free, no API key. */
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 
+/**
+ * OpenFreeMap's tiles stop at zoom 14; beyond, the map stretches their simplified
+ * shapes, and roads drift metres away from routes drawn on the real ways. Zoom 16 is
+ * the closest view before that shows.
+ */
+const MAX_ZOOM = 16;
+
 const markerTones: Record<NonNullable<MapMarker['tone']>, string> = {
   default: 'bg-blaze',
   start: 'bg-start',
@@ -100,6 +107,7 @@ export function MapView({
         // The page keeps the scroll wheel: zooming takes Ctrl/⌘ + scroll, or two fingers.
         cooperativeGestures
         initialViewState={initialViewState}
+        maxZoom={MAX_ZOOM}
         mapStyle={MAP_STYLE}
         style={{ width: '100%', height: '100%' }}
         onLoad={(event) => {

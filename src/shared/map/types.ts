@@ -14,6 +14,7 @@ export interface MapOverlay {
   readonly markers?: readonly MapMarker[];
   readonly line?: readonly Position[];
   readonly alternatives?: readonly (readonly Position[])[];
+  readonly dashedLine?: readonly Position[];
   readonly onMapClick?: (position: Position) => void;
 }
 
@@ -30,6 +31,8 @@ export interface MapViewProps {
   readonly line?: readonly Position[];
   /** Lines drawn faded beneath `line` (e.g. the proposals not selected). */
   readonly alternatives?: readonly (readonly Position[])[];
+  /** A line drawn dashed, e.g. the way to where `line` starts. */
+  readonly dashedLine?: readonly Position[];
   readonly onMarkerSelect?: (id: string) => void;
   /** Called with the position the Visitor clicked or tapped on the map. */
   readonly onMapClick?: (position: Position) => void;

@@ -1,4 +1,9 @@
-import type { Activity, Relief } from '@/shared/domain/values';
+import {
+  isRunning,
+  type Activity,
+  type Relief,
+  type RunningActivity,
+} from '@/shared/domain/values';
 
 export const itineraryKinds = ['uphill', 'loop', 'session'] as const;
 export type ItineraryKind = (typeof itineraryKinds)[number];
@@ -47,3 +52,7 @@ export const DEFAULT_PLAN: PlanForm = {
   session: { repeats: 8, repeatLength: 300, minGradient: 0.06, maxGradient: 0.08, radius: 10_000 },
   activity: 'running',
 };
+
+/** Hill Sessions are for running only: any other Activity asks for running. */
+export const sessionActivity = (activity: Activity): RunningActivity =>
+  isRunning(activity) ? activity : 'running';

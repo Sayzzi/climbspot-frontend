@@ -9,7 +9,7 @@ import { fakeMap } from './fake-map-control';
  * exposed as text. Tests drive it through `fakeMap`.
  */
 export function MapView(props: MapViewProps) {
-  const { label, markers = [], line, alternatives = [], onMarkerSelect } = props;
+  const { label, markers = [], line, alternatives = [], dashedLine, onMarkerSelect } = props;
 
   useEffect(() => {
     fakeMap.register(props);
@@ -31,6 +31,7 @@ export function MapView(props: MapViewProps) {
         </button>
       ))}
       {line && <p>{`Line through ${String(line.length)} points`}</p>}
+      {dashedLine && <p>{`Dashed line through ${String(dashedLine.length)} points`}</p>}
       {alternatives.length > 0 && (
         <p>{`Other lines through ${alternatives.map((other) => String(other.length)).join(', ')} points`}</p>
       )}

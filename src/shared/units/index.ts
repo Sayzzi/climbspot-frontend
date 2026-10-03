@@ -2,6 +2,7 @@ export {
   distanceBounds,
   metresPerDistanceUnit,
   parseDistance,
+  type DistanceBounds,
   type Formatters,
   type UnitSystem,
 } from './format';

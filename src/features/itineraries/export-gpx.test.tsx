@@ -97,7 +97,7 @@ describe('Exporting an Itinerary as GPX', () => {
     await user.click(plan().getByRole('button', { name: 'Download GPX' }));
 
     const { file, points } = await savedGpx();
-    expect(file.name).toBe('ClimbSpot loop 5.6 km.gpx');
+    expect(file.name).toBe('ClimbSpot 5.6 km loop.gpx');
     expect(points).toHaveLength(4);
     expect(points[0]?.elevation).toBe(450);
     expect(points.at(-1)?.elevation).toBe(450);
@@ -109,6 +109,6 @@ describe('Exporting an Itinerary as GPX', () => {
 
     await user.click(plan().getByRole('button', { name: 'Download GPX' }));
 
-    expect(savedFiles()[0]?.name).toBe('ClimbSpot loop 3.5 mi.gpx');
+    expect(savedFiles()[0]?.name).toBe('ClimbSpot 3.5 mi loop.gpx');
   });
 });

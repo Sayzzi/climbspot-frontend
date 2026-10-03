@@ -163,7 +163,9 @@ describe('Plan tab: Hill sessions', () => {
     expect(proposal.getByText('Total length').nextSibling).toHaveTextContent('8.4 km');
     expect(proposal.getByText('Height gained').nextSibling).toHaveTextContent('245 m');
     expect(proposal.getByText('Km-effort').nextSibling).toHaveTextContent('10.8');
+    expect(proposal.getByText('Repeat length').nextSibling).toHaveTextContent('300 m');
     expect(proposal.getByText('Repeat gradient').nextSibling).toHaveTextContent('7.5%');
+    expect(proposal.getByText('Repeat max gradient').nextSibling).toHaveTextContent('7.5%');
     expect(proposal.getByText('Warm-up').nextSibling).toHaveTextContent('1.8 km');
     const [, second] = within(
       plan().getByRole('list', { name: 'Proposed itineraries' }),
@@ -171,7 +173,7 @@ describe('Plan tab: Hill sessions', () => {
     expect(second).toHaveTextContent('Close match: 5.2% instead of 6%–8%');
   });
 
-  it('draws the Repeat over its Warm-up, with the Repeat’s Elevation Profile', async () => {
+  it('draws the Repeat, its Warm-up dashed, with the Repeat’s Elevation Profile', async () => {
     sessionsApi();
     const { user } = await openSessions();
 
@@ -179,7 +181,7 @@ describe('Plan tab: Hill sessions', () => {
     await firstProposal();
 
     expect(screen.getByText('Line through 2 points')).toBeInTheDocument();
-    expect(screen.getByText('Other lines through 3 points')).toBeInTheDocument();
+    expect(screen.getByText('Dashed line through 3 points')).toBeInTheDocument();
     expect(
       plan().getByRole('img', { name: 'Elevation profile: 300 m from 450 m to 472 m.' }),
     ).toBeInTheDocument();

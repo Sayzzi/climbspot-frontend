@@ -22,7 +22,8 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
   const { t } = useTranslation('itineraries');
   const name = useItineraryName(proposal);
   const facts = useFacts(proposal);
-  const fileName = useFileName(proposal);
+  const fileName = t(`file.${proposal.kind}`, { name });
+  const format = useFormatters();
 
   const saveWorkout = async (session: HillSession) => {
     // The FIT SDK is large: loaded only when a workout is saved.
@@ -31,7 +32,8 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
       fileNameFor(fileName, 'fit'),
       toFitWorkout(session, name, {
         warmUp: t('workout.warmUp'),
-        repeat: (index, count) => t('workout.repeat', { index, count }),
+        repeat: (index, count) =>
+          t('workout.repeat', { index: format.number(index), count: format.number(count) }),
         recovery: t('workout.recovery'),
         coolDown: t('workout.coolDown'),
       }),
@@ -107,28 +109,7 @@ function useItineraryName(proposal: Proposal): string {
       return t('name.loop', { length: format.distance(proposal.length) });
     case 'session':
       return t('name.session', {
-        repeats: proposal.repeats,
-        length: format.distance(proposal.repeat.length),
-        gradient: format.gradient(proposal.repeat.averageGradient),
-      });
-  }
-}
-
-function useFileName(proposal: Proposal): string {
-  const { t } = useTranslation('itineraries');
-  const format = useFormatters();
-
-  switch (proposal.kind) {
-    case 'uphill':
-      return t('file.uphill', {
-        length: format.distance(proposal.length),
-        gradient: format.gradient(proposal.averageGradient),
-      });
-    case 'loop':
-      return t('file.loop', { length: format.distance(proposal.length) });
-    case 'session':
-      return t('file.session', {
-        repeats: proposal.repeats,
+        repeats: format.number(proposal.repeats),
         length: format.distance(proposal.repeat.length),
         gradient: format.gradient(proposal.repeat.averageGradient),
       });
@@ -150,9 +131,14 @@ function useFacts(proposal: Proposal) {
         { term: t('facts.totalLength'), value: format.distance(proposal.totals.length) },
         { term: t('facts.heightGained'), value: format.elevation(proposal.totals.heightGained) },
         ...effort,
+        { term: t('facts.repeatLength'), value: format.distance(proposal.repeat.length) },
         {
           term: t('facts.repeatGradient'),
           value: format.gradient(proposal.repeat.averageGradient),
+        },
+        {
+          term: t('facts.repeatMaximumGradient'),
+          value: format.gradient(proposal.repeat.maximumGradient),
         },
         { term: t('facts.warmUp'), value: format.distance(proposal.warmUp.length) },
       ];

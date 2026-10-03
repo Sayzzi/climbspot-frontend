@@ -1,7 +1,13 @@
 import { useId, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { distanceBounds, parseDistance, useFormatters, useUnits } from '@/shared/units';
+import {
+  distanceBounds,
+  parseDistance,
+  useFormatters,
+  useUnits,
+  type DistanceBounds,
+} from '@/shared/units';
 
 export const selectClassName =
   'w-full rounded-md border border-pine/25 bg-white px-2 py-1.5 focus-visible:outline-2 focus-visible:outline-pine';
@@ -61,7 +67,7 @@ interface DistanceFieldProps {
   /** Metres. */
   readonly value: number;
   /** Accepted range, in metres. */
-  readonly bounds: { readonly minimum: number; readonly maximum: number };
+  readonly bounds: DistanceBounds;
   /** Called with whole metres whenever the typed distance is valid. */
   readonly onChange: (metres: number) => void;
   readonly onValidityChange: (valid: boolean) => void;
@@ -69,8 +75,17 @@ interface DistanceFieldProps {
   readonly showProblem: boolean;
 }
 
-/** A distance typed freely in km, or miles with imperial units, within bounds. */
-export function DistanceField({
+/**
+ * A distance typed freely in km, or miles with imperial units, within bounds. When the
+ * Visitor switches units, the field starts again from the distance it holds, written in
+ * the new unit.
+ */
+export function DistanceField(props: DistanceFieldProps) {
+  const { system } = useUnits();
+  return <DistanceInput key={system} {...props} />;
+}
+
+function DistanceInput({
   label,
   value,
   bounds,
@@ -87,7 +102,7 @@ export function DistanceField({
   const inputId = useId();
   const problemId = useId();
   const unit = t(`units.short.${system}`);
-  const range = distanceBounds(bounds.minimum, bounds.maximum, system);
+  const range = distanceBounds(bounds, system);
   const problemShown = !valid && (showProblem || blurred);
 
   return (
@@ -103,7 +118,7 @@ export function DistanceField({
         value={text}
         onChange={(event) => {
           setText(event.target.value);
-          const metres = parseDistance(event.target.value, system, bounds.minimum, bounds.maximum);
+          const metres = parseDistance(event.target.value, system, bounds);
           setValid(metres !== undefined);
           onValidityChange(metres !== undefined);
           if (metres !== undefined) {

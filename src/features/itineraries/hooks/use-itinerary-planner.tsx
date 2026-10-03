@@ -5,13 +5,12 @@ import type { Position } from '@/shared/lib/position';
 import type { MapOverlay } from '@/shared/map';
 import type { Tab } from '@/shared/ui/tabs';
 
-import { isRunning } from '@/shared/domain/values';
-
 import { usePlanLoops } from '../api/plan-loops';
 import { usePlanSessions } from '../api/plan-sessions';
 import { usePlanUphill } from '../api/plan-uphill';
 import { PlanPanel } from '../components/plan-panel';
-import { DEFAULT_PLAN, type PlanForm } from '../domain';
+import { DEFAULT_PLAN, sessionActivity, type PlanForm } from '../domain';
+import { mainStretch } from '../proposal';
 import type { Proposal } from '../types';
 
 /**
@@ -45,7 +44,7 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
       sessions.mutate({
         start,
         ...form.session,
-        activity: isRunning(form.activity) ? form.activity : 'running',
+        activity: sessionActivity(form.activity),
       });
     }
   };
@@ -54,12 +53,7 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
     if (next.kind !== form.kind) {
       setSelected(0);
     }
-    // Hill Sessions are running workouts: a cycling Activity becomes running.
-    setForm(
-      next.kind === 'session' && !isRunning(next.activity)
-        ? { ...next, activity: 'running' }
-        : next,
-    );
+    setForm(next.kind === 'session' ? { ...next, activity: sessionActivity(next.activity) } : next);
   };
 
   return {
@@ -83,15 +77,12 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
       markers: start
         ? [{ id: 'plan-start', position: start, label: t('start.marker'), tone: 'start' }]
         : [],
-      ...(shown && { line: positionsOf(drawnPathOf(shown)) }),
+      ...(shown && { line: positionsOf(mainStretch(shown).path) }),
+      ...(shown?.kind === 'session' && { dashedLine: positionsOf(shown.warmUp.path) }),
       ...(proposals && {
-        alternatives: [
-          // A session's Warm-up, then the other proposals.
-          ...(shown?.kind === 'session' ? [positionsOf(shown.warmUp.path)] : []),
-          ...proposals
-            .filter((proposal) => proposal !== shown)
-            .map((proposal) => positionsOf(drawnPathOf(proposal))),
-        ],
+        alternatives: proposals
+          .filter((proposal) => proposal !== shown)
+          .map((proposal) => positionsOf(mainStretch(proposal).path)),
       }),
       onMapClick: (position) => {
         setStart(position);
@@ -100,10 +91,6 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
     },
   };
 }
-
-/** What stands for a proposal on the map: its path, or a session's Repeat. */
-const drawnPathOf = (proposal: Proposal) =>
-  proposal.kind === 'session' ? proposal.repeat.path : proposal.path;
 
 /** GeoJSON pairs are [longitude, latitude]. */
 function positionsOf(path: { readonly coordinates: readonly [number, number][] }): Position[] {

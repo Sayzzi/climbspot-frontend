@@ -48,7 +48,7 @@ export function UphillFields({
         onValidityChange={onValidityChange}
         showProblem={showProblems}
       />
-      <Within criteria={criteria} onChange={onChange} />
+      <RadiusField criteria={criteria} onChange={onChange} />
     </div>
   );
 }
@@ -61,6 +61,7 @@ export function SessionFields({
   showProblems,
 }: CriteriaFieldsProps<SessionCriteria>) {
   const { t } = useTranslation('itineraries');
+  const format = useFormatters();
 
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -68,7 +69,7 @@ export function SessionFields({
         label={t('session.repeats')}
         value={criteria.repeats}
         options={REPEAT_COUNTS}
-        format={String}
+        format={(value) => format.number(value)}
         onChange={(repeats) => {
           onChange({ ...criteria, repeats });
         }}
@@ -84,7 +85,7 @@ export function SessionFields({
         showProblem={showProblems}
       />
       <GradientRange criteria={criteria} onChange={onChange} />
-      <Within criteria={criteria} onChange={onChange} />
+      <RadiusField criteria={criteria} onChange={onChange} />
     </div>
   );
 }
@@ -108,7 +109,7 @@ function GradientRange<Criteria extends GradientRangeCriteria>({
   return (
     <>
       <Choice
-        label={t('uphill.minGradient')}
+        label={t('criteria.minGradient')}
         value={criteria.minGradient}
         options={GRADIENT_CHOICES}
         format={(value) => format.gradient(value)}
@@ -121,7 +122,7 @@ function GradientRange<Criteria extends GradientRangeCriteria>({
         }}
       />
       <Choice
-        label={t('uphill.maxGradient')}
+        label={t('criteria.maxGradient')}
         value={criteria.maxGradient}
         options={GRADIENT_CHOICES}
         format={(value) => format.gradient(value)}
@@ -138,7 +139,7 @@ function GradientRange<Criteria extends GradientRangeCriteria>({
 }
 
 /** How far from the starting point to look. */
-function Within<Criteria extends { readonly radius: number }>({
+function RadiusField<Criteria extends { readonly radius: number }>({
   criteria,
   onChange,
 }: {
@@ -150,7 +151,7 @@ function Within<Criteria extends { readonly radius: number }>({
 
   return (
     <Choice
-      label={t('uphill.radius')}
+      label={t('criteria.radius')}
       value={criteria.radius}
       options={RADII}
       format={(value) => format.distance(value)}

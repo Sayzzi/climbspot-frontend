@@ -38,7 +38,7 @@ export const categories = everyOf<Category>()([
 
 export const reliefs = everyOf<Relief>()(['flat', 'rolling', 'hilly']);
 
-/** Activities that are running: Hill Sessions, effort and times only make sense for them. */
+/** Activities that are running. */
 export const runningActivities = [
   'running',
   'trail_running',

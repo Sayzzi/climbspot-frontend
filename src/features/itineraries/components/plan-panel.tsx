@@ -1,4 +1,4 @@
-import { useState, type SubmitEvent } from 'react';
+import type { SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { activities, runningActivities, type Activity } from '@/shared/domain/values';
@@ -8,9 +8,11 @@ import { Button } from '@/shared/ui/button';
 import { ElevationProfileChart } from '@/shared/ui/elevation-profile-chart';
 import { ErrorNotice } from '@/shared/ui/error-notice';
 import { SegmentedControl } from '@/shared/ui/segmented-control';
-import { useFormatters } from '@/shared/units';
+import { useFormatters, useUnits } from '@/shared/units';
 
 import { itineraryKinds, type PlanForm } from '../domain';
+import { useRequestGate } from '../hooks/use-request-gate';
+import { mainStretch } from '../proposal';
 import type { Proposal } from '../types';
 import { LoopFields, SessionFields, UphillFields } from './criteria-fields';
 import { Field, selectClassName } from './fields';
@@ -35,22 +37,12 @@ export function PlanPanel(props: PlanPanelProps) {
   const { form, onFormChange, proposals, selected } = props;
   const labels = useDomainLabels();
   const shown = proposals?.[selected];
-  // Typed distances that cannot be sent, per kind, and whether to say so.
-  const [invalidKinds, setInvalidKinds] = useState<ReadonlySet<string>>(new Set());
-  const [triedToSend, setTriedToSend] = useState(false);
-  const validityOf = (kind: string) => (valid: boolean) => {
-    setInvalidKinds((current) => {
-      const next = new Set(current);
-      if (valid) next.delete(kind);
-      else next.add(kind);
-      return next;
-    });
-  };
+  const { system } = useUnits();
+  const gate = useRequestGate(system);
 
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setTriedToSend(true);
-    if (!props.pending && !invalidKinds.has(form.kind)) {
+    if (gate.mayAsk(form.kind) && !props.pending) {
       props.onSubmit();
     }
   };
@@ -78,8 +70,8 @@ export function PlanPanel(props: PlanPanelProps) {
             onChange={(uphill) => {
               onFormChange({ ...form, uphill });
             }}
-            onValidityChange={validityOf('uphill')}
-            showProblems={triedToSend}
+            onValidityChange={gate.validityOf('uphill')}
+            showProblems={gate.showProblems}
           />
         )}
         {form.kind === 'loop' && (
@@ -88,8 +80,8 @@ export function PlanPanel(props: PlanPanelProps) {
             onChange={(loop) => {
               onFormChange({ ...form, loop });
             }}
-            onValidityChange={validityOf('loop')}
-            showProblems={triedToSend}
+            onValidityChange={gate.validityOf('loop')}
+            showProblems={gate.showProblems}
           />
         )}
         {form.kind === 'session' && (
@@ -98,8 +90,8 @@ export function PlanPanel(props: PlanPanelProps) {
             onChange={(session) => {
               onFormChange({ ...form, session });
             }}
-            onValidityChange={validityOf('session')}
-            showProblems={triedToSend}
+            onValidityChange={gate.validityOf('session')}
+            showProblems={gate.showProblems}
           />
         )}
         <Field label={t('activity')}>
@@ -112,7 +104,7 @@ export function PlanPanel(props: PlanPanelProps) {
               }}
               className={selectClassName}
             >
-              {/* Hill Sessions are running workouts. */}
+              {/* Hill Sessions are for running only. */}
               {(form.kind === 'session' ? runningActivities : activities).map((activity) => (
                 <option key={activity} value={activity}>
                   {labels.activity(activity)}
@@ -169,7 +161,7 @@ export function PlanPanel(props: PlanPanelProps) {
 function Profile({ proposal }: { readonly proposal: Proposal }) {
   const { t } = useTranslation('itineraries');
   const format = useFormatters();
-  const { elevationProfile, length } = proposal.kind === 'session' ? proposal.repeat : proposal;
+  const { elevationProfile, length } = mainStretch(proposal);
   const elevations = elevationProfile.map((point) => point.elevation);
 
   return (

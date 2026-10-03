@@ -2,7 +2,13 @@ import { screen, within } from '@testing-library/react';
 import { HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
-import { aLoopItinerary, anUphillItinerary, handlers, nearbyResults } from '@/test/api';
+import {
+  aHillSession,
+  aLoopItinerary,
+  anUphillItinerary,
+  handlers,
+  nearbyResults,
+} from '@/test/api';
 import { fakeMap } from '@/test/fake-map-control';
 import { stubLanguages } from '@/test/languages';
 import { renderApp } from '@/test/render-app';
@@ -19,6 +25,10 @@ function planningApi() {
     handlers.loops(async (request) => {
       sent.push((await request.json()) as Record<string, unknown>);
       return HttpResponse.json({ itineraries: [aLoopItinerary()] }) as never;
+    }),
+    handlers.sessions(async (request) => {
+      sent.push((await request.json()) as Record<string, unknown>);
+      return HttpResponse.json({ sessions: [aHillSession()] }) as never;
     }),
     handlers.uphill(async (request) => {
       sent.push((await request.json()) as Record<string, unknown>);
@@ -115,7 +125,7 @@ describe('Free distances in the Plan tab', () => {
     await find(user, 'loop');
 
     expect(plan().getByRole('alert')).toHaveTextContent(
-      'Enter a distance between 0.7 and 62.1 mi.',
+      'Enter a distance between 0.63 and 62.13 mi.',
     );
     expect(sent).toHaveLength(0);
   });
@@ -130,5 +140,37 @@ describe('Free distances in the Plan tab', () => {
 
     await plan().findByRole('list', { name: 'Proposed itineraries' });
     expect(sent[0]).toMatchObject({ minGradient: 0.2, maxGradient: 0.3 });
+  });
+
+  it('rewrites a typed distance in the new unit when the Visitor switches units', async () => {
+    const sent = planningApi();
+    const { user } = await openPlan('loop');
+
+    await user.click(
+      within(screen.getByRole('radiogroup', { name: 'Units' })).getByRole('radio', {
+        name: 'Imperial',
+      }),
+    );
+
+    expect(plan().getByRole('textbox', { name: 'Distance (mi)' })).toHaveDisplayValue('3.11');
+    await find(user, 'loop');
+    await plan().findByRole('list', { name: 'Proposed itineraries' });
+    expect(sent[0]).toMatchObject({ distance: 5000 });
+  });
+
+  it('takes short Repeats in miles', async () => {
+    stubLanguages('en-US');
+    const sent = planningApi();
+    const { user } = await renderApp('/?latitude=45.9&longitude=6.13');
+    await user.click(await screen.findByRole('tab', { name: 'Plan' }));
+    await user.click(plan().getByRole('radio', { name: 'Hill session' }));
+    fakeMap.click({ latitude: 45.9, longitude: 6.13 });
+
+    expect(plan().getByRole('textbox', { name: 'Repeat length (mi)' })).toHaveDisplayValue('0.19');
+    await typeInto(user, 'Repeat length (mi)', '0.15');
+    await user.click(plan().getByRole('button', { name: 'Find hill sessions' }));
+
+    await plan().findByRole('list', { name: 'Proposed itineraries' });
+    expect(sent[0]).toMatchObject({ repeatLength: 241 });
   });
 });

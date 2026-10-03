@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 
 import { apiClient } from '@/shared/api/client';
-import { toPairs } from '@/shared/api/geojson';
 import { unwrap } from '@/shared/api/request';
 
 import type { HillSession, HillSessionRequest } from '../types';
+import { withPairs } from './with-pairs';
 
 /** Asks the API for Hill Sessions from a point. */
 export function usePlanSessions() {
@@ -13,14 +13,8 @@ export function usePlanSessions() {
       (await unwrap(apiClient.POST('/itineraries/sessions', { body: request }))).sessions.map(
         (session) => ({
           ...session,
-          repeat: {
-            ...session.repeat,
-            path: { type: 'LineString', coordinates: toPairs(session.repeat.path.coordinates) },
-          },
-          warmUp: {
-            ...session.warmUp,
-            path: { type: 'LineString', coordinates: toPairs(session.warmUp.path.coordinates) },
-          },
+          repeat: withPairs(session.repeat),
+          warmUp: withPairs(session.warmUp),
         }),
       ),
   });

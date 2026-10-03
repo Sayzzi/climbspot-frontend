@@ -48,6 +48,7 @@ export function MapView({
   markers = [],
   line,
   alternatives,
+  dashedLine,
   onMarkerSelect,
   onAreaChange,
   onMapClick,
@@ -98,6 +99,19 @@ export function MapView({
         },
       },
     [line],
+  );
+
+  const dashedData = useMemo(
+    () =>
+      dashedLine && {
+        type: 'Feature' as const,
+        properties: {},
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: dashedLine.map(({ longitude, latitude }) => [longitude, latitude]),
+        },
+      },
+    [dashedLine],
   );
 
   const alternativesData = useMemo(
@@ -157,6 +171,16 @@ export function MapView({
               type="line"
               paint={{ 'line-color': routeColour, 'line-width': 4, 'line-opacity': 0.35 }}
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+            />
+          </Source>
+        )}
+        {dashedData && (
+          <Source id="dashed" type="geojson" data={dashedData}>
+            <Layer
+              id="dashed"
+              type="line"
+              paint={{ 'line-color': routeColour, 'line-width': 3, 'line-dasharray': [2, 1.5] }}
+              layout={{ 'line-join': 'round' }}
             />
           </Source>
         )}

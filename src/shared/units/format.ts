@@ -24,7 +24,7 @@ export interface Formatters {
   duration(minutes: number): string;
   /** A distance as typed in a field, in km or miles, up to two decimals and no unit. */
   distanceInput(metres: number): string;
-  /** A bound of a typed distance, in km or miles, up to one decimal. */
+  /** A bound of a typed distance, in km or miles, up to two decimals. */
   distanceBound(value: number): string;
 }
 
@@ -40,7 +40,7 @@ export function createFormatters(system: UnitSystem, locale: string): Formatters
 
   const twoDigits = new Intl.NumberFormat(locale, { minimumIntegerDigits: 2 });
   const typed = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: false });
-  const bound = new Intl.NumberFormat(locale, { maximumFractionDigits: 1, useGrouping: false });
+  const bound = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: false });
   const [hours, minutes] = [unit('hour', 0), unit('minute', 0)];
 
   return {
@@ -82,19 +82,21 @@ function imperial(unit: UnitFormat): Pick<Formatters, 'distance' | 'elevation'> 
   };
 }
 
+/** A range of distances, in metres or in the Visitor's unit. */
+export interface DistanceBounds {
+  readonly minimum: number;
+  readonly maximum: number;
+}
+
 /**
  * The range a distance may be typed in, in km or miles, from bounds in metres; rounded
- * inwards to a tenth, so that what the Visitor reads is exactly what is accepted.
+ * inwards to a hundredth, so that what the Visitor reads is exactly what is accepted.
  */
-export function distanceBounds(
-  minimum: number,
-  maximum: number,
-  system: UnitSystem,
-): { readonly minimum: number; readonly maximum: number } {
+export function distanceBounds(bounds: DistanceBounds, system: UnitSystem): DistanceBounds {
   const unit = metresPerDistanceUnit(system);
   return {
-    minimum: Math.ceil((minimum / unit) * 10 - 1e-9) / 10,
-    maximum: Math.floor((maximum / unit) * 10 + 1e-9) / 10,
+    minimum: Math.ceil((bounds.minimum / unit) * 100 - 1e-9) / 100,
+    maximum: Math.floor((bounds.maximum / unit) * 100 + 1e-9) / 100,
   };
 }
 
@@ -105,16 +107,15 @@ export function distanceBounds(
 export function parseDistance(
   text: string,
   system: UnitSystem,
-  minimum: number,
-  maximum: number,
+  bounds: DistanceBounds,
 ): number | undefined {
   const normalised = text.trim().replace(',', '.');
   if (!/^\d+(\.\d+)?$/.test(normalised)) {
     return undefined;
   }
   const typed = Number(normalised);
-  const bounds = distanceBounds(minimum, maximum, system);
-  return typed >= bounds.minimum && typed <= bounds.maximum
+  const range = distanceBounds(bounds, system);
+  return typed >= range.minimum && typed <= range.maximum
     ? Math.round(typed * metresPerDistanceUnit(system))
     : undefined;
 }

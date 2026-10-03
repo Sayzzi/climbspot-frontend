@@ -12,11 +12,13 @@
     "missing": "Place your starting point on the map first.",
     "marker": "Starting point"
   },
-  "uphill": {
+  "criteria": {
     "minGradient": "Gradient from",
     "maxGradient": "Gradient to",
+    "radius": "Within"
+  },
+  "uphill": {
     "length": "Length",
-    "radius": "Within",
     "submit": "Find uphill itineraries"
   },
   "loop": {
@@ -55,7 +57,9 @@
     "relief": "Relief",
     "totalLength": "Total length",
     "repeatGradient": "Repeat gradient",
-    "warmUp": "Warm-up"
+    "warmUp": "Warm-up",
+    "repeatLength": "Repeat length",
+    "repeatMaximumGradient": "Repeat max gradient"
   },
   "download": "Download GPX",
   "downloadWorkout": "Download workout (FIT)",
@@ -66,9 +70,9 @@
     "coolDown": "Cool-down"
   },
   "file": {
-    "uphill": "ClimbSpot uphill {{length}} at {{gradient}}",
-    "loop": "ClimbSpot loop {{length}}",
-    "session": "ClimbSpot hill session {{repeats}} × {{length}} at {{gradient}}"
+    "uphill": "ClimbSpot uphill {{name}}",
+    "loop": "ClimbSpot {{name}}",
+    "session": "ClimbSpot hill session {{name}}"
   },
   "profile": {
     "uphill": "Elevation profile: {{length}} from {{start}} to {{top}}.",

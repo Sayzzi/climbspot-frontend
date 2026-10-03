@@ -5,18 +5,17 @@ import { activities, runningActivities, type Activity } from '@/shared/domain/va
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
-import { ElevationProfileChart } from '@/shared/ui/elevation-profile-chart';
 import { ErrorNotice } from '@/shared/ui/error-notice';
 import { SegmentedControl } from '@/shared/ui/segmented-control';
-import { useFormatters, useUnits } from '@/shared/units';
+import { useUnits } from '@/shared/units';
 
 import { itineraryKinds, type PlanForm } from '../domain';
 import { useRequestGate } from '../hooks/use-request-gate';
-import { mainStretch } from '../proposal';
 import type { Proposal } from '../types';
 import { LoopFields, SessionFields, UphillFields } from './criteria-fields';
 import { Field, selectClassName } from './fields';
 import { ProposalCard } from './proposal-card';
+import { ProposalProfile } from './proposal-profile';
 
 interface PlanPanelProps {
   readonly hasStart: boolean;
@@ -152,35 +151,7 @@ export function PlanPanel(props: PlanPanelProps) {
         </ul>
       )}
 
-      {shown && <Profile proposal={shown} />}
+      {shown && <ProposalProfile proposal={shown} />}
     </div>
-  );
-}
-
-/** The Elevation Profile of a proposal: the path of an Itinerary, the Repeat of a session. */
-function Profile({ proposal }: { readonly proposal: Proposal }) {
-  const { t } = useTranslation('itineraries');
-  const format = useFormatters();
-  const { elevationProfile, length } = mainStretch(proposal);
-  const elevations = elevationProfile.map((point) => point.elevation);
-
-  return (
-    <ElevationProfileChart
-      profile={elevationProfile}
-      length={length}
-      description={
-        proposal.kind === 'loop'
-          ? t('profile.loop', {
-              length: format.distance(length),
-              lowest: format.elevation(Math.min(...elevations)),
-              highest: format.elevation(Math.max(...elevations)),
-            })
-          : t('profile.uphill', {
-              length: format.distance(length),
-              start: format.elevation(elevations[0] ?? 0),
-              top: format.elevation(elevations.at(-1) ?? 0),
-            })
-      }
-    />
   );
 }

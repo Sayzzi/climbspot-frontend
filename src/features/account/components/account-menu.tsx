@@ -89,6 +89,16 @@ export function AccountMenu() {
           </Link>
           <Link
             role="menuitem"
+            to="/itineraries"
+            className={itemClassName}
+            onClick={() => {
+              setOpen(false);
+            }}
+          >
+            {t('menu.itineraries')}
+          </Link>
+          <Link
+            role="menuitem"
             to="/account"
             className={itemClassName}
             onClick={() => {

@@ -34,22 +34,35 @@ interface ClientResult {
 export async function unwrap<R extends ClientResult>(
   request: Promise<R>,
 ): Promise<NonNullable<R['data']>> {
-  let result: R;
+  const { data, error, response } = await reached(request);
+  if (error !== undefined || data === undefined || data === null) {
+    throw requestError(error, response);
+  }
+  return data;
+}
+
+/** Like {@link unwrap}, for a request the API answers without a body (204 No Content). */
+export async function unwrapEmpty(request: Promise<ClientResult>): Promise<void> {
+  const { error, response } = await reached(request);
+  if (error !== undefined || !response.ok) {
+    throw requestError(error, response);
+  }
+}
+
+async function reached<R extends ClientResult>(request: Promise<R>): Promise<R> {
   try {
-    result = await request;
+    return await request;
   } catch (cause) {
     throw new NetworkError({ cause });
   }
+}
 
-  const { data, error, response } = result;
-  if (error !== undefined || data === undefined || data === null) {
-    const body = isApiError(error) ? error.error : undefined;
-    throw new ApiRequestError(
-      body?.code ?? 'UNKNOWN_ERROR',
-      body?.message ?? `HTTP ${String(response.status)}`,
-    );
-  }
-  return data;
+function requestError(error: unknown, response: Response): ApiRequestError {
+  const body = isApiError(error) ? error.error : undefined;
+  return new ApiRequestError(
+    body?.code ?? 'UNKNOWN_ERROR',
+    body?.message ?? `HTTP ${String(response.status)}`,
+  );
 }
 
 function isApiError(value: unknown): value is ApiError {

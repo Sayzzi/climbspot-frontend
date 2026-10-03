@@ -2,6 +2,8 @@ import { http, HttpResponse, type JsonBodyType } from 'msw';
 
 import type { components } from '@/shared/api/schema.gen';
 
+import { server } from './server';
+
 export type AscentSummary = components['schemas']['NearbyAscents']['ascents'][number];
 export type Ascent = components['schemas']['Ascent'];
 export type ApiError = components['schemas']['ApiError'];
@@ -225,4 +227,75 @@ export const handlers = {
 export function nearbyResults(ascents: AscentSummary[]): HttpResponse<JsonBodyType> {
   const body: components['schemas']['NearbyAscents'] = { ascents };
   return HttpResponse.json(body);
+}
+
+export type SavedItinerary = components['schemas']['SavedItinerary'];
+type SavedProposal = SavedItinerary['proposal'];
+
+/** A Saved Itinerary as the API answers it. */
+export function aSavedItinerary(
+  overrides: Partial<SavedItinerary> & { proposal?: SavedProposal } = {},
+): SavedItinerary {
+  const proposal = overrides.proposal ?? aLoopItinerary();
+  return {
+    id: crypto.randomUUID(),
+    name: 'Saved loop',
+    kind: proposal.kind,
+    length: proposal.kind === 'session' ? proposal.totals.length : proposal.length,
+    savedAt: '2026-10-01T08:00:00.000Z',
+    ...overrides,
+    proposal,
+  };
+}
+
+/**
+ * The signed-in Visitor's Saved Itineraries, kept in memory behind the API's routes:
+ * newest first, as the API lists them. Records what each request sent.
+ */
+export function savedItinerariesApi(initial: readonly SavedItinerary[] = []) {
+  let saved = [...initial];
+  const sent = recorder();
+  let clock = Date.parse('2026-10-02T08:00:00.000Z');
+  const summary = ({ proposal: _proposal, ...rest }: SavedItinerary) => rest;
+  const notFound = () => apiErrorResponse(404, 'SAVED_ITINERARY_NOT_FOUND');
+
+  server.use(
+    http.get(apiUrl('/saved-itineraries'), ({ request }) => {
+      sent.record(request);
+      return HttpResponse.json({ savedItineraries: saved.map(summary) });
+    }),
+    http.post(apiUrl('/saved-itineraries'), async ({ request }) => {
+      sent.record(request);
+      const { name, proposal } = (await request.json()) as {
+        name: string;
+        proposal: SavedProposal;
+      };
+      clock += 60_000;
+      const created = aSavedItinerary({ name, proposal, savedAt: new Date(clock).toISOString() });
+      saved = [created, ...saved];
+      return HttpResponse.json(created, { status: 201 });
+    }),
+    http.get(apiUrl('/saved-itineraries/:id'), ({ request, params }) => {
+      sent.record(request);
+      const found = saved.find((itinerary) => itinerary.id === params.id);
+      return found ? HttpResponse.json(found) : notFound();
+    }),
+    http.patch(apiUrl('/saved-itineraries/:id'), async ({ request, params }) => {
+      sent.record(request);
+      const { name } = (await request.json()) as { name: string };
+      const found = saved.find((itinerary) => itinerary.id === params.id);
+      if (!found) {
+        return notFound();
+      }
+      const renamed = { ...found, name };
+      saved = saved.map((itinerary) => (itinerary === found ? renamed : itinerary));
+      return HttpResponse.json(renamed);
+    }),
+    http.delete(apiUrl('/saved-itineraries/:id'), ({ request, params }) => {
+      sent.record(request);
+      saved = saved.filter((itinerary) => itinerary.id !== params.id);
+      return new HttpResponse(null, { status: 204 });
+    }),
+  );
+  return { sent, saved: () => saved };
 }

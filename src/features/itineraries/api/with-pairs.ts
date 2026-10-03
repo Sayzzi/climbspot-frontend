@@ -16,3 +16,18 @@ export function withPairs<T extends WidenedPath>(
     path: { type: itinerary.path.type, coordinates: toPairs(itinerary.path.coordinates) },
   };
 }
+
+interface WidenedSession {
+  readonly kind: 'session';
+  readonly repeat: WidenedPath;
+  readonly warmUp: WidenedPath;
+}
+
+/** Restores the pairs of every path of a proposal, whatever its kind. */
+export function proposalWithPairs<
+  T extends (WidenedPath & { kind: 'uphill' | 'loop' }) | WidenedSession,
+>(proposal: T) {
+  return proposal.kind === 'session'
+    ? { ...proposal, repeat: withPairs(proposal.repeat), warmUp: withPairs(proposal.warmUp) }
+    : withPairs(proposal);
+}

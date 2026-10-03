@@ -10,7 +10,7 @@ import { usePlanSessions } from '../api/plan-sessions';
 import { usePlanUphill } from '../api/plan-uphill';
 import { PlanPanel } from '../components/plan-panel';
 import { DEFAULT_PLAN, sessionActivity, type PlanForm } from '../domain';
-import { mainStretch } from '../proposal';
+import { mainStretch, positionsOf } from '../proposal';
 import type { Proposal } from '../types';
 
 /**
@@ -90,9 +90,4 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
       },
     },
   };
-}
-
-/** GeoJSON pairs are [longitude, latitude]. */
-function positionsOf(path: { readonly coordinates: readonly [number, number][] }): Position[] {
-  return path.coordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
 }

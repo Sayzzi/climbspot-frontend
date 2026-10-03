@@ -77,6 +77,7 @@ describe('Signing in', () => {
     const menu = within(screen.getByRole('menu'));
     expect(menu.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
       'Add a climb',
+      'My itineraries',
       'Account',
       'Sign out',
     ]);

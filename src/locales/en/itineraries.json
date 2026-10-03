@@ -83,5 +83,28 @@
     "uphill": "Try another point, another Activity or a wider Gradient range.",
     "loop": "Try another point, another Activity or another Relief.",
     "session": "Try another point, a wider Gradient range or a wider radius."
+  },
+  "saved": {
+    "title": "My itineraries",
+    "list": "Saved itineraries",
+    "save": "Save",
+    "saveAs": "Save {{name}}",
+    "name": "Name",
+    "nameMissing": "Give the itinerary a name.",
+    "cancel": "Cancel",
+    "done": "Saved to My itineraries.",
+    "signInToSave": "Sign in to save",
+    "signedOut": "Sign in to see your saved itineraries.",
+    "signIn": "Sign in",
+    "loading": "Loading your itineraries…",
+    "loadingOne": "Loading the itinerary…",
+    "empty": "Nothing saved yet. Plan an itinerary from the Plan tab of the map, then save it.",
+    "plan": "Plan an itinerary",
+    "summary": "{{kind}} · {{length}} · saved {{date}}",
+    "map": "Map of {{name}}",
+    "rename": "Rename",
+    "renameLabel": "Rename {{name}}",
+    "delete": "Delete",
+    "confirmDelete": "Delete “{{name}}”? This cannot be undone."
   }
 }

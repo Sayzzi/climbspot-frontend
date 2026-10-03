@@ -15,6 +15,8 @@
     "INTERNAL_ERROR": "Something went wrong on our side. Please try again.",
     "ASCENT_NOT_FOUND": "This climb does not exist or has been removed.",
     "AUTHENTICATION_REQUIRED": "Sign in again to continue.",
+    "SAVED_ITINERARY_NOT_FOUND": "This itinerary is no longer saved.",
+    "SAVED_ITINERARY_TOO_LARGE": "This itinerary is too large to be saved.",
     "GPX_INVALID": "This file is not a valid GPX file.",
     "GPX_EMPTY": "This file has no track or route with at least two points.",
     "GPX_TOO_LARGE": "This file is too large. Use a file under 5 MB with at most 20,000 points.",

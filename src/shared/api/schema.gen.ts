@@ -422,6 +422,12 @@ export interface components {
                         number
                     ][];
                 };
+                elevationProfile: {
+                    /** @description Distance from the beginning, in metres. */
+                    distance: number;
+                    /** @description Elevation, in metres. */
+                    elevation: number;
+                }[];
                 /** @description Length of the Warm-up, in metres. */
                 length: number;
             };

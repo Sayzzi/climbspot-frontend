@@ -1,19 +1,46 @@
 import { distanceBetween } from '@/shared/lib/geodesy';
 
-import type { Itinerary } from './types';
+import type { HillSession, Itinerary } from './types';
 
 export const GPX_TYPE = 'application/gpx+xml';
 
+type Profile = readonly { readonly distance: number; readonly elevation: number }[];
+
+/** A stretch of a track: its path, and the profile measured along it. */
+interface TrackPart {
+  readonly coordinates: readonly (readonly [number, number])[];
+  readonly elevationProfile: Profile;
+  readonly length: number;
+}
+
+/** An Itinerary as one track part. */
+export const itineraryTrack = (itinerary: Itinerary): TrackPart[] => [
+  { coordinates: itinerary.path.coordinates, ...itinerary },
+];
+
+/** A Hill Session as track parts: Warm-up, each Repeat up and back down, Cool-down. */
+export function sessionTrack(session: HillSession): TrackPart[] {
+  const warmUp = { coordinates: session.warmUp.path.coordinates, ...session.warmUp };
+  const repeat = { coordinates: session.repeat.path.coordinates, ...session.repeat };
+  return [
+    warmUp,
+    ...Array.from({ length: session.repeats }, () => [repeat, backwards(repeat)]).flat(),
+    backwards(warmUp),
+  ];
+}
+
 /**
- * A GPX 1.1 track of an Itinerary: every point of its path, with the elevation of its
- * profile at that point's distance along the path.
+ * A GPX 1.1 track: every point of its parts' paths, with the elevation of each part's
+ * profile at that point's distance along it.
  */
-export function toGpx(itinerary: Itinerary, name: string): string {
-  const elevations = elevationsAlong(itinerary);
-  const points = itinerary.path.coordinates.map(
-    ([longitude, latitude], index) =>
-      `      <trkpt lat="${String(latitude)}" lon="${String(longitude)}"><ele>${(elevations[index] ?? 0).toFixed(1)}</ele></trkpt>`,
-  );
+export function toGpx(parts: readonly TrackPart[], name: string): string {
+  const points = parts.flatMap((part) => {
+    const elevations = elevationsAlong(part);
+    return part.coordinates.map(
+      ([longitude, latitude], index) =>
+        `      <trkpt lat="${String(latitude)}" lon="${String(longitude)}"><ele>${(elevations[index] ?? 0).toFixed(1)}</ele></trkpt>`,
+    );
+  });
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -30,13 +57,19 @@ export function toGpx(itinerary: Itinerary, name: string): string {
   ].join('\n');
 }
 
-/** A file name from a description, without the characters file systems refuse. */
-export function gpxFileName(name: string): string {
-  return `${name.replace(/[/\\:*?"<>|]/g, '-')}.gpx`;
+/** The same part travelled the other way. */
+function backwards(part: TrackPart): TrackPart {
+  return {
+    coordinates: part.coordinates.toReversed(),
+    elevationProfile: part.elevationProfile
+      .toReversed()
+      .map((point) => ({ ...point, distance: part.length - point.distance })),
+    length: part.length,
+  };
 }
 
-function elevationsAlong({ path, elevationProfile, length }: Itinerary): number[] {
-  const positions = path.coordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
+function elevationsAlong({ coordinates, elevationProfile, length }: TrackPart): number[] {
+  const positions = coordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
   let travelled = 0;
   const distances = positions.map((position, index) => {
     const previous = positions[index - 1];
@@ -48,10 +81,7 @@ function elevationsAlong({ path, elevationProfile, length }: Itinerary): number[
   return distances.map((distance) => elevationAt(elevationProfile, distance * scale));
 }
 
-function elevationAt(
-  profile: readonly { readonly distance: number; readonly elevation: number }[],
-  distance: number,
-): number {
+function elevationAt(profile: Profile, distance: number): number {
   const after = profile.findIndex((sample) => sample.distance >= distance);
   const next = profile[after];
   const previous = profile[after - 1];

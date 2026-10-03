@@ -4,6 +4,7 @@ export interface Download {
   readonly name: string;
   readonly type: string;
   readonly content: () => Promise<string>;
+  readonly bytes: () => Promise<Uint8Array>;
 }
 
 const files = new Map<string, Blob>();
@@ -25,7 +26,12 @@ vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
 ) {
   const blob = files.get(this.href);
   if (this.download !== '' && blob) {
-    downloads.push({ name: this.download, type: blob.type, content: () => blob.text() });
+    downloads.push({
+      name: this.download,
+      type: blob.type,
+      content: () => blob.text(),
+      bytes: async () => new Uint8Array(await blob.arrayBuffer()),
+    });
   }
 });
 

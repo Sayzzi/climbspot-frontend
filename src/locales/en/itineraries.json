@@ -58,6 +58,13 @@
     "warmUp": "Warm-up"
   },
   "download": "Download GPX",
+  "downloadWorkout": "Download workout (FIT)",
+  "workout": {
+    "warmUp": "Warm-up",
+    "repeat": "Repeat {{index}}/{{count}}",
+    "recovery": "Recovery",
+    "coolDown": "Cool-down"
+  },
   "file": {
     "uphill": "ClimbSpot uphill {{length}} at {{gradient}}",
     "loop": "ClimbSpot loop {{length}}",

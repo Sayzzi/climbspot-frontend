@@ -2,14 +2,14 @@ import { useTranslation } from 'react-i18next';
 
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { cn } from '@/shared/lib/cn';
-import { saveFile } from '@/shared/lib/save-file';
+import { fileNameFor, saveFile } from '@/shared/lib/save-file';
 import { Button } from '@/shared/ui/button';
 import { FactList } from '@/shared/ui/fact-list';
 import { useEffortFacts } from '@/shared/pace';
 import { useFormatters } from '@/shared/units';
 
-import { GPX_TYPE, gpxFileName, toGpx } from '../gpx';
-import type { Proposal } from '../types';
+import { GPX_TYPE, itineraryTrack, sessionTrack, toGpx } from '../gpx';
+import type { HillSession, Proposal } from '../types';
 
 interface ProposalCardProps {
   readonly proposal: Proposal;
@@ -23,6 +23,21 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
   const name = useItineraryName(proposal);
   const facts = useFacts(proposal);
   const fileName = useFileName(proposal);
+
+  const saveWorkout = async (session: HillSession) => {
+    // The FIT SDK is large: loaded only when a workout is saved.
+    const { FIT_TYPE, toFitWorkout } = await import('../fit');
+    saveFile(
+      fileNameFor(fileName, 'fit'),
+      toFitWorkout(session, name, {
+        warmUp: t('workout.warmUp'),
+        repeat: (index, count) => t('workout.repeat', { index, count }),
+        recovery: t('workout.recovery'),
+        coolDown: t('workout.coolDown'),
+      }),
+      FIT_TYPE,
+    );
+  };
 
   return (
     <article
@@ -46,19 +61,33 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
         {proposal.exact ? t('exact') : <Differences proposal={proposal} />}
       </p>
       <FactList className="mt-2 grid-cols-3" facts={facts} />
-      {/* Hill Sessions are exported with their own files. */}
-      {selected && proposal.kind !== 'session' && (
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          className="mt-3"
-          onClick={() => {
-            saveFile(gpxFileName(fileName), toGpx(proposal, fileName), GPX_TYPE);
-          }}
-        >
-          {t('download')}
-        </Button>
+      {selected && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const track =
+                proposal.kind === 'session' ? sessionTrack(proposal) : itineraryTrack(proposal);
+              saveFile(fileNameFor(fileName, 'gpx'), toGpx(track, fileName), GPX_TYPE);
+            }}
+          >
+            {t('download')}
+          </Button>
+          {proposal.kind === 'session' && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                void saveWorkout(proposal);
+              }}
+            >
+              {t('downloadWorkout')}
+            </Button>
+          )}
+        </div>
       )}
     </article>
   );

@@ -171,6 +171,11 @@ export function aHillSession(overrides: Partial<HillSession> = {}): HillSession 
           [6.01, 45.01],
         ],
       },
+      elevationProfile: [
+        { distance: 0, elevation: 430 },
+        { distance: 900, elevation: 440 },
+        { distance: 1800, elevation: 450 },
+      ],
       length: 1800,
     },
     totals: {

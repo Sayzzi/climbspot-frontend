@@ -56,6 +56,7 @@ function RootLayout() {
         <nav className="flex h-16 items-center justify-between gap-4 px-4">
           <Link
             to="/"
+            search={{ welcome: true }}
             className="flex min-h-11 items-center gap-2 font-display text-2xl font-extrabold text-pine"
           >
             <LogoMark />

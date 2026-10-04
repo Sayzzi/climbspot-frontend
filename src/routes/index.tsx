@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { z } from 'zod';
 
 import {
   filtersOf,
@@ -16,12 +17,15 @@ import {
   type SearchFilterValues,
 } from '@/features/ascents';
 import { useItineraryPlanner } from '@/features/itineraries';
-import { prefersReducedMotion, useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 
 import { HomeHero } from './-components/home-hero';
+import { useWelcome } from './-components/use-welcome';
 
 export const Route = createFileRoute('/')({
-  validateSearch: searchParamsSchema,
+  // `welcome`: the logo asks for the welcome screen again.
+  validateSearch: searchParamsSchema.extend({
+    welcome: z.boolean().optional().catch(undefined),
+  }),
   component: SearchPage,
 });
 
@@ -30,7 +34,13 @@ function SearchPage() {
   const search = Route.useSearch();
   const position = positionOf(search);
   const filters = filtersOf(search);
-  const reveal = useScrollProgress();
+  const welcome = useWelcome(search.welcome === true, () => {
+    void navigate({
+      search: ({ welcome: _asked, ...rest }) => rest,
+      replace: true,
+      resetScroll: false,
+    });
+  });
   const planner = useItineraryPlanner();
 
   // Searches stay on the map: the router must not scroll back to the title.
@@ -65,29 +75,29 @@ function SearchPage() {
         }
         notice={position ? undefined : <LocateNotice state={located} />}
         onSearchArea={searchAround}
-        reveal={reveal}
+        behindWelcome={welcome.open}
         extraTabs={[planner]}
       />
-      <HomeHero
-        reveal={reveal}
-        onShowClimbs={() => {
-          revealMap(SEARCH_PANEL_ID);
-        }}
-        onExploreMap={() => {
-          revealMap(SEARCH_MAP_ID);
-        }}
-      />
-      {/* Scroll distance that dissolves the name and reveals the map. */}
-      <div aria-hidden="true" className="h-[200vh]" />
+      {welcome.open && (
+        <HomeHero
+          closing={welcome.closing}
+          onShowClimbs={() => {
+            welcome.close(() => {
+              focus(SEARCH_PANEL_ID);
+            });
+          }}
+          onExploreMap={() => {
+            welcome.close(() => {
+              focus(SEARCH_MAP_ID);
+            });
+          }}
+        />
+      )}
     </>
   );
 }
 
-/** Scrolls the map into view, moving the focus to what the Visitor asked for. */
-function revealMap(focusId: string) {
-  window.scrollTo({
-    top: window.innerHeight,
-    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-  });
-  document.getElementById(focusId)?.focus({ preventScroll: true });
+/** Moves the focus to what the Visitor asked for: the map, or the search panel. */
+function focus(id: string) {
+  document.getElementById(id)?.focus();
 }

@@ -1,7 +1,6 @@
 import { useId, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { prefersReducedMotion } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
 import { MapView, type MapOverlay } from '@/shared/map';
 import { Button } from '@/shared/ui/button';
@@ -24,9 +23,6 @@ const SEARCH_ZOOM = 11;
 export const SEARCH_MAP_ID = 'search-map';
 export const SEARCH_PANEL_ID = 'search-panel';
 
-/** Above this share of the reveal, the map takes gestures and the panel is fully shown. */
-const REVEALED = 0.98;
-
 interface NearbySearchProps {
   /** Nothing is searched until there is a position. */
   readonly criteria: NearbyCriteria | undefined;
@@ -36,8 +32,8 @@ interface NearbySearchProps {
   readonly notice?: ReactNode;
   /** The Visitor asked to search around another position. */
   readonly onSearchArea: (center: Position) => void;
-  /** How far the map has been revealed, from 0 (behind the page's title) to 1. */
-  readonly reveal: number;
+  /** The welcome screen is over the map: neither the map nor the panel takes input. */
+  readonly behindWelcome: boolean;
   /** More tabs for the panel; each may add markers, a line and clicks to the map while open. */
   readonly extraTabs?: readonly (Tab & { readonly mapOverlay?: MapOverlay })[];
 }
@@ -51,7 +47,7 @@ export function NearbySearch({
   filters,
   notice,
   onSearchArea,
-  reveal,
+  behindWelcome,
   extraTabs = [],
 }: NearbySearchProps) {
   const { t } = useTranslation('ascents');
@@ -59,8 +55,6 @@ export function NearbySearch({
   const [selectedId, setSelectedId] = useState<string>();
   const [movedTo, setMovedTo] = useState<Position>();
   const selected = ascents?.find((ascent) => ascent.id === selectedId);
-  const revealed = reveal >= REVEALED;
-  const panelReveal = Math.max(0, reveal * 2 - 1);
   const [activeTab, setActiveTab] = useState('ascents');
   const overlay = extraTabs.find((tab) => tab.id === activeTab)?.mapOverlay;
 
@@ -121,7 +115,7 @@ export function NearbySearch({
         {...(overlay?.onMapClick && { onMapClick: overlay.onMapClick })}
         onMarkerSelect={setSelectedId}
         onAreaChange={setMovedTo}
-        interactive={revealed}
+        interactive={!behindWelcome}
         // Zoom buttons sit below the floating header (beating MapLibre's own stylesheet).
         className="size-full rounded-none [&_.maplibregl-ctrl-top-right]:top-16!"
       />
@@ -145,25 +139,14 @@ export function NearbySearch({
         id={SEARCH_PANEL_ID}
         tabIndex={-1}
         aria-label={t('search.panel')}
-        // Keyboard users tabbing into the panel get the map revealed for them.
-        onFocus={() => {
-          if (!revealed) {
-            window.scrollTo({
-              top: window.innerHeight,
-              behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-            });
-          }
-        }}
-        style={{
-          opacity: panelReveal,
-          transform: prefersReducedMotion()
-            ? undefined
-            : `translateY(${String((1 - panelReveal) * 16)}px)`,
-        }}
+        inert={behindWelcome}
         className={cn(
           // Above the map's own controls (attribution, zoom).
           'absolute inset-x-0 bottom-0 z-10 flex max-h-[55vh] flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl',
           'lg:inset-x-auto lg:top-20 lg:bottom-auto lg:left-4 lg:max-h-[calc(100vh-6rem)] lg:w-[24rem] lg:rounded-xl',
+          // Comes up as the welcome screen goes.
+          'transition-[opacity,translate] duration-300 ease-out',
+          behindWelcome && 'translate-y-4 opacity-0',
         )}
       >
         <Tabs

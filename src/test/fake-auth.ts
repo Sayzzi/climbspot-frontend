@@ -29,8 +29,8 @@ const ENROLMENT = {
   qrCode: 'data:image/svg+xml;base64,PHN2Zy8+',
   secret: 'JBSWY3DPEHPK3PXP',
 };
-/** Accounts with a second factor. */
-const secondFactors = new Set<string>();
+/** How many authenticator apps each account with a second factor has. */
+const secondFactors = new Map<string, number>();
 
 /** The code the fake sends by e-mail when the Visitor must prove it is them. */
 export const FAKE_EMAIL_CODE = '123456';
@@ -97,12 +97,16 @@ export const authClient: AuthClient = {
     codesSent += 1;
     return Promise.resolve();
   },
-  enrollAuthenticator: () => Promise.resolve(ENROLMENT),
+  enrollAuthenticator: () =>
+    Promise.resolve({
+      ...ENROLMENT,
+      factorId: `factor-${String((secondFactors.get(current?.email ?? '') ?? 0) + 1)}`,
+    }),
   verifyAuthenticator: (factorId, code) => {
-    if (!current?.email || factorId !== ENROLMENT.factorId || code !== FAKE_TOTP_CODE) {
+    if (!current?.email || !factorId.startsWith('factor-') || code !== FAKE_TOTP_CODE) {
       return Promise.reject(new AuthFailure('invalid-code'));
     }
-    secondFactors.add(current.email);
+    secondFactors.set(current.email, (secondFactors.get(current.email) ?? 0) + 1);
     giveCode();
     return Promise.resolve();
   },
@@ -111,6 +115,22 @@ export const authClient: AuthClient = {
       return Promise.reject(new AuthFailure('invalid-code'));
     }
     giveCode();
+    return Promise.resolve();
+  },
+  authenticatorCount: () => Promise.resolve(secondFactors.get(current?.email ?? '') ?? 0),
+  removeAuthenticators: () => {
+    if (current?.email) {
+      secondFactors.delete(current.email);
+      current = { ...current, secondFactor: 'none' };
+      notifyCurrent();
+    }
+    return Promise.resolve();
+  },
+  requireSecondFactor: () => {
+    if (current) {
+      current = { ...current, secondFactor: 'required', accessToken: FAKE_TOKEN };
+      notifyCurrent();
+    }
     return Promise.resolve();
   },
   signOut: () => {
@@ -124,6 +144,12 @@ export const authClient: AuthClient = {
     return Promise.resolve();
   },
 };
+
+function notifyCurrent() {
+  act(() => {
+    notify({ session: current, expired: false });
+  });
+}
 
 /** The session gives its second factor's code. */
 function giveCode() {
@@ -169,10 +195,16 @@ export const fakeAuth = {
   },
   signUps: () => signUps,
   /** The account has a second factor: signing in asks for its code. */
-  withSecondFactor(email = 'ada@example.com') {
-    secondFactors.add(email);
+  withSecondFactor(email = 'ada@example.com', apps = 1) {
+    secondFactors.set(email, apps);
+  },
+  /** The second factor turns on elsewhere: this session has not given its code. */
+  secondFactorAddedElsewhere(email = 'ada@example.com') {
+    secondFactors.set(email, 1);
   },
   hasSecondFactor: (email = 'ada@example.com') => secondFactors.has(email),
+  /** The signed-in Visitor gives their second factor's code. */
+  giveSecondFactorNow: () => authClient.giveSecondFactor(FAKE_TOTP_CODE),
   resetLinks: () => resetLinks,
   /** The password the account now has, if any. */
   passwordOf: (email: string) => passwords.get(email)?.password,

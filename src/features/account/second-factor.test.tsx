@@ -132,3 +132,88 @@ describe('Signing in with a second factor', () => {
     expect(header().getByRole('link', { name: 'Sign in' })).toBeInTheDocument();
   });
 });
+
+describe('Managing the second factor', () => {
+  async function openSecurityWith(apps: number) {
+    fakeAuth.withSecondFactor('ada@example.com', apps);
+    fakeAuth.signIn();
+    await fakeAuth.giveSecondFactorNow();
+    const app = await renderApp('/account');
+    const security = within(await screen.findByRole('region', { name: 'Security' }));
+    return { ...app, security };
+  }
+
+  it('invites to add a second app, and adds it', async () => {
+    const { user, security } = await openSecurityWith(1);
+
+    expect(
+      await security.findByText(
+        'Add a second app too (on another phone, or in your password manager), in case you lose this one.',
+      ),
+    ).toBeVisible();
+    await user.click(security.getByRole('button', { name: 'Add a second app' }));
+    await user.type(field('First code from the app'), FAKE_TOTP_CODE);
+    await user.click(security.getByRole('button', { name: 'Turn it on' }));
+
+    expect(await security.findByText('Two authenticator apps give your codes.')).toBeVisible();
+    expect(security.queryByRole('button', { name: 'Add a second app' })).not.toBeInTheDocument();
+  });
+
+  it('turns off after a code', async () => {
+    const { user, security } = await openSecurityWith(2);
+
+    await user.click(await security.findByRole('button', { name: 'Turn off the second factor' }));
+    await user.type(field('Code from your authenticator app'), '000000');
+    await user.click(security.getByRole('button', { name: 'Turn it off' }));
+    expect(await security.findByRole('alert')).toHaveTextContent('Wrong or expired code.');
+    expect(fakeAuth.hasSecondFactor()).toBe(true);
+
+    await user.clear(field('Code from your authenticator app'));
+    await user.type(field('Code from your authenticator app'), FAKE_TOTP_CODE);
+    await user.click(security.getByRole('button', { name: 'Turn it off' }));
+
+    expect(await security.findByText('Second factor: off')).toBeVisible();
+    expect(fakeAuth.hasSecondFactor()).toBe(false);
+  });
+});
+
+describe('The API asking for the second factor', () => {
+  it('leads to the code when the session has not given it', async () => {
+    fakeAuth.signIn();
+    fakeAuth.secondFactorAddedElsewhere();
+    server.use(
+      handlers.me(() =>
+        HttpResponse.json(
+          { error: { code: 'SECOND_FACTOR_REQUIRED', message: 'test' } },
+          { status: 401 },
+        ),
+      ),
+    );
+    const { user, router } = await renderApp('/account');
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/second-factor');
+    });
+    server.use(handlers.me(() => HttpResponse.json(anAccount())));
+    await giveCode(user, FAKE_TOTP_CODE);
+
+    expect(await header().findByRole('button', { name: 'Ada’s menu' })).toBeInTheDocument();
+  });
+
+  it('explains when signing in cannot be checked', async () => {
+    fakeAuth.signIn();
+    server.use(
+      handlers.me(() =>
+        HttpResponse.json(
+          { error: { code: 'AUTHENTICATION_UNAVAILABLE', message: 'test' } },
+          { status: 503 },
+        ),
+      ),
+    );
+    await renderApp('/account');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Signing in cannot be checked right now. Please try again in a moment.',
+    );
+  });
+});

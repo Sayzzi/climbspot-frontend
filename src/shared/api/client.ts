@@ -14,7 +14,8 @@ export const apiClient = createClient<paths>({
 });
 
 // The signed-in Visitor's token goes with every request; a token the API no longer
-// accepts ends the session, so that the Visitor is asked to sign in again.
+// accepts ends the session, so that the Visitor is asked to sign in again, and one that
+// has not given the second factor's code asks for it.
 apiClient.use({
   onRequest({ request }) {
     const session = authClient.session();
@@ -25,7 +26,13 @@ apiClient.use({
   },
   async onResponse({ request, response }) {
     if (response.status === 401 && request.headers.has('Authorization')) {
-      await authClient.expire();
+      const body = (await response
+        .clone()
+        .json()
+        .catch(() => undefined)) as { error?: { code?: string } } | undefined;
+      await (body?.error?.code === 'SECOND_FACTOR_REQUIRED'
+        ? authClient.requireSecondFactor()
+        : authClient.expire());
     }
     return response;
   },

@@ -20,6 +20,8 @@ export interface AuthContextValue {
   readonly enrollAuthenticator: () => Promise<AuthenticatorEnrolment>;
   readonly verifyAuthenticator: (factorId: string, code: string) => Promise<void>;
   readonly giveSecondFactor: (code: string) => Promise<void>;
+  readonly authenticatorCount: () => Promise<number>;
+  readonly removeAuthenticators: () => Promise<void>;
   readonly signOut: () => Promise<void>;
 }
 

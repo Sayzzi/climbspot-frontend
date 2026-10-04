@@ -103,6 +103,12 @@
     "stepIntro": "Your account asks for a second factor: enter the code your authenticator app shows.",
     "code": "Code from your authenticator app",
     "continue": "Continue",
-    "lost": "Lost your authenticator app? Contact the ClimbSpot team."
+    "lost": "Lost your authenticator app? Contact the ClimbSpot team.",
+    "addSecondInvite": "Add a second app too (on another phone, or in your password manager), in case you lose this one.",
+    "addSecond": "Add a second app",
+    "twoApps": "Two authenticator apps give your codes.",
+    "turnOff": "Turn off the second factor",
+    "turnOffConfirm": "Enter a code from your app to turn the second factor off.",
+    "turnOffSubmit": "Turn it off"
   }
 }

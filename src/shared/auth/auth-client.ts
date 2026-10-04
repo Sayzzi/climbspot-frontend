@@ -157,6 +157,30 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
       }
       throw new AuthFailure('invalid-code');
     },
+    authenticatorCount: async () => {
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (error) throw failureOf(error);
+      return data.totp.length;
+    },
+    removeAuthenticators: async () => {
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (error) throw failureOf(error);
+      for (const factor of data.totp) {
+        const removed = await supabase.auth.mfa.unenroll({ factorId: factor.id });
+        if (removed.error) throw failureOf(removed.error);
+      }
+      // The session's user now has no factor: refreshing tells the listeners.
+      await supabase.auth.refreshSession();
+    },
+    requireSecondFactor: async () => {
+      // The factor was added elsewhere: the user, refreshed, now has it.
+      const { data } = await supabase.auth.refreshSession();
+      const refreshed = toSession(data.session);
+      if (refreshed) {
+        current = { ...refreshed, secondFactor: 'required' };
+        for (const listener of listeners) listener({ session: current, expired: false });
+      }
+    },
     signOut: async () => {
       // Supabase tells its listeners before `signOut` resolves.
       signingOut = true;
@@ -187,6 +211,9 @@ const unavailable: AuthClient = {
   enrollAuthenticator: () => Promise.reject(new AuthFailure('failed')),
   verifyAuthenticator: () => Promise.reject(new AuthFailure('failed')),
   giveSecondFactor: () => Promise.reject(new AuthFailure('failed')),
+  authenticatorCount: () => Promise.resolve(0),
+  removeAuthenticators: () => Promise.reject(new AuthFailure('failed')),
+  requireSecondFactor: () => Promise.resolve(),
   signOut: () => Promise.resolve(),
   expire: () => Promise.resolve(),
 };

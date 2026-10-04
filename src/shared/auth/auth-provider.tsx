@@ -44,6 +44,8 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       verifyAuthenticator: (factorId: string, code: string) =>
         authClient.verifyAuthenticator(factorId, code),
       giveSecondFactor: (code: string) => authClient.giveSecondFactor(code),
+      authenticatorCount: () => authClient.authenticatorCount(),
+      removeAuthenticators: () => authClient.removeAuthenticators(),
       signOut: () => authClient.signOut(),
     }),
     [session, expired],

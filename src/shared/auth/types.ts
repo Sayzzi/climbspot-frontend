@@ -93,6 +93,12 @@ export interface AuthClient {
    * @throws {AuthFailure} `invalid-code`
    */
   giveSecondFactor(code: string): Promise<void>;
+  /** How many authenticator apps give the Visitor's codes. */
+  authenticatorCount(): Promise<number>;
+  /** Turns the second factor off: every authenticator app stops being asked for. */
+  removeAuthenticators(): Promise<void>;
+  /** The API says this session must give the second factor's code: ask for it. */
+  requireSecondFactor(): Promise<void>;
   signOut(): Promise<void>;
   /** Ends a session the API refused; like any session the Visitor did not end, it expired. */
   expire(): Promise<void>;

@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { AuthSession } from './types';
+import type { AuthSession, SignUpOutcome } from './types';
 
 export interface AuthContextValue {
   readonly available: boolean;
@@ -9,6 +9,8 @@ export interface AuthContextValue {
   readonly expired: boolean;
   readonly sendMagicLink: (email: string) => Promise<void>;
   readonly signInWithGoogle: () => Promise<void>;
+  readonly signInWithPassword: (email: string, password: string) => Promise<void>;
+  readonly signUp: (email: string, password: string) => Promise<SignUpOutcome>;
   readonly signOut: () => Promise<void>;
 }
 

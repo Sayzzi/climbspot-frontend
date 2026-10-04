@@ -1,13 +1,27 @@
-import { createClient, type Session } from '@supabase/supabase-js';
+import { createClient, type AuthError, type Session } from '@supabase/supabase-js';
 
 import { env } from '@/shared/config/env';
 
-import type { AuthChange, AuthClient, AuthSession } from './types';
+import { AuthFailure, type AuthChange, type AuthClient, type AuthSession } from './types';
 
 const toSession = (session: Session | null): AuthSession | undefined =>
   session
     ? { visitorId: session.user.id, accessToken: session.access_token, email: session.user.email }
     : undefined;
+
+/** Supabase's error, as a reason the app can explain. */
+function failureOf(error: AuthError): AuthFailure {
+  switch (error.code) {
+    case 'invalid_credentials':
+      return new AuthFailure('invalid-credentials');
+    case 'email_not_confirmed':
+      return new AuthFailure('email-not-confirmed');
+    case 'weak_password':
+      return new AuthFailure('weak-password');
+    default:
+      return new AuthFailure('failed');
+  }
+}
 
 function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
   // Picks up the session from the link or Google's redirect on its own.
@@ -49,6 +63,19 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
       });
       if (error) throw error;
     },
+    signInWithPassword: async (email, password) => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw failureOf(error);
+    },
+    signUp: async (email, password, returnTo) => {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: returnTo },
+      });
+      if (error) throw failureOf(error);
+      return data.session ? 'signed-in' : 'confirmation-sent';
+    },
     signOut: async () => {
       // Supabase tells its listeners before `signOut` resolves.
       signingOut = true;
@@ -71,6 +98,8 @@ const unavailable: AuthClient = {
   onChange: () => () => undefined,
   sendMagicLink: () => Promise.reject(new Error('Signing in is not configured.')),
   signInWithGoogle: () => Promise.reject(new Error('Signing in is not configured.')),
+  signInWithPassword: () => Promise.reject(new AuthFailure('failed')),
+  signUp: () => Promise.reject(new AuthFailure('failed')),
   signOut: () => Promise.resolve(),
   expire: () => Promise.resolve(),
 };

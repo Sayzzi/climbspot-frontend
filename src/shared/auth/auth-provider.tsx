@@ -28,6 +28,9 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       expired,
       sendMagicLink: (email: string) => authClient.sendMagicLink(email, returnTo()),
       signInWithGoogle: () => authClient.signInWithGoogle(returnTo()),
+      signInWithPassword: (email: string, password: string) =>
+        authClient.signInWithPassword(email, password),
+      signUp: (email: string, password: string) => authClient.signUp(email, password, returnTo()),
       signOut: () => authClient.signOut(),
     }),
     [session, expired],

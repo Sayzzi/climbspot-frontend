@@ -1,6 +1,11 @@
 import { act } from '@testing-library/react';
 
-import type { AuthChange, AuthClient, AuthSession } from '@/shared/auth/types';
+import {
+  AuthFailure,
+  type AuthChange,
+  type AuthClient,
+  type AuthSession,
+} from '@/shared/auth/types';
 
 /** The access token the fake gives a signed-in Visitor. */
 export const FAKE_TOKEN = 'fake-access-token';
@@ -9,6 +14,10 @@ let current: AuthSession | undefined;
 const listeners = new Set<(change: AuthChange) => void>();
 const sentLinks: { email: string; returnTo: string }[] = [];
 let googleSignIns = 0;
+/** Accounts with a password, and whether their e-mail address is confirmed. */
+const passwords = new Map<string, { password: string; confirmed: boolean }>();
+const signUps: { email: string; password: string; returnTo: string }[] = [];
+let confirmationRequired = true;
 
 function notify(change: AuthChange) {
   for (const listener of listeners) listener(change);
@@ -29,6 +38,26 @@ export const authClient: AuthClient = {
   signInWithGoogle: () => {
     googleSignIns += 1;
     return Promise.resolve();
+  },
+  signInWithPassword: (email, password) => {
+    const account = passwords.get(email);
+    if (account?.password !== password) {
+      return Promise.reject(new AuthFailure('invalid-credentials'));
+    }
+    if (!account.confirmed) {
+      return Promise.reject(new AuthFailure('email-not-confirmed'));
+    }
+    fakeAuth.signIn(email);
+    return Promise.resolve();
+  },
+  signUp: (email, password, returnTo) => {
+    signUps.push({ email, password, returnTo });
+    passwords.set(email, { password, confirmed: !confirmationRequired });
+    if (confirmationRequired) {
+      return Promise.resolve('confirmation-sent');
+    }
+    fakeAuth.signIn(email);
+    return Promise.resolve('signed-in');
   },
   signOut: () => {
     current = undefined;
@@ -60,6 +89,15 @@ export const fakeAuth = {
       notify({ session: current, expired: false });
     });
   },
+  /** An account that signs in with this password; unconfirmed if told so. */
+  withPassword(email: string, password: string, { confirmed = true } = {}) {
+    passwords.set(email, { password, confirmed });
+  },
+  /** Accounts are created signed in at once, as when Supabase asks no confirmation. */
+  confirmNothing() {
+    confirmationRequired = false;
+  },
+  signUps: () => signUps,
   sentLinks: () => sentLinks,
   googleSignIns: () => googleSignIns,
   reset() {
@@ -67,5 +105,8 @@ export const fakeAuth = {
     listeners.clear();
     sentLinks.length = 0;
     googleSignIns = 0;
+    passwords.clear();
+    signUps.length = 0;
+    confirmationRequired = true;
   },
 };

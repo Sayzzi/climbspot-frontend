@@ -11,14 +11,17 @@ export interface Tab {
 interface TabsProps {
   readonly label: string;
   readonly tabs: readonly Tab[];
+  /** The open tab, when the parent decides it (e.g. to open another from elsewhere). */
+  readonly selected?: string;
   /** Called with the id of the tab the Visitor opened. */
   readonly onSelect?: (id: string) => void;
   readonly className?: string;
 }
 
 /** Tabs following the WAI-ARIA pattern: arrow keys move between tabs. */
-export function Tabs({ label, tabs, onSelect, className }: TabsProps) {
-  const [selected, setSelectedState] = useState(tabs[0]?.id);
+export function Tabs({ label, tabs, selected: chosen, onSelect, className }: TabsProps) {
+  const [opened, setSelectedState] = useState(tabs[0]?.id);
+  const selected = chosen ?? opened;
   const setSelected = (id: string) => {
     setSelectedState(id);
     onSelect?.(id);
@@ -79,7 +82,8 @@ export function Tabs({ label, tabs, onSelect, className }: TabsProps) {
           id={`${prefix}-${tab.id}-panel`}
           aria-labelledby={`${prefix}-${tab.id}-tab`}
           hidden={tab.id !== selected}
-          className="min-h-0 overflow-y-auto p-4"
+          // A short fade shows the panel changed.
+          className="min-h-0 animate-panel-in overflow-y-auto p-4"
         >
           {tab.content}
         </div>

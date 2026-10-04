@@ -5,11 +5,12 @@
     "loading": "Looking for climbs…",
     "empty": {
       "title": "No climbs around here yet",
-      "hint": "Try a wider radius or fewer filters."
+      "hint": "Try a wider radius or fewer filters.",
+      "changeFilters": "Change the filters"
     },
     "searchArea": "Search this area",
     "viewDetails": "View {{name}}",
-    "details": "View details →",
+    "details": "View details",
     "selected": "Selected climb",
     "panel": "Search",
     "tabs": {

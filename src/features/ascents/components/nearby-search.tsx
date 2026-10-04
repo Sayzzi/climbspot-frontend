@@ -6,6 +6,7 @@ import { MapView, type MapOverlay } from '@/shared/map';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
 import { Tabs, type Tab } from '@/shared/ui/tabs';
+import { plateClassName } from '@/shared/ui/plate';
 
 import { useNearbyAscents } from '../api/nearby-ascents';
 import type { NearbyAscent, NearbyCriteria, Position } from '../types';
@@ -74,9 +75,20 @@ export function NearbySearch({
         />
       )}
       {ascents?.length === 0 && (
-        <div className="rounded-lg bg-lichen p-4">
-          <p className="font-semibold">{t('search.empty.title')}</p>
-          <p className="text-sm text-ink-muted">{t('search.empty.hint')}</p>
+        <div className="flex flex-col items-start gap-3 rounded-md bg-lichen p-4">
+          <div>
+            <p className="font-semibold">{t('search.empty.title')}</p>
+            <p className="text-sm text-ink-muted">{t('search.empty.hint')}</p>
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setActiveTab('filters');
+            }}
+          >
+            {t('search.empty.changeFilters')}
+          </Button>
         </div>
       )}
       {ascents && ascents.length > 0 && (
@@ -143,8 +155,9 @@ export function NearbySearch({
         inert={behindWelcome}
         className={cn(
           // Above the map's own controls (attribution, zoom).
-          'absolute inset-x-0 bottom-0 z-10 flex max-h-[55vh] flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl',
-          'lg:inset-x-auto lg:top-20 lg:bottom-auto lg:left-4 lg:max-h-[calc(100vh-6rem)] lg:w-[24rem] lg:rounded-xl',
+          plateClassName,
+          'absolute inset-x-0 bottom-0 z-10 flex max-h-[55vh] flex-col overflow-hidden rounded-b-none',
+          'lg:inset-x-auto lg:top-20 lg:bottom-auto lg:left-4 lg:max-h-[calc(100vh-6rem)] lg:w-[24rem] lg:rounded-b-md',
           // Comes up as the welcome screen goes.
           'transition-[opacity,translate] duration-300 ease-out',
           behindWelcome && 'translate-y-4 opacity-0',
@@ -157,6 +170,7 @@ export function NearbySearch({
             { id: 'filters', label: t('search.tabs.filters'), content: filters },
             ...extraTabs,
           ]}
+          selected={activeTab}
           onSelect={setActiveTab}
         />
       </aside>
@@ -173,7 +187,10 @@ function SelectedAscent({ ascent }: { readonly ascent: NearbyAscent }) {
     <section
       aria-label={t('search.selected')}
       aria-describedby={titleId}
-      className="absolute inset-x-4 top-32 z-10 flex items-center justify-between gap-3 rounded-lg bg-white p-3 shadow-lg lg:top-auto lg:right-4 lg:bottom-6 lg:left-[26rem]"
+      className={cn(
+        plateClassName,
+        'absolute inset-x-4 top-32 z-10 flex items-center justify-between gap-3 p-3 lg:top-auto lg:right-4 lg:bottom-6 lg:left-[26rem]',
+      )}
     >
       <p id={titleId} className="font-display text-lg font-semibold">
         {ascent.name}

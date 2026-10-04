@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useCurrentPosition } from '@/shared/hooks/use-current-position';
 import type { Position } from '@/shared/lib/position';
 import type { MapOverlay } from '@/shared/map';
 import type { Tab } from '@/shared/ui/tabs';
@@ -19,10 +20,14 @@ import type { Proposal } from '../types';
  */
 export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay } {
   const { t } = useTranslation('itineraries');
-  const [start, setStart] = useState<Position>();
+  // A position placed on the map, or the Visitor's own ("Use my location").
+  const [startChoice, setStartChoice] = useState<Position | 'here'>();
   const [form, setForm] = useState<PlanForm>(DEFAULT_PLAN);
   const [missingStart, setMissingStart] = useState(false);
   const [selected, setSelected] = useState(0);
+  const here = useCurrentPosition(startChoice === 'here');
+  const start =
+    startChoice === 'here' ? (here.status === 'located' ? here.position : undefined) : startChoice;
   const uphill = usePlanUphill();
   const loops = usePlanLoops();
   const sessions = usePlanSessions();
@@ -62,6 +67,11 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
     content: (
       <PlanPanel
         hasStart={start !== undefined}
+        onUseMyLocation={() => {
+          setStartChoice('here');
+          setMissingStart(false);
+        }}
+        locationFailed={startChoice === 'here' && here.status === 'failed'}
         missingStart={missingStart}
         form={form}
         onFormChange={changeForm}
@@ -85,7 +95,7 @@ export function useItineraryPlanner(): Tab & { readonly mapOverlay: MapOverlay }
           .map((proposal) => positionsOf(mainStretch(proposal).path)),
       }),
       onMapClick: (position) => {
-        setStart(position);
+        setStartChoice(position);
         setMissingStart(false);
       },
     },

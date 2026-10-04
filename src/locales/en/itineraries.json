@@ -10,7 +10,9 @@
     "hint": "Click or tap the map to place your starting point.",
     "placed": "Starting point placed. Click the map to move it.",
     "missing": "Place your starting point on the map first.",
-    "marker": "Starting point"
+    "marker": "Starting point",
+    "useMyLocation": "Use my location",
+    "locationFailed": "Your location is not available: place your starting point on the map."
   },
   "criteria": {
     "minGradient": "Gradient from",

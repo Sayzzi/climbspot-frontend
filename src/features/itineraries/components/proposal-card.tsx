@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { cn } from '@/shared/lib/cn';
 import { FactList } from '@/shared/ui/fact-list';
+import { SignFigures } from '@/shared/ui/sign-figures';
 import { useFormatters } from '@/shared/units';
 
 import { useProposalFacts, useProposalName } from '../hooks/use-proposal-description';
@@ -43,7 +44,10 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
       <p className={cn('text-sm', proposal.exact ? 'text-moss' : 'text-ink-muted')}>
         {proposal.exact ? t('exact') : <Differences proposal={proposal} />}
       </p>
-      <FactList className="mt-2 grid-cols-3" facts={facts} />
+      <div className="mt-3">
+        <SignFigures facts={facts.slice(0, 3)} />
+      </div>
+      <FactList className="mt-3 grid-cols-3 border-t border-pine/10 pt-3" facts={facts.slice(3)} />
       {selected && (
         <div className="mt-3 flex flex-col gap-3">
           <div className="flex flex-wrap gap-2">

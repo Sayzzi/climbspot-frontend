@@ -19,6 +19,9 @@ import { ProposalProfile } from './proposal-profile';
 
 interface PlanPanelProps {
   readonly hasStart: boolean;
+  readonly onUseMyLocation: () => void;
+  /** The browser could not tell where the Visitor is. */
+  readonly locationFailed: boolean;
   readonly missingStart: boolean;
   readonly form: PlanForm;
   readonly onFormChange: (form: PlanForm) => void;
@@ -58,9 +61,19 @@ export function PlanPanel(props: PlanPanelProps) {
         }}
       />
 
-      <p className={cn('text-sm', props.hasStart ? 'text-ink' : 'text-ink-muted')}>
-        {props.hasStart ? t('start.placed') : t('start.hint')}
-      </p>
+      <div className="flex flex-col items-start gap-2">
+        <p className={cn('text-sm', props.hasStart ? 'text-ink' : 'text-ink-muted')}>
+          {props.hasStart ? t('start.placed') : t('start.hint')}
+        </p>
+        <Button type="button" variant="secondary" size="sm" onClick={props.onUseMyLocation}>
+          {t('start.useMyLocation')}
+        </Button>
+        {props.locationFailed && (
+          <p role="status" className="text-sm font-semibold text-danger">
+            {t('start.locationFailed')}
+          </p>
+        )}
+      </div>
 
       <form noValidate onSubmit={submit} className="flex flex-col gap-3">
         {form.kind === 'uphill' && (

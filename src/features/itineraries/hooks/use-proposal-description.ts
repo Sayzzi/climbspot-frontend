@@ -28,7 +28,7 @@ export function useProposalName(proposal: Proposal): string {
   }
 }
 
-/** What a proposal measures, as facts to list. */
+/** What a proposal measures, as facts to list: the three key figures first. */
 export function useProposalFacts(proposal: Proposal) {
   const { t } = useTranslation('itineraries');
   const format = useFormatters();
@@ -43,12 +43,12 @@ export function useProposalFacts(proposal: Proposal) {
       return [
         { term: t('facts.totalLength'), value: format.distance(proposal.totals.length) },
         { term: t('facts.heightGained'), value: format.elevation(proposal.totals.heightGained) },
-        ...effort,
-        { term: t('facts.repeatLength'), value: format.distance(proposal.repeat.length) },
         {
           term: t('facts.repeatGradient'),
           value: format.gradient(proposal.repeat.averageGradient),
         },
+        ...effort,
+        { term: t('facts.repeatLength'), value: format.distance(proposal.repeat.length) },
         {
           term: t('facts.repeatMaximumGradient'),
           value: format.gradient(proposal.repeat.maximumGradient),
@@ -65,9 +65,9 @@ export function useProposalFacts(proposal: Proposal) {
     case 'uphill':
       return [
         { term: t('facts.length'), value: format.distance(proposal.length) },
-        ...effort,
         { term: t('facts.elevationGain'), value: format.elevation(proposal.elevationGain) },
         { term: t('facts.averageGradient'), value: format.gradient(proposal.averageGradient) },
+        ...effort,
         { term: t('facts.maximumGradient'), value: format.gradient(proposal.maximumGradient) },
         { term: t('facts.category'), value: labels.category(proposal.category) },
         {

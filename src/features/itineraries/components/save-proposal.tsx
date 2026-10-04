@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { Confirmation } from '@/shared/ui/confirmation';
 import { textLinkClassName } from '@/shared/ui/text-link';
 
 import { useSaveItinerary } from '../api/saved-itineraries';
@@ -34,12 +35,12 @@ export function SaveProposal({ proposal, defaultName }: SaveProposalProps) {
   }
   if (answered && save.isSuccess) {
     return (
-      <p role="status" className="text-sm text-moss">
+      <Confirmation>
         {t('saved.done')}{' '}
         <Link to="/itineraries" className={textLinkClassName}>
           {t('saved.title')}
         </Link>
-      </p>
+      </Confirmation>
     );
   }
   if (naming !== proposal) {

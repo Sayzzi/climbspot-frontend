@@ -8,6 +8,7 @@ import { useFormatters } from '@/shared/units';
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import type { NearbyAscent } from '../types';
 import { FactList } from '@/shared/ui/fact-list';
+import { SignFigures } from '@/shared/ui/sign-figures';
 import { PoweredByStrava } from '@/shared/ui/strava-brand';
 
 interface AscentListItemProps {
@@ -49,18 +50,15 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
           </span>
         </header>
         {/* What tells climbs apart, first and large, like the figures on a trail sign. */}
-        <dl className="mt-3 grid grid-cols-3 gap-2">
-          {[
-            [t('facts.length'), format.distance(ascent.length)],
-            [t('facts.elevationGain'), format.elevation(ascent.elevationGain)],
-            [t('facts.averageGradient'), format.gradient(ascent.averageGradient)],
-          ].map(([term, value]) => (
-            <div key={term} className="flex flex-col-reverse">
-              <dt className="text-xs text-ink-muted">{term}</dt>
-              <dd className="font-display text-2xl leading-tight font-bold text-pine">{value}</dd>
-            </div>
-          ))}
-        </dl>
+        <div className="mt-3">
+          <SignFigures
+            facts={[
+              { term: t('facts.length'), value: format.distance(ascent.length) },
+              { term: t('facts.elevationGain'), value: format.elevation(ascent.elevationGain) },
+              { term: t('facts.averageGradient'), value: format.gradient(ascent.averageGradient) },
+            ]}
+          />
+        </div>
         <FactList
           className="mt-3 grid-cols-3 border-t border-pine/10 pt-3"
           facts={[

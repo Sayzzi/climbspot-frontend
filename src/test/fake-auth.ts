@@ -22,6 +22,16 @@ const resetLinks: { email: string; returnTo: string }[] = [];
 let reauthenticationRequired = false;
 let codesSent = 0;
 
+/** The code the fake authenticator apps give. */
+export const FAKE_TOTP_CODE = '246810';
+const ENROLMENT = {
+  factorId: 'factor-1',
+  qrCode: 'data:image/svg+xml;base64,PHN2Zy8+',
+  secret: 'JBSWY3DPEHPK3PXP',
+};
+/** Accounts with a second factor. */
+const secondFactors = new Set<string>();
+
 /** The code the fake sends by e-mail when the Visitor must prove it is them. */
 export const FAKE_EMAIL_CODE = '123456';
 
@@ -87,6 +97,22 @@ export const authClient: AuthClient = {
     codesSent += 1;
     return Promise.resolve();
   },
+  enrollAuthenticator: () => Promise.resolve(ENROLMENT),
+  verifyAuthenticator: (factorId, code) => {
+    if (!current?.email || factorId !== ENROLMENT.factorId || code !== FAKE_TOTP_CODE) {
+      return Promise.reject(new AuthFailure('invalid-code'));
+    }
+    secondFactors.add(current.email);
+    giveCode();
+    return Promise.resolve();
+  },
+  giveSecondFactor: (code) => {
+    if (!current || code !== FAKE_TOTP_CODE) {
+      return Promise.reject(new AuthFailure('invalid-code'));
+    }
+    giveCode();
+    return Promise.resolve();
+  },
   signOut: () => {
     current = undefined;
     notify({ session: undefined, expired: false });
@@ -99,10 +125,26 @@ export const authClient: AuthClient = {
   },
 };
 
+/** The session gives its second factor's code. */
+function giveCode() {
+  if (!current) {
+    return;
+  }
+  current = { ...current, secondFactor: 'given', accessToken: `${FAKE_TOKEN}-aal2` };
+  act(() => {
+    notify({ session: current, expired: false });
+  });
+}
+
 export const fakeAuth = {
   /** Starts the test signed in (call before rendering) or signs in during it. */
   signIn(email = 'ada@example.com') {
-    current = { visitorId: `visitor-${email}`, accessToken: FAKE_TOKEN, email };
+    current = {
+      visitorId: `visitor-${email}`,
+      accessToken: FAKE_TOKEN,
+      email,
+      secondFactor: secondFactors.has(email) ? 'required' : 'none',
+    };
     act(() => {
       notify({ session: current, expired: false });
     });
@@ -126,6 +168,11 @@ export const fakeAuth = {
     confirmationRequired = false;
   },
   signUps: () => signUps,
+  /** The account has a second factor: signing in asks for its code. */
+  withSecondFactor(email = 'ada@example.com') {
+    secondFactors.add(email);
+  },
+  hasSecondFactor: (email = 'ada@example.com') => secondFactors.has(email),
   resetLinks: () => resetLinks,
   /** The password the account now has, if any. */
   passwordOf: (email: string) => passwords.get(email)?.password,
@@ -147,5 +194,6 @@ export const fakeAuth = {
     resetLinks.length = 0;
     reauthenticationRequired = false;
     codesSent = 0;
+    secondFactors.clear();
   },
 };

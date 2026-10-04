@@ -27,7 +27,9 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const value = useMemo(
     () => ({
       available: authClient.available,
-      session,
+      // Until the second factor's code is given, the Visitor counts as signed out.
+      session: session?.secondFactor === 'required' ? undefined : session,
+      secondFactorPending: session?.secondFactor === 'required',
       expired,
       sendMagicLink: (email: string) => authClient.sendMagicLink(email, returnTo()),
       signInWithGoogle: () => authClient.signInWithGoogle(returnTo()),
@@ -38,6 +40,10 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       updatePassword: (password: string, code?: string) =>
         authClient.updatePassword(password, code),
       requestReauthentication: () => authClient.requestReauthentication(),
+      enrollAuthenticator: () => authClient.enrollAuthenticator(),
+      verifyAuthenticator: (factorId: string, code: string) =>
+        authClient.verifyAuthenticator(factorId, code),
+      giveSecondFactor: (code: string) => authClient.giveSecondFactor(code),
       signOut: () => authClient.signOut(),
     }),
     [session, expired],

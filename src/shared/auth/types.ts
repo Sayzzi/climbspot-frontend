@@ -5,6 +5,20 @@ export interface AuthSession {
   /** Sent to the API to prove who the Visitor is; renewed about every hour. */
   readonly accessToken: string;
   readonly email: string | undefined;
+  /**
+   * The Visitor's second factor: `none` when they have none, `required` until this
+   * session gives its code (they count as signed out meanwhile), `given` once it has.
+   */
+  readonly secondFactor: 'none' | 'required' | 'given';
+}
+
+/** What an authenticator app needs to start giving codes. */
+export interface AuthenticatorEnrolment {
+  readonly factorId: string;
+  /** An image of the QR code to scan, as a data URL. */
+  readonly qrCode: string;
+  /** The same, as a key to type. */
+  readonly secret: string;
 }
 
 /** Why signing in or creating an account did not work, in terms the app can explain. */
@@ -66,6 +80,19 @@ export interface AuthClient {
   updatePassword(password: string, code?: string): Promise<void>;
   /** Sends the signed-in Visitor a code by e-mail, for `updatePassword`. */
   requestReauthentication(): Promise<void>;
+  /** Starts adding an authenticator app as a second factor. */
+  enrollAuthenticator(): Promise<AuthenticatorEnrolment>;
+  /**
+   * Turns the authenticator on with a first code from it; the session then counts as
+   * having given the second factor.
+   * @throws {AuthFailure} `invalid-code`
+   */
+  verifyAuthenticator(factorId: string, code: string): Promise<void>;
+  /**
+   * Gives the second factor's code for this session, from any of the Visitor's apps.
+   * @throws {AuthFailure} `invalid-code`
+   */
+  giveSecondFactor(code: string): Promise<void>;
   signOut(): Promise<void>;
   /** Ends a session the API refused; like any session the Visitor did not end, it expired. */
   expire(): Promise<void>;

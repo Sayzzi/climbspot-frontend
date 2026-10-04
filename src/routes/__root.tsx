@@ -2,7 +2,13 @@ import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Link, Outlet, useLocation } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
-import { AccountMenu, SessionNotice, useFlatPaceSource, useFlatPaceSync } from '@/features/account';
+import {
+  AccountMenu,
+  SessionNotice,
+  useFlatPaceSource,
+  useFlatPaceSync,
+  useSecondFactorStep,
+} from '@/features/account';
 import { useStravaSyncOnSignIn } from '@/features/strava';
 import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
@@ -25,6 +31,7 @@ function RootLayout() {
   const isHome = useLocation({ select: (location) => location.pathname === '/' });
   const reveal = useScrollProgress();
   useFlatPaceSync();
+  useSecondFactorStep();
   const paceSource = useFlatPaceSource();
   useStravaSyncOnSignIn();
   // On the home page the big name is the brand; the small one appears as it dissolves.

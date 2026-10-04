@@ -2,8 +2,9 @@ import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NewPasswordForm } from './new-password-form';
+import { SecondFactorSection } from './second-factor-section';
 
-/** How the signed-in Visitor signs in: their password, and more to come. */
+/** How the signed-in Visitor signs in: their password and their second factor. */
 export function SecuritySection() {
   const { t } = useTranslation('account');
   const headingId = useId();
@@ -21,6 +22,7 @@ export function SecuritySection() {
         <p className="text-sm text-ink-muted">{t('security.password.explanation')}</p>
         <NewPasswordForm />
       </div>
+      <SecondFactorSection />
     </section>
   );
 }

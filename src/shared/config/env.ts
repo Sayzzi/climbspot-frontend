@@ -5,6 +5,8 @@ const envSchema = z.object({
   /** The Supabase project signing Visitors in (ADR 0009); without both, signing in is off. */
   VITE_SUPABASE_URL: z.url().optional(),
   VITE_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+  /** Where Visitors who lost their authenticator write to; until set, they are told to contact the team. */
+  VITE_SUPPORT_EMAIL: z.email().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

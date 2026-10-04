@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './../routes/index'
 import { Route as AccountRouteImport } from './../routes/account'
 import { Route as ItinerariesRouteImport } from './../routes/itineraries'
 import { Route as NewPasswordRouteImport } from './../routes/new-password'
+import { Route as SecondFactorRouteImport } from './../routes/second-factor'
 import { Route as SignInRouteImport } from './../routes/sign-in'
 import { Route as AscentsAscentIdRouteImport } from './../routes/ascents/$ascentId'
 import { Route as AscentsNewRouteImport } from './../routes/ascents/new'
@@ -36,6 +37,11 @@ const ItinerariesRoute = ItinerariesRouteImport.update({
 const NewPasswordRoute = NewPasswordRouteImport.update({
   id: '/new-password',
   path: '/new-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecondFactorRoute = SecondFactorRouteImport.update({
+  id: '/second-factor',
+  path: '/second-factor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignInRoute = SignInRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/itineraries': typeof ItinerariesRoute
   '/new-password': typeof NewPasswordRoute
+  '/second-factor': typeof SecondFactorRoute
   '/sign-in': typeof SignInRoute
   '/ascents/$ascentId': typeof AscentsAscentIdRoute
   '/ascents/new': typeof AscentsNewRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/itineraries': typeof ItinerariesRoute
   '/new-password': typeof NewPasswordRoute
+  '/second-factor': typeof SecondFactorRoute
   '/sign-in': typeof SignInRoute
   '/ascents/$ascentId': typeof AscentsAscentIdRoute
   '/ascents/new': typeof AscentsNewRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/itineraries': typeof ItinerariesRoute
   '/new-password': typeof NewPasswordRoute
+  '/second-factor': typeof SecondFactorRoute
   '/sign-in': typeof SignInRoute
   '/ascents/$ascentId': typeof AscentsAscentIdRoute
   '/ascents/new': typeof AscentsNewRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/itineraries'
     | '/new-password'
+    | '/second-factor'
     | '/sign-in'
     | '/ascents/$ascentId'
     | '/ascents/new'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/itineraries'
     | '/new-password'
+    | '/second-factor'
     | '/sign-in'
     | '/ascents/$ascentId'
     | '/ascents/new'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/itineraries'
     | '/new-password'
+    | '/second-factor'
     | '/sign-in'
     | '/ascents/$ascentId'
     | '/ascents/new'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   ItinerariesRoute: typeof ItinerariesRoute
   NewPasswordRoute: typeof NewPasswordRoute
+  SecondFactorRoute: typeof SecondFactorRoute
   SignInRoute: typeof SignInRoute
   AscentsAscentIdRoute: typeof AscentsAscentIdRoute
   AscentsNewRoute: typeof AscentsNewRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/new-password'
       fullPath: '/new-password'
       preLoaderRoute: typeof NewPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/second-factor': {
+      id: '/second-factor'
+      path: '/second-factor'
+      fullPath: '/second-factor'
+      preLoaderRoute: typeof SecondFactorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sign-in': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   ItinerariesRoute: ItinerariesRoute,
   NewPasswordRoute: NewPasswordRoute,
+  SecondFactorRoute: SecondFactorRoute,
   SignInRoute: SignInRoute,
   AscentsAscentIdRoute: AscentsAscentIdRoute,
   AscentsNewRoute: AscentsNewRoute,

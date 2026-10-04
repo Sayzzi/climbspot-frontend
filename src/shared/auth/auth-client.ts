@@ -4,10 +4,37 @@ import { env } from '@/shared/config/env';
 
 import { AuthFailure, type AuthChange, type AuthClient, type AuthSession } from './types';
 
-const toSession = (session: Session | null): AuthSession | undefined =>
-  session
-    ? { visitorId: session.user.id, accessToken: session.access_token, email: session.user.email }
-    : undefined;
+/** The session's authenticator assurance level, read from its access token. */
+function assuranceOf(accessToken: string): string | undefined {
+  try {
+    const payload = accessToken.split('.')[1] ?? '';
+    const claims = JSON.parse(atob(payload.replaceAll('-', '+').replaceAll('_', '/'))) as {
+      aal?: string;
+    };
+    return claims.aal;
+  } catch {
+    return undefined;
+  }
+}
+
+function toSession(session: Session | null): AuthSession | undefined {
+  if (!session) {
+    return undefined;
+  }
+  const hasSecondFactor = (session.user.factors ?? []).some(
+    (factor) => factor.factor_type === 'totp' && factor.status === 'verified',
+  );
+  return {
+    visitorId: session.user.id,
+    accessToken: session.access_token,
+    email: session.user.email,
+    secondFactor: !hasSecondFactor
+      ? 'none'
+      : assuranceOf(session.access_token) === 'aal2'
+        ? 'given'
+        : 'required',
+  };
+}
 
 /** Supabase's error, as a reason the app can explain. */
 function failureOf(error: AuthError): AuthFailure {
@@ -21,6 +48,7 @@ function failureOf(error: AuthError): AuthFailure {
     case 'reauthentication_needed':
       return new AuthFailure('reauthentication-needed');
     case 'reauthentication_not_valid':
+    case 'mfa_verification_failed':
       return new AuthFailure('invalid-code');
     default:
       return new AuthFailure('failed');
@@ -95,6 +123,40 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
       const { error } = await supabase.auth.reauthenticate();
       if (error) throw failureOf(error);
     },
+    enrollAuthenticator: async () => {
+      // An enrolment left unfinished would stand in the way of this one.
+      const listed = await supabase.auth.mfa.listFactors();
+      for (const factor of listed.data?.all ?? []) {
+        if (factor.factor_type === 'totp' && factor.status === 'unverified') {
+          await supabase.auth.mfa.unenroll({ factorId: factor.id });
+        }
+      }
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: 'totp',
+        friendlyName: `Authenticator ${new Date().toISOString()}`,
+      });
+      if (error) throw failureOf(error);
+      return { factorId: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret };
+    },
+    verifyAuthenticator: async (factorId, code) => {
+      const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code });
+      if (error) throw failureOf(error);
+    },
+    giveSecondFactor: async (code) => {
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (error) throw failureOf(error);
+      // Each of the Visitor's apps gives its own codes: try them in turn.
+      for (const factor of data.totp) {
+        const verified = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
+        if (!verified.error) {
+          return;
+        }
+        if (verified.error.code !== 'mfa_verification_failed') {
+          throw failureOf(verified.error);
+        }
+      }
+      throw new AuthFailure('invalid-code');
+    },
     signOut: async () => {
       // Supabase tells its listeners before `signOut` resolves.
       signingOut = true;
@@ -122,6 +184,9 @@ const unavailable: AuthClient = {
   sendPasswordReset: () => Promise.reject(new AuthFailure('failed')),
   updatePassword: () => Promise.reject(new AuthFailure('failed')),
   requestReauthentication: () => Promise.reject(new AuthFailure('failed')),
+  enrollAuthenticator: () => Promise.reject(new AuthFailure('failed')),
+  verifyAuthenticator: () => Promise.reject(new AuthFailure('failed')),
+  giveSecondFactor: () => Promise.reject(new AuthFailure('failed')),
   signOut: () => Promise.resolve(),
   expire: () => Promise.resolve(),
 };

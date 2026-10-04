@@ -1,10 +1,13 @@
 import { createContext } from 'react';
 
-import type { AuthSession, SignUpOutcome } from './types';
+import type { AuthenticatorEnrolment, AuthSession, SignUpOutcome } from './types';
 
 export interface AuthContextValue {
   readonly available: boolean;
+  /** The signed-in Visitor's session; none until it gave the second factor's code, if needed. */
   readonly session: AuthSession | undefined;
+  /** Signed in, but the second factor's code is still to give. */
+  readonly secondFactorPending: boolean;
   /** True once a session ended because the API no longer accepted it. */
   readonly expired: boolean;
   readonly sendMagicLink: (email: string) => Promise<void>;
@@ -14,6 +17,9 @@ export interface AuthContextValue {
   readonly sendPasswordReset: (email: string) => Promise<void>;
   readonly updatePassword: (password: string, code?: string) => Promise<void>;
   readonly requestReauthentication: () => Promise<void>;
+  readonly enrollAuthenticator: () => Promise<AuthenticatorEnrolment>;
+  readonly verifyAuthenticator: (factorId: string, code: string) => Promise<void>;
+  readonly giveSecondFactor: (code: string) => Promise<void>;
   readonly signOut: () => Promise<void>;
 }
 

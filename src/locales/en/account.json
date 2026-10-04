@@ -86,5 +86,23 @@
       "title": "Password",
       "explanation": "Set a password to sign in with it, or change the one you have."
     }
+  },
+  "secondFactor": {
+    "title": "Second factor",
+    "off": "Second factor: off",
+    "on": "Second factor: on",
+    "offExplanation": "Ask for a code from an authenticator app (Google Authenticator, 1Password…) whenever you sign in.",
+    "onExplanation": "Signing in asks for a code from your authenticator app.",
+    "turnOn": "Turn on the second factor",
+    "scan": "Scan this QR code with your authenticator app.",
+    "qrCode": "QR code to scan with your authenticator app",
+    "key": "Or type this key:",
+    "firstCode": "First code from the app",
+    "confirm": "Turn it on",
+    "stepTitle": "Enter your code",
+    "stepIntro": "Your account asks for a second factor: enter the code your authenticator app shows.",
+    "code": "Code from your authenticator app",
+    "continue": "Continue",
+    "lost": "Lost your authenticator app? Contact the ClimbSpot team."
   }
 }

@@ -28,7 +28,12 @@ beforeEach(() => {
 
 describe('Accessibility (WCAG 2.2 AA)', () => {
   it.each([
-    ['the home page and its panels', '/?latitude=45&longitude=6', 'heading', 'ClimbSpot'],
+    [
+      'the home page and its panels',
+      '/?latitude=45&longitude=6',
+      'heading',
+      'Find the hills worth climbing near you.',
+    ],
     ['a climb’s page', `/ascents/${ID}`, 'heading', 'Le Mur'],
     ['the sign-in page', '/sign-in', 'heading', 'Sign in'],
   ])('holds on %s', async (_, path, role, name) => {

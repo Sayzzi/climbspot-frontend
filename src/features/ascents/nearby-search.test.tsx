@@ -11,13 +11,14 @@ const AT_LE_BOURG = '/?latitude=45&longitude=6';
 const results = () => screen.findByRole('list', { name: 'Nearby climbs' });
 
 describe('Nearby search', () => {
-  it('opens on the app name, over the map', async () => {
+  it('opens on what ClimbSpot does, over the map', async () => {
     server.use(handlers.nearby(() => nearbyResults([])));
 
     await renderApp(AT_LE_BOURG);
 
-    expect(screen.getByRole('heading', { level: 1, name: 'ClimbSpot' })).toBeInTheDocument();
-    expect(screen.getByText('Find the hills worth climbing near you.')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Find the hills worth climbing near you.' }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Map of nearby climbs' })).toBeInTheDocument();
   });
 

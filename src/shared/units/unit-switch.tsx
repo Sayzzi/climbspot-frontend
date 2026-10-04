@@ -22,7 +22,7 @@ export function UnitSwitch() {
         {systems.map((option) => (
           <label
             key={option}
-            className="cursor-pointer rounded-full px-2.5 py-1 has-checked:bg-pine has-checked:text-white has-focus-visible:outline-3 has-focus-visible:outline-pine sm:px-3"
+            className="flex min-h-10 cursor-pointer items-center rounded-full px-2.5 has-checked:bg-pine has-checked:text-white has-focus-visible:outline-3 has-focus-visible:outline-pine sm:px-3"
           >
             <input
               type="radio"

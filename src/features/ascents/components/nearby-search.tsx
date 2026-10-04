@@ -20,6 +20,10 @@ const OVERVIEW: { center: Position; zoom: number } = {
 
 const SEARCH_ZOOM = 11;
 
+/** Where the home page's actions move the focus: the map, or the search panel. */
+export const SEARCH_MAP_ID = 'search-map';
+export const SEARCH_PANEL_ID = 'search-panel';
+
 /** Above this share of the reveal, the map takes gestures and the panel is fully shown. */
 const REVEALED = 0.98;
 
@@ -97,7 +101,7 @@ export function NearbySearch({
   );
 
   return (
-    <div className="fixed inset-0">
+    <div id={SEARCH_MAP_ID} tabIndex={-1} className="fixed inset-0 focus:outline-none">
       <MapView
         label={t('search.map')}
         center={criteria?.position ?? OVERVIEW.center}
@@ -138,6 +142,8 @@ export function NearbySearch({
       {selected && <SelectedAscent ascent={selected} />}
 
       <aside
+        id={SEARCH_PANEL_ID}
+        tabIndex={-1}
         aria-label={t('search.panel')}
         // Keyboard users tabbing into the panel get the map revealed for them.
         onFocus={() => {

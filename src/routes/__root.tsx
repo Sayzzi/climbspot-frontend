@@ -10,7 +10,6 @@ import {
   useSecondFactorStep,
 } from '@/features/account';
 import { useStravaSyncOnSignIn } from '@/features/strava';
-import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
 import { buttonVariants } from '@/shared/ui/button-variants';
 import { LogoMark } from '@/shared/ui/logo';
@@ -30,13 +29,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 function RootLayout() {
   const { t } = useTranslation();
   const isHome = useLocation({ select: (location) => location.pathname === '/' });
-  const reveal = useScrollProgress();
   useFlatPaceSync();
   useSecondFactorStep();
   const paceSource = useFlatPaceSource();
   useStravaSyncOnSignIn();
-  // On the home page the big name is the brand; the small one appears as it dissolves.
-  const brandOpacity = isHome ? Math.max(0, reveal * 2 - 1) : 1;
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -60,11 +56,11 @@ function RootLayout() {
         <nav className="flex h-16 items-center justify-between gap-4 px-4">
           <Link
             to="/"
-            style={{ opacity: brandOpacity }}
             className="flex min-h-11 items-center gap-2 font-display text-2xl font-extrabold text-pine"
           >
             <LogoMark />
-            {t('app.name')}
+            {/* On phones the mark alone leaves room for the controls. */}
+            <span className="sr-only sm:not-sr-only">{t('app.name')}</span>
           </Link>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <FlatPaceSetting {...paceSource} attribution={<PoweredByStrava />} />

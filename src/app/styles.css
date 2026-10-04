@@ -50,6 +50,27 @@
   --color-danger: #a82828;
   /* Strava's orange, as its brand guidelines require for its button and marks. */
   --color-strava: #fc5200;
+
+  /* The home page's opening move: the profile climbs, then the waymark appears. */
+  --animate-profile-draw: profile-draw 1.6s cubic-bezier(0.55, 0, 0.25, 1) 0.2s forwards;
+  --animate-waymark-in: waymark-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) 1.65s forwards;
+
+  @keyframes profile-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes waymark-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.85);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 /* Read at runtime by the map, which cannot use utility classes: always emitted. */

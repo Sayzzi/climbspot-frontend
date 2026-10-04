@@ -1,7 +1,6 @@
 {
   "app": {
-    "name": "ClimbSpot",
-    "tagline": "Find the hills worth climbing near you."
+    "name": "ClimbSpot"
   },
   "notFound": {
     "title": "Page not found",
@@ -124,5 +123,11 @@
   "strava": {
     "connect": "Connect with Strava",
     "poweredBy": "Powered by Strava"
+  },
+  "home": {
+    "headline": "Find the hills worth climbing near you.",
+    "intro": "Uphill paths for running, trail running and cycling, each measured on the terrain, with loops and hill sessions planned around them.",
+    "showClimbs": "Climbs near me",
+    "exploreMap": "Explore the map"
   }
 }

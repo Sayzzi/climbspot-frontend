@@ -1,5 +1,6 @@
 export { AccountDetails } from './components/account-details';
 export { AccountMenu } from './components/account-menu';
+export { NewPasswordForm } from './components/new-password-form';
 export { useFlatPaceSource } from './hooks/use-flat-pace-source';
 export { useFlatPaceSync } from './hooks/use-flat-pace-sync';
 export { SessionNotice } from './components/session-notice';

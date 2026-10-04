@@ -9,7 +9,13 @@ export interface AuthSession {
 
 /** Why signing in or creating an account did not work, in terms the app can explain. */
 export type AuthFailureReason =
-  'invalid-credentials' | 'email-not-confirmed' | 'weak-password' | 'failed';
+  | 'invalid-credentials'
+  | 'email-not-confirmed'
+  | 'weak-password'
+  /** Changing the password needs the code just sent by e-mail ("Secure password change"). */
+  | 'reauthentication-needed'
+  | 'invalid-code'
+  | 'failed';
 
 export class AuthFailure extends Error {
   readonly reason: AuthFailureReason;
@@ -50,6 +56,16 @@ export interface AuthClient {
    * @throws {AuthFailure}
    */
   signUp(email: string, password: string, returnTo: string): Promise<SignUpOutcome>;
+  /** Sends a link to choose a new password, bringing the Visitor back to `returnTo` signed in. */
+  sendPasswordReset(email: string, returnTo: string): Promise<void>;
+  /**
+   * Sets the signed-in Visitor's password; `code` is the one sent by e-mail when Supabase
+   * asks the Visitor to prove it is them.
+   * @throws {AuthFailure} `reauthentication-needed` when a code is needed and none was given.
+   */
+  updatePassword(password: string, code?: string): Promise<void>;
+  /** Sends the signed-in Visitor a code by e-mail, for `updatePassword`. */
+  requestReauthentication(): Promise<void>;
   signOut(): Promise<void>;
   /** Ends a session the API refused; like any session the Visitor did not end, it expired. */
   expire(): Promise<void>;

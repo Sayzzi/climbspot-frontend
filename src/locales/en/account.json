@@ -17,7 +17,9 @@
       "invalid-credentials": "Wrong e-mail or password.",
       "email-not-confirmed": "Confirm your e-mail address first, with the link we sent you.",
       "weak-password": "This password is not accepted. Choose a longer one.",
-      "failed": "That did not work. Please try again in a moment."
+      "failed": "That did not work. Please try again in a moment.",
+      "reauthentication-needed": "Confirm it is you with the code we sent by e-mail.",
+      "invalid-code": "Wrong or expired code."
     },
     "password": {
       "continue": "Continue with a password",
@@ -28,7 +30,9 @@
       "create": "Create an account",
       "createSubmit": "Create my account",
       "haveAccount": "I already have an account",
-      "confirm": "Check your inbox: confirm your address with the link sent to {{email}}."
+      "confirm": "Check your inbox: confirm your address with the link sent to {{email}}.",
+      "forgot": "Forgot your password?",
+      "resetSent": "Check your inbox: we sent a link to choose a new password to {{email}}."
     }
   },
   "menu": {
@@ -64,5 +68,23 @@
   "flatPace": {
     "strava": "Strava",
     "useStrava": "Use Strava’s pace ({{pace}})"
+  },
+  "newPassword": {
+    "title": "Choose a new password",
+    "label": "New password",
+    "save": "Save the password",
+    "saved": "Your password is saved.",
+    "codeSent": "To confirm it is you, enter the code we sent to {{email}}.",
+    "code": "Code from the e-mail",
+    "confirm": "Confirm",
+    "expired": "This link has expired or was already used. Ask for a new one from the sign-in page.",
+    "toAccount": "Go to your account"
+  },
+  "security": {
+    "title": "Security",
+    "password": {
+      "title": "Password",
+      "explanation": "Set a password to sign in with it, or change the one you have."
+    }
   }
 }

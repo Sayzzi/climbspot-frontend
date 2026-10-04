@@ -18,6 +18,12 @@ let googleSignIns = 0;
 const passwords = new Map<string, { password: string; confirmed: boolean }>();
 const signUps: { email: string; password: string; returnTo: string }[] = [];
 let confirmationRequired = true;
+const resetLinks: { email: string; returnTo: string }[] = [];
+let reauthenticationRequired = false;
+let codesSent = 0;
+
+/** The code the fake sends by e-mail when the Visitor must prove it is them. */
+export const FAKE_EMAIL_CODE = '123456';
 
 function notify(change: AuthChange) {
   for (const listener of listeners) listener(change);
@@ -59,6 +65,28 @@ export const authClient: AuthClient = {
     fakeAuth.signIn(email);
     return Promise.resolve('signed-in');
   },
+  sendPasswordReset: (email, returnTo) => {
+    resetLinks.push({ email, returnTo });
+    return Promise.resolve();
+  },
+  updatePassword: (password, code) => {
+    const email = current?.email;
+    if (email === undefined) {
+      return Promise.reject(new AuthFailure('failed'));
+    }
+    if (reauthenticationRequired && code === undefined) {
+      return Promise.reject(new AuthFailure('reauthentication-needed'));
+    }
+    if (reauthenticationRequired && code !== FAKE_EMAIL_CODE) {
+      return Promise.reject(new AuthFailure('invalid-code'));
+    }
+    passwords.set(email, { password, confirmed: true });
+    return Promise.resolve();
+  },
+  requestReauthentication: () => {
+    codesSent += 1;
+    return Promise.resolve();
+  },
   signOut: () => {
     current = undefined;
     notify({ session: undefined, expired: false });
@@ -98,6 +126,14 @@ export const fakeAuth = {
     confirmationRequired = false;
   },
   signUps: () => signUps,
+  resetLinks: () => resetLinks,
+  /** The password the account now has, if any. */
+  passwordOf: (email: string) => passwords.get(email)?.password,
+  /** Changing the password needs a code sent by e-mail, as with an old sign-in. */
+  requireReauthentication() {
+    reauthenticationRequired = true;
+  },
+  codesSent: () => codesSent,
   sentLinks: () => sentLinks,
   googleSignIns: () => googleSignIns,
   reset() {
@@ -108,5 +144,8 @@ export const fakeAuth = {
     passwords.clear();
     signUps.length = 0;
     confirmationRequired = true;
+    resetLinks.length = 0;
+    reauthenticationRequired = false;
+    codesSent = 0;
   },
 };

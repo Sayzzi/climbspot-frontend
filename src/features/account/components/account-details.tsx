@@ -10,6 +10,7 @@ import { useFormatters, useUnits } from '@/shared/units';
 
 import { useDeleteMyAccount, useMyAccount, useUpdateMyAccount } from '../api/my-account';
 import { AccountDeletion } from './account-deletion';
+import { SecuritySection } from './security-section';
 
 /** The signed-in Visitor's account; an invitation to sign in otherwise. */
 export function AccountDetails() {
@@ -49,6 +50,7 @@ function Account({ deletion }: { readonly deletion: ReturnType<typeof useDeleteM
       </dl>
       <FlatPace />
       <DisplayNameForm current={account.data.displayName} />
+      <SecuritySection />
       <AccountDeletion deletion={deletion} />
     </div>
   );

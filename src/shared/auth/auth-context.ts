@@ -11,6 +11,9 @@ export interface AuthContextValue {
   readonly signInWithGoogle: () => Promise<void>;
   readonly signInWithPassword: (email: string, password: string) => Promise<void>;
   readonly signUp: (email: string, password: string) => Promise<SignUpOutcome>;
+  readonly sendPasswordReset: (email: string) => Promise<void>;
+  readonly updatePassword: (password: string, code?: string) => Promise<void>;
+  readonly requestReauthentication: () => Promise<void>;
   readonly signOut: () => Promise<void>;
 }
 

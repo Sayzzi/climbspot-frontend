@@ -18,6 +18,10 @@ function failureOf(error: AuthError): AuthFailure {
       return new AuthFailure('email-not-confirmed');
     case 'weak_password':
       return new AuthFailure('weak-password');
+    case 'reauthentication_needed':
+      return new AuthFailure('reauthentication-needed');
+    case 'reauthentication_not_valid':
+      return new AuthFailure('invalid-code');
     default:
       return new AuthFailure('failed');
   }
@@ -76,6 +80,21 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
       if (error) throw failureOf(error);
       return data.session ? 'signed-in' : 'confirmation-sent';
     },
+    sendPasswordReset: async (email, returnTo) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: returnTo });
+      if (error) throw failureOf(error);
+    },
+    updatePassword: async (password, code) => {
+      const { error } = await supabase.auth.updateUser({
+        password,
+        ...(code !== undefined && { nonce: code }),
+      });
+      if (error) throw failureOf(error);
+    },
+    requestReauthentication: async () => {
+      const { error } = await supabase.auth.reauthenticate();
+      if (error) throw failureOf(error);
+    },
     signOut: async () => {
       // Supabase tells its listeners before `signOut` resolves.
       signingOut = true;
@@ -100,6 +119,9 @@ const unavailable: AuthClient = {
   signInWithGoogle: () => Promise.reject(new Error('Signing in is not configured.')),
   signInWithPassword: () => Promise.reject(new AuthFailure('failed')),
   signUp: () => Promise.reject(new AuthFailure('failed')),
+  sendPasswordReset: () => Promise.reject(new AuthFailure('failed')),
+  updatePassword: () => Promise.reject(new AuthFailure('failed')),
+  requestReauthentication: () => Promise.reject(new AuthFailure('failed')),
   signOut: () => Promise.resolve(),
   expire: () => Promise.resolve(),
 };

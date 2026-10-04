@@ -2,39 +2,37 @@ import { useNavigate } from '@tanstack/react-router';
 import { useId, useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthFailure, useAuth } from '@/shared/auth';
+import { AuthFailure, useAuth, type AuthFailureReason } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
 import { textInputClassName } from '@/shared/ui/text-input';
 
-import { isKnownLeaked, lengthProblem } from '../password-rules';
+import { isKnownLeaked, lengthProblem, type PasswordProblem } from '../password-rules';
 
 const looksLikeEmail = (text: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text.trim());
 
 /** Signing in by a link, or with a password (creating an account with one), or with Google. */
 type Mode = 'link' | 'password' | 'create';
 
-type Problem =
-  | 'email'
-  | 'linkFailed'
-  | 'too-short'
-  | 'too-long'
-  | 'leaked'
-  | 'invalid-credentials'
-  | 'email-not-confirmed'
-  | 'weak-password'
-  | 'failed';
+type Problem = 'email' | 'linkFailed' | PasswordProblem | AuthFailureReason;
 
 /** Signing in with a link sent by e-mail, a password, or Google; or creating an account. */
 export function SignInForm() {
   const { t } = useTranslation('account');
-  const { available, sendMagicLink, signInWithGoogle, signInWithPassword, signUp } = useAuth();
+  const {
+    available,
+    sendMagicLink,
+    signInWithGoogle,
+    signInWithPassword,
+    signUp,
+    sendPasswordReset,
+  } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>('link');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [problem, setProblem] = useState<Problem>();
   const [pending, setPending] = useState(false);
-  const [sent, setSent] = useState<{ email: string; kind: 'link' | 'confirmation' }>();
+  const [sent, setSent] = useState<{ email: string; kind: 'link' | 'confirmation' | 'reset' }>();
   const ids = { email: useId(), password: useId(), hint: useId(), problem: useId() };
 
   if (!available) {
@@ -102,6 +100,19 @@ export function SignInForm() {
       } else {
         setSent({ email: address, kind: 'confirmation' });
       }
+    });
+  };
+
+  const sendReset = async () => {
+    const address = email.trim();
+    if (!looksLikeEmail(address)) {
+      setProblem('email');
+      return;
+    }
+    setProblem(undefined);
+    await attempt(async () => {
+      await sendPasswordReset(address);
+      setSent({ email: address, kind: 'reset' });
     });
   };
 
@@ -179,6 +190,9 @@ export function SignInForm() {
             <Button type="submit" disabled={pending}>
               {t('signIn.password.signIn')}
             </Button>
+            <Button type="button" variant="ghost" onClick={() => void sendReset()}>
+              {t('signIn.password.forgot')}
+            </Button>
             <Button
               type="button"
               variant="ghost"
@@ -209,9 +223,16 @@ export function SignInForm() {
 
         {sent && (
           <p role="status" className="text-sm text-moss">
-            {sent.kind === 'link'
-              ? t('signIn.sent', { email: sent.email })
-              : t('signIn.password.confirm', { email: sent.email })}
+            {t(
+              (
+                {
+                  link: 'signIn.sent',
+                  confirmation: 'signIn.password.confirm',
+                  reset: 'signIn.password.resetSent',
+                } as const
+              )[sent.kind],
+              { email: sent.email },
+            )}
           </p>
         )}
       </form>

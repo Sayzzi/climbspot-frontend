@@ -7,6 +7,9 @@ import type { AuthSession } from './types';
 /** Where the Visitor comes back after signing in: the home page of this site. */
 const returnTo = () => `${window.location.origin}/`;
 
+/** Where a link to choose a new password brings the Visitor. */
+const newPasswordPage = () => `${window.location.origin}/new-password`;
+
 /** Holds the signed-in Visitor's session for the whole app. */
 export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | undefined>(() => authClient.session());
@@ -31,6 +34,10 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       signInWithPassword: (email: string, password: string) =>
         authClient.signInWithPassword(email, password),
       signUp: (email: string, password: string) => authClient.signUp(email, password, returnTo()),
+      sendPasswordReset: (email: string) => authClient.sendPasswordReset(email, newPasswordPage()),
+      updatePassword: (password: string, code?: string) =>
+        authClient.updatePassword(password, code),
+      requestReauthentication: () => authClient.requestReauthentication(),
       signOut: () => authClient.signOut(),
     }),
     [session, expired],

@@ -192,7 +192,13 @@ export function aHillSession(overrides: Partial<HillSession> = {}): HillSession 
 export type Account = components['schemas']['Account'];
 
 export function anAccount(overrides: Partial<Account> = {}): Account {
-  return { displayName: 'Ada', email: 'ada@example.com', flatPace: null, ...overrides };
+  return {
+    displayName: 'Ada',
+    email: 'ada@example.com',
+    flatPace: null,
+    flatPaceSource: null,
+    ...overrides,
+  };
 }
 
 export const handlers = {
@@ -301,4 +307,87 @@ export function savedItinerariesApi(initial: readonly SavedItinerary[] = []) {
     }),
   );
   return { sent, saved: () => saved };
+}
+
+export type StravaConnection = components['schemas']['StravaConnection'];
+
+const noStravaConnection: StravaConnection = {
+  status: 'none',
+  athlete: null,
+  connectedAt: null,
+  lastSyncAt: null,
+  recordedRuns: 0,
+};
+
+/** A Strava Connection as the API answers it: connected as Ada Runner unless told otherwise. */
+export function aStravaConnection(overrides: Partial<StravaConnection> = {}): StravaConnection {
+  return {
+    status: 'connected',
+    athlete: { name: 'Ada Runner' },
+    connectedAt: '2026-10-01T08:00:00.000Z',
+    lastSyncAt: '2026-10-01T08:00:00.000Z',
+    recordedRuns: 12,
+    ...overrides,
+  };
+}
+
+export const STRAVA_AUTHORIZE_URL = 'https://www.strava.com/oauth/authorize?state=the-state';
+
+/**
+ * The signed-in Visitor's Strava Connection behind the API's routes, kept in memory.
+ * `answer` overrides what a route answers, e.g. an error. Records what each request sent.
+ */
+export function stravaApi(
+  initial: StravaConnection = noStravaConnection,
+  answer: Partial<
+    Record<'authorize' | 'connect' | 'sync' | 'end', () => HttpResponse<JsonBodyType>>
+  > = {},
+) {
+  let connection = initial;
+  const sent = recorder();
+  const reply = (route: keyof typeof answer, otherwise: () => HttpResponse<JsonBodyType>) =>
+    (answer[route] ?? otherwise)();
+
+  server.use(
+    http.get(apiUrl('/strava/authorize'), ({ request }) => {
+      sent.record(request);
+      return reply('authorize', () => HttpResponse.json({ url: STRAVA_AUTHORIZE_URL }));
+    }),
+    http.get(apiUrl('/strava/connection'), ({ request }) => {
+      sent.record(request);
+      return HttpResponse.json(connection);
+    }),
+    http.post(apiUrl('/strava/connection'), ({ request }) => {
+      sent.record(request);
+      return reply('connect', () => {
+        connection = aStravaConnection();
+        return HttpResponse.json(connection);
+      });
+    }),
+    http.post(apiUrl('/strava/sync'), ({ request }) => {
+      sent.record(request);
+      return reply('sync', () => {
+        connection = { ...connection, lastSyncAt: new Date().toISOString() };
+        return HttpResponse.json(connection);
+      });
+    }),
+    http.delete(apiUrl('/strava/connection'), ({ request }) => {
+      sent.record(request);
+      return reply('end', () => {
+        connection = noStravaConnection;
+        return new HttpResponse(null, { status: 204 });
+      });
+    }),
+  );
+  return {
+    sent,
+    /** Changes the connection, as if Strava's side changed. */
+    set: (next: StravaConnection) => {
+      connection = next;
+    },
+    requestsTo: (method: string, path: string) =>
+      sent.requests.filter(
+        (request) => request.method === method && new URL(request.url).pathname === path,
+      ),
+  };
 }

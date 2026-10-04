@@ -1,0 +1,21 @@
+{
+  "title": "Strava",
+  "loading": "Loading your Strava connection…",
+  "explanation": "Connect Strava to get your flat pace and your times on climbs from your runs. ClimbSpot reads your runs and trail runs, private ones included, and never shows them to anyone else.",
+  "connect": "Connect with Strava",
+  "connectedAs": "Connected as {{name}}",
+  "poweredBy": "Powered by Strava",
+  "end": {
+    "action": "End the connection",
+    "confirm": "End the Strava connection? ClimbSpot erases your imported runs, your times on climbs and the flat pace from Strava.",
+    "yes": "Yes, end it",
+    "cancel": "Cancel"
+  },
+  "callback": {
+    "title": "Connecting Strava",
+    "connecting": "Connecting your Strava account…",
+    "denied": "Strava was not connected: ClimbSpot was not allowed to read your runs.",
+    "back": "Back to your account",
+    "signedOut": "Sign in to connect your Strava account."
+  }
+}

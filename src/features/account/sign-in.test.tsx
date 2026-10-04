@@ -2,12 +2,21 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
-import { anAccount, apiErrorResponse, handlers, nearbyResults, recorder } from '@/test/api';
+import {
+  anAccount,
+  apiErrorResponse,
+  handlers,
+  nearbyResults,
+  recorder,
+  stravaApi,
+} from '@/test/api';
 import { FAKE_TOKEN, fakeAuth } from '@/test/fake-auth';
 import { renderApp } from '@/test/render-app';
 import { server } from '@/test/server';
 
 function accountApi(account = anAccount()) {
+  // The Account page shows the Strava section too.
+  stravaApi();
   const sent = recorder();
   server.use(
     handlers.nearby(() => nearbyResults([])),

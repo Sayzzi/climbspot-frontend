@@ -15,6 +15,7 @@ import { Route as ItinerariesRouteImport } from './../routes/itineraries'
 import { Route as SignInRouteImport } from './../routes/sign-in'
 import { Route as AscentsAscentIdRouteImport } from './../routes/ascents/$ascentId'
 import { Route as AscentsNewRouteImport } from './../routes/ascents/new'
+import { Route as StravaCallbackRouteImport } from './../routes/strava/callback'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const AscentsNewRoute = AscentsNewRouteImport.update({
   path: '/ascents/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StravaCallbackRoute = StravaCallbackRouteImport.update({
+  id: '/strava/callback',
+  path: '/strava/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/ascents/$ascentId': typeof AscentsAscentIdRoute
   '/ascents/new': typeof AscentsNewRoute
+  '/strava/callback': typeof StravaCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/ascents/$ascentId': typeof AscentsAscentIdRoute
   '/ascents/new': typeof AscentsNewRoute
+  '/strava/callback': typeof StravaCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/ascents/$ascentId': typeof AscentsAscentIdRoute
   '/ascents/new': typeof AscentsNewRoute
+  '/strava/callback': typeof StravaCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/ascents/$ascentId'
     | '/ascents/new'
+    | '/strava/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/ascents/$ascentId'
     | '/ascents/new'
+    | '/strava/callback'
   id:
     | '__root__'
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/ascents/$ascentId'
     | '/ascents/new'
+    | '/strava/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +118,7 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   AscentsAscentIdRoute: typeof AscentsAscentIdRoute
   AscentsNewRoute: typeof AscentsNewRoute
+  StravaCallbackRoute: typeof StravaCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AscentsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/strava/callback': {
+      id: '/strava/callback'
+      path: '/strava/callback'
+      fullPath: '/strava/callback'
+      preLoaderRoute: typeof StravaCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   AscentsAscentIdRoute: AscentsAscentIdRoute,
   AscentsNewRoute: AscentsNewRoute,
+  StravaCallbackRoute: StravaCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

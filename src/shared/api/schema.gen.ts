@@ -86,6 +86,71 @@ export interface paths {
         patch: operations["renameSavedItinerary"];
         trace?: never;
     };
+    "/strava/authorize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Strava's authorisation page for the signed-in Visitor
+         * @description Strava sends the Visitor back to the frontend with a code and this state, for `POST /strava/connection`.
+         */
+        get: operations["authorizeStrava"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/strava/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The signed-in Visitor's Strava Connection */
+        get: operations["getStravaConnection"];
+        put?: never;
+        /**
+         * Make the Strava Connection with the code Strava sent back
+         * @description Then imports the runs and trail runs of the last three months, as far as Strava’s limits allow.
+         */
+        post: operations["connectStrava"];
+        /**
+         * End the Strava Connection
+         * @description Withdraws ClimbSpot’s access at Strava when Strava can be reached, and erases everything kept from Strava.
+         */
+        delete: operations["endStravaConnection"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/strava/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import the Recorded Runs started since the latest one
+         * @description Runs and trail runs only. Stopping at Strava’s limits keeps what was imported; the next synchronisation carries on.
+         */
+        post: operations["syncStrava"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ascents": {
         parameters: {
             query?: never;
@@ -110,7 +175,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Find the Ascents whose Start is closest to a position */
+        /**
+         * Find the Ascents whose Start is closest to a position
+         * @description With a signed-in Visitor's token, each Ascent they went up carries their best Ascent Time.
+         */
         get: operations["findAscentsNearby"];
         put?: never;
         post?: never;
@@ -129,6 +197,26 @@ export interface paths {
         };
         /** Get an Ascent with its path and Elevation Profile */
         get: operations["getAscent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ascents/{id}/my-times": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The signed-in Visitor's Ascent Times on an Ascent, newest first
+         * @description Found in their Recorded Runs through their Strava Connection; only for them.
+         */
+        get: operations["getMyAscentTimes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -218,15 +306,17 @@ export interface components {
             displayName: string;
             email: string | null;
             /**
-             * @description Flat Pace in seconds per kilometre (180 to 720).
+             * @description The Flat Pace that applies: the one stated, or else the one from Strava.
              * @example 330
              */
             flatPace: number | null;
+            /** @enum {string|null} */
+            flatPaceSource: "stated" | "strava" | null;
         };
         AccountChanges: {
             displayName?: string;
             /**
-             * @description Flat Pace in seconds per kilometre (180 to 720).
+             * @description A stated Flat Pace, or `null` to go back to the one from Strava.
              * @example 330
              */
             flatPace?: number | null;
@@ -437,6 +527,37 @@ export interface components {
         SavedItineraryChanges: {
             name: string;
         };
+        StravaAuthorization: {
+            /**
+             * Format: uri
+             * @description Strava's page where the Visitor agrees.
+             */
+            url: string;
+        };
+        StravaConnection: {
+            /**
+             * @description `lost`: the Visitor withdrew ClimbSpot at Strava, and needs to connect again.
+             * @enum {string}
+             */
+            status: "none" | "connected" | "lost";
+            athlete: {
+                name: string;
+            } | null;
+            /** Format: date-time */
+            connectedAt: string | null;
+            /**
+             * Format: date-time
+             * @description When Recorded Runs were last imported in full.
+             */
+            lastSyncAt: string | null;
+            recordedRuns: number;
+        };
+        StravaConnectionRequest: {
+            /** @description The code Strava sent back. */
+            code: string;
+            /** @description The state Strava sent back with it. */
+            state: string;
+        };
         Ascent: {
             /** Format: uuid */
             id: string;
@@ -526,6 +647,22 @@ export interface components {
                 createdAt: string;
                 /** @description Geodesic distance from the searched position to the Start, in metres. */
                 distanceToStart: number;
+                /** @description The signed-in Visitor's best Ascent Time here and how many they have; only for them, and only when they have one. */
+                myAscentTimes?: {
+                    /** @description Seconds. */
+                    best: number;
+                    count: number;
+                };
+            }[];
+        };
+        MyAscentTimes: {
+            ascentTimes: {
+                /**
+                 * Format: date-time
+                 * @description When the Visitor left the Start.
+                 */
+                startedAt: string;
+                seconds: number;
             }[];
         };
         LoopItineraries: {
@@ -936,6 +1073,198 @@ export interface operations {
             };
         };
     };
+    authorizeStrava: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Where to send the Visitor. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StravaAuthorization"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    getStravaConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Strava Connection. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StravaConnection"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    connectStrava: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StravaConnectionRequest"];
+            };
+        };
+        responses: {
+            /** @description The Strava Connection. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StravaConnection"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: the code or state is missing. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `STRAVA_AUTHORIZATION_REFUSED`: Strava refused the code, or the state is not the Visitor’s. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `STRAVA_UNAVAILABLE`: Strava is down or its limits are reached. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    endStravaConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ended. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    syncStrava: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Strava Connection. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StravaConnection"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `STRAVA_CONNECTION_LOST`: the Visitor withdrew ClimbSpot at Strava; they need to connect again. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `STRAVA_UNAVAILABLE`: Strava is down or its limits are reached; what was imported stays. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     createAscent: {
         parameters: {
             query?: never;
@@ -1074,6 +1403,55 @@ export interface operations {
             };
             /** @description `VALIDATION_FAILED`: the id is not a UUID. */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `ASCENT_NOT_FOUND`: no Ascent has this id. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    getMyAscentTimes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Their Ascent Times; empty when they have none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyAscentTimes"];
+                };
+            };
+            /** @description `VALIDATION_FAILED`: the id is not a UUID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -12,12 +12,17 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
   const supabase = createClient(url, publishableKey, { auth: { detectSessionInUrl: true } });
   const listeners = new Set<(change: AuthChange) => void>();
   let current: AuthSession | undefined;
-  let expiring = false;
+  let signingOut = false;
 
   supabase.auth.onAuthStateChange((_event, session) => {
+    const previous = current;
     current = toSession(session);
-    const change = { session: current, expired: expiring && current === undefined };
-    expiring = false;
+    // A session that ends without the Visitor signing out has expired: the API refused
+    // it, or Supabase could no longer refresh it.
+    const change = {
+      session: current,
+      expired: previous !== undefined && current === undefined && !signingOut,
+    };
     for (const listener of listeners) listener(change);
   });
 
@@ -43,10 +48,15 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
       if (error) throw error;
     },
     signOut: async () => {
-      await supabase.auth.signOut();
+      // Supabase tells its listeners before `signOut` resolves.
+      signingOut = true;
+      try {
+        await supabase.auth.signOut();
+      } finally {
+        signingOut = false;
+      }
     },
     expire: async () => {
-      expiring = true;
       await supabase.auth.signOut({ scope: 'local' });
     },
   };

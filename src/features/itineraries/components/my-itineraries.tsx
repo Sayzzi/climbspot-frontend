@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useAuth } from '@/shared/auth';
+import { SignedInOnly } from '@/shared/auth';
 import { cn } from '@/shared/lib/cn';
 import { buttonVariants } from '@/shared/ui/button-variants';
 import { ErrorNotice } from '@/shared/ui/error-notice';
@@ -12,23 +12,22 @@ import { useSavedItineraries } from '../api/saved-itineraries';
 import type { SavedItinerarySummary } from '../types';
 import { SavedItineraryDetail } from './saved-itinerary-detail';
 
-/** The signed-in Visitor's Saved Itineraries, and the one they select. */
+/** The signed-in Visitor's Saved Itineraries; an invitation to sign in otherwise. */
 export function MyItineraries() {
   const { t } = useTranslation('itineraries');
-  const { session } = useAuth();
+  return (
+    <SignedInOnly reason={t('saved.signedOut')}>
+      <SavedItineraries />
+    </SignedInOnly>
+  );
+}
+
+/** The signed-in Visitor's Saved Itineraries, and the one they select. */
+function SavedItineraries() {
+  const { t } = useTranslation('itineraries');
   const saved = useSavedItineraries();
   const [selectedId, setSelectedId] = useState<string>();
 
-  if (!session) {
-    return (
-      <div className="flex max-w-xl flex-col items-start gap-3 rounded-lg bg-lichen p-4">
-        <p>{t('saved.signedOut')}</p>
-        <Link to="/sign-in" className={buttonVariants()}>
-          {t('saved.signIn')}
-        </Link>
-      </div>
-    );
-  }
   if (saved.error) {
     return <ErrorNotice error={saved.error} onRetry={() => void saved.refetch()} />;
   }

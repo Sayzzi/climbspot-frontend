@@ -10,7 +10,7 @@ import { useMyAccount, useUpdateMyAccount } from '../api/my-account';
  * its pace applies, or else the browser's is carried over to it; afterwards, every
  * change the Visitor makes is saved to it. Signed out, the browser keeps the pace.
  */
-export function FlatPaceSync() {
+export function useFlatPaceSync(): void {
   const { session } = useAuth();
   const { data: account } = useMyAccount();
   const { mutate } = useUpdateMyAccount();
@@ -38,6 +38,4 @@ export function FlatPaceSync() {
       mutate({ flatPace: secondsPerKm });
     }
   }, [session, account, secondsPerKm, setSecondsPerKm, mutate]);
-
-  return null;
 }

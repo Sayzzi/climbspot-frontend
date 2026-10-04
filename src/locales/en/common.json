@@ -31,7 +31,8 @@
     "ROUTING_UNAVAILABLE": "Planning is temporarily unavailable. Please try again in a moment."
   },
   "actions": {
-    "retry": "Try again"
+    "retry": "Try again",
+    "signIn": "Sign in"
   },
   "nav": {
     "addAscent": "Add a climb"

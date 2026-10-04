@@ -10,6 +10,7 @@ import { surfaces } from '@/shared/domain/values';
 import { activitiesBySurface } from '../domain';
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import type { Surface } from '@/shared/domain/values';
+import { textInputClassName } from '@/shared/ui/text-input';
 import type { Ascent } from '../types';
 import { findUploadProblems, type UploadField } from '../upload-validation';
 
@@ -64,7 +65,7 @@ export function UploadForm({ onCreated }: UploadFormProps) {
           }}
           aria-invalid={errors.name !== undefined}
           aria-describedby={errors.name && `${ids.name}-error`}
-          className="rounded-md border border-pine/25 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-pine"
+          className={textInputClassName}
         />
         <FieldError id={`${ids.name}-error`} message={errors.name} />
       </div>

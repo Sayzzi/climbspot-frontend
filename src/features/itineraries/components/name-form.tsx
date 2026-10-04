@@ -2,6 +2,7 @@ import { useId, useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/shared/ui/button';
+import { textInputClassName } from '@/shared/ui/text-input';
 
 /** Longest name of a Saved Itinerary, as the API allows. */
 const NAME_MAX_LENGTH = 100;
@@ -43,7 +44,7 @@ export function NameForm({ label, initialName, pending, onSubmit, onCancel }: Na
         onChange={(event) => {
           setName(event.target.value);
         }}
-        className="rounded-md border border-pine/25 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-pine"
+        className={textInputClassName}
       />
       {missing && <p className="text-sm font-semibold text-danger">{t('saved.nameMissing')}</p>}
       <div className="flex gap-2">

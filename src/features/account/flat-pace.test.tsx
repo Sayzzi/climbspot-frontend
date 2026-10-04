@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
@@ -82,5 +82,24 @@ describe('Flat Pace on the account', () => {
 
     expect(paceButton()).toHaveAccessibleName('Flat pace: 6:00/km');
     expect(localStorage.getItem('climbspot.flatPace')).toBe('360');
+  });
+
+  it('is shown on the Account page, and changed from there', async () => {
+    const changes = accountApi(300);
+    fakeAuth.signIn();
+    const { user } = await renderApp('/account');
+    const main = within(screen.getByRole('main'));
+
+    expect(await main.findByText('5:00/km')).toBeVisible();
+    await user.click(main.getByRole('button', { name: 'Change the flat pace' }));
+    const dialog = within(screen.getByRole('dialog', { name: 'Flat pace' }));
+    await user.clear(dialog.getByRole('textbox'));
+    await user.type(dialog.getByRole('textbox'), '5:30');
+    await user.click(dialog.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(changes).toEqual([{ flatPace: 330 }]);
+    });
+    expect(main.getByText('5:30/km')).toBeVisible();
   });
 });

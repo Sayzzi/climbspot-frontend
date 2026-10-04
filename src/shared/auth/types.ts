@@ -24,6 +24,6 @@ export interface AuthClient {
   /** Leaves for Google's sign-in, coming back to `returnTo`. */
   signInWithGoogle(returnTo: string): Promise<void>;
   signOut(): Promise<void>;
-  /** Ends a session the API refused, telling listeners it expired. */
+  /** Ends a session the API refused; like any session the Visitor did not end, it expired. */
   expire(): Promise<void>;
 }

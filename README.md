@@ -30,7 +30,7 @@ pnpm install
 pnpm dev        # http://localhost:5173, talks to the API at VITE_API_URL
 ```
 
-`.env.development` points at a local API (`http://localhost:3000`). Override it in `.env.development.local` if needed; see `.env.example` for every variable. Signing in needs the Supabase project's publishable key in `.env.development.local` (`VITE_SUPABASE_PUBLISHABLE_KEY`); without it, the app works without accounts.
+`.env.development` points at a local API (`http://localhost:3000`). Override it in `.env.development.local` if needed; see `.env.example` for every variable. Signing in needs the Supabase project's publishable key in `.env.development.local` (`VITE_SUPABASE_PUBLISHABLE_KEY`); without it, the app works without accounts. Magic links and Google are set up once in the Supabase dashboard, as the [backend README](https://github.com/Sayzzi/climbspot-backend#accounts) describes.
 
 ## Scripts
 

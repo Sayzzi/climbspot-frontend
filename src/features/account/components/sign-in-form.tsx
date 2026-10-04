@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
+import { textInputClassName } from '@/shared/ui/text-input';
 
 const looksLikeEmail = (text: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text.trim());
 
@@ -51,7 +52,7 @@ export function SignInForm() {
           }}
           aria-invalid={problem === 'email'}
           aria-describedby={problem ? problemId : undefined}
-          className="rounded-md border border-pine/25 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-pine"
+          className={textInputClassName}
         />
         {problem && (
           <p id={problemId} role="alert" className="text-sm text-danger">

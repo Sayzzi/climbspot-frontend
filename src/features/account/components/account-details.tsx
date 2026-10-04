@@ -1,10 +1,12 @@
-import { Link } from '@tanstack/react-router';
 import { useId, useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useAuth } from '@/shared/auth';
+import { SignedInOnly } from '@/shared/auth';
+import { useFlatPace } from '@/shared/pace';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { textInputClassName } from '@/shared/ui/text-input';
+import { useFormatters, useUnits } from '@/shared/units';
 
 import { useDeleteMyAccount, useMyAccount, useUpdateMyAccount } from '../api/my-account';
 import { AccountDeletion } from './account-deletion';
@@ -12,8 +14,6 @@ import { AccountDeletion } from './account-deletion';
 /** The signed-in Visitor's account; an invitation to sign in otherwise. */
 export function AccountDetails() {
   const { t } = useTranslation('account');
-  const { session } = useAuth();
-  const account = useMyAccount();
   // Kept here, above the signed-out view, so that the Visitor is told once signed out.
   const deletion = useDeleteMyAccount();
 
@@ -24,16 +24,17 @@ export function AccountDetails() {
       </p>
     );
   }
-  if (!session) {
-    return (
-      <p className="text-ink-muted">
-        {t('account.signedOut')}{' '}
-        <Link to="/sign-in" className="font-semibold text-pine underline underline-offset-2">
-          {t('signIn.title')}
-        </Link>
-      </p>
-    );
-  }
+  return (
+    <SignedInOnly reason={t('account.signedOut')}>
+      <Account deletion={deletion} />
+    </SignedInOnly>
+  );
+}
+
+function Account({ deletion }: { readonly deletion: ReturnType<typeof useDeleteMyAccount> }) {
+  const { t } = useTranslation('account');
+  const account = useMyAccount();
+
   if (account.error) {
     return <ErrorNotice error={account.error} onRetry={() => void account.refetch()} />;
   }
@@ -46,6 +47,7 @@ export function AccountDetails() {
         <dt className="text-ink-muted">{t('account.email')}</dt>
         <dd className="font-medium">{account.data.email}</dd>
       </dl>
+      <FlatPace />
       <DisplayNameForm current={account.data.displayName} />
       <AccountDeletion deletion={deletion} />
     </div>
@@ -75,7 +77,7 @@ function DisplayNameForm({ current }: { readonly current: string }) {
         onChange={(event) => {
           setName(event.target.value);
         }}
-        className="rounded-md border border-pine/25 bg-white px-3 py-2 focus-visible:outline-2 focus-visible:outline-pine"
+        className={textInputClassName}
       />
       <Button type="submit" size="sm" disabled={update.isPending} className="self-start">
         {t('account.save')}
@@ -94,5 +96,30 @@ function DisplayNameForm({ current }: { readonly current: string }) {
         />
       )}
     </form>
+  );
+}
+
+/** The Flat Pace, kept with the account; changed in the same place as in the header. */
+function FlatPace() {
+  const { t } = useTranslation('account');
+  const { t: tCommon } = useTranslation();
+  const { system } = useUnits();
+  const format = useFormatters();
+  const { secondsPerKm, openSetting } = useFlatPace();
+
+  return (
+    <div className="flex flex-col items-start gap-2 text-sm">
+      <dl>
+        <dt className="text-ink-muted">{t('account.flatPace')}</dt>
+        <dd className="font-medium">
+          {secondsPerKm === undefined
+            ? t('account.flatPaceUnset')
+            : tCommon(`pace.per.${system}`, { pace: format.pace(secondsPerKm) })}
+        </dd>
+      </dl>
+      <Button type="button" variant="secondary" size="sm" onClick={openSetting}>
+        {t('account.changeFlatPace')}
+      </Button>
+    </div>
   );
 }

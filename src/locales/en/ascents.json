@@ -72,5 +72,11 @@
       "fileRequired": "Choose a GPX file.",
       "fileTooLarge": "This file is larger than 5 MB."
     }
+  },
+  "myTimes": {
+    "title": "Your times",
+    "best": "Best",
+    "summary_one": "Your best: {{time}} · up once",
+    "summary_other": "Your best: {{time}} · up {{count}} times"
   }
 }

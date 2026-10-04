@@ -5,6 +5,7 @@ import { ApiRequestError } from '@/shared/api/request';
 import { useAuth } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { ConnectWithStrava, PoweredByStrava } from '@/shared/ui/strava-brand';
 
 import {
   useAuthorizeStrava,
@@ -13,7 +14,6 @@ import {
   useSyncStrava,
 } from '../api/strava';
 import type { StravaConnection } from '../types';
-import { ConnectWithStrava, PoweredByStrava } from './strava-brand';
 
 /** The signed-in Visitor's Strava Connection, on their Account page; nothing otherwise. */
 export function StravaSection() {

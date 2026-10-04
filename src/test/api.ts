@@ -229,6 +229,10 @@ export const handlers = {
   sessions: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/itineraries/sessions'), ({ request }) => respond(request)),
+  myAscentTimes: (respond: (id: string, request: Request) => HttpResponse<JsonBodyType>) =>
+    http.get(apiUrl('/ascents/:id/my-times'), ({ params, request }) =>
+      respond(String(params.id), request),
+    ),
   createAscent: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/ascents'), ({ request }) => respond(request)),

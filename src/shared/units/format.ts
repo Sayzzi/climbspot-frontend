@@ -22,6 +22,8 @@ export interface Formatters {
   pace(secondsPerKm: number): string;
   /** A duration in whole minutes: "23 min", or hours and minutes beyond an hour. */
   duration(minutes: number): string;
+  /** A time taken, to the second, as a stopwatch shows it: "5:12", "1:02:05". */
+  clock(seconds: number): string;
   /** A distance as typed in a field, in km or miles, up to two decimals and no unit. */
   distanceInput(metres: number): string;
   /** A bound of a typed distance, in km or miles, up to two decimals. */
@@ -51,6 +53,13 @@ export function createFormatters(system: UnitSystem, locale: string): Formatters
     },
     distanceInput: (metres) => typed.format(metres / metresPerDistanceUnit(system)),
     distanceBound: (value) => bound.format(value),
+    clock: (total) => {
+      const seconds = Math.round(total);
+      const [h, m, s] = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60];
+      return h > 0
+        ? `${plain.format(h)}:${twoDigits.format(m)}:${twoDigits.format(s)}`
+        : `${plain.format(m)}:${twoDigits.format(s)}`;
+    },
     duration: (total) =>
       total <= 60
         ? minutes.format(total)

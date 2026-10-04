@@ -63,6 +63,14 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
             },
           ]}
         />
+        {ascent.myAscentTimes && (
+          <p className="mt-2 text-sm font-semibold text-moss">
+            {t('myTimes.summary', {
+              time: format.clock(ascent.myAscentTimes.best),
+              count: ascent.myAscentTimes.count,
+            })}
+          </p>
+        )}
         <AscentLink ascent={ascent} className="mt-3 inline-block" />
       </article>
     </li>

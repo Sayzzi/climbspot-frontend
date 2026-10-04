@@ -115,5 +115,9 @@
   "distance": {
     "label": "{{label}} ({{unit}})",
     "range": "Enter a distance between {{minimum}} and {{maximum}} {{unit}}."
+  },
+  "strava": {
+    "connect": "Connect with Strava",
+    "poweredBy": "Powered by Strava"
   }
 }

@@ -10,6 +10,7 @@ import { useFormatters } from '@/shared/units';
 import { ascentQuery } from '../api/ascent';
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { BackToSearch } from './back-to-search';
+import { MyAscentTimes } from './my-ascent-times';
 import { FactList } from '@/shared/ui/fact-list';
 import { ElevationProfileChart } from '@/shared/ui/elevation-profile-chart';
 
@@ -89,6 +90,8 @@ export function AscentDetail({ id }: { readonly id: string }) {
           />
         </section>
       </div>
+
+      <MyAscentTimes ascentId={ascent.id} />
     </article>
   );
 }

@@ -217,3 +217,32 @@ describe('The API asking for the second factor', () => {
     );
   });
 });
+
+describe('Leaving the code step', () => {
+  it('lets the Visitor go elsewhere, where protected pages invite to finish signing in', async () => {
+    fakeAuth.withSecondFactor();
+    fakeAuth.signIn();
+    const { user, router } = await renderApp('/second-factor');
+    await screen.findByRole('heading', { level: 1, name: 'Enter your code' });
+
+    await router.navigate({ to: '/account' });
+
+    expect(
+      await screen.findByText('Finish signing in: enter the code from your authenticator app.'),
+    ).toBeVisible();
+    await user.click(screen.getByRole('link', { name: 'Enter my code' }));
+    expect(router.state.location.pathname).toBe('/second-factor');
+  });
+
+  it('comes back to the page the Visitor was headed for, once the code is given', async () => {
+    fakeAuth.withSecondFactor();
+    fakeAuth.signIn();
+    const { user, router } = await renderApp('/new-password');
+    await screen.findByRole('heading', { level: 1, name: 'Enter your code' });
+
+    await giveCode(user, FAKE_TOTP_CODE);
+
+    expect(await screen.findByLabelText('New password', { selector: 'input' })).toBeVisible();
+    expect(router.state.location.pathname).toBe('/new-password');
+  });
+});

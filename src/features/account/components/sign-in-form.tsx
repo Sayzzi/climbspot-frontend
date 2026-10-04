@@ -1,12 +1,12 @@
 import { useNavigate } from '@tanstack/react-router';
-import { useId, useState, type SubmitEvent } from 'react';
+import { useEffect, useId, useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AuthFailure, useAuth, type AuthFailureReason } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
 import { textInputClassName } from '@/shared/ui/text-input';
 
-import { isKnownLeaked, lengthProblem, type PasswordProblem } from '../password-rules';
+import { newPasswordProblem, type PasswordProblem } from '../password-rules';
 
 const looksLikeEmail = (text: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text.trim());
 
@@ -19,6 +19,7 @@ type Problem = 'email' | 'linkFailed' | PasswordProblem | AuthFailureReason;
 export function SignInForm() {
   const { t } = useTranslation('account');
   const {
+    session,
     available,
     sendMagicLink,
     signInWithGoogle,
@@ -37,6 +38,13 @@ export function SignInForm() {
   const [sent, setSent] = useState<{ email: string; kind: 'link' | 'confirmation' | 'reset' }>();
   const ids = { email: useId(), password: useId(), hint: useId(), problem: useId() };
 
+  // Signed in (with the second factor's code when needed), the Visitor goes home.
+  useEffect(() => {
+    if (session) {
+      void navigate({ to: '/' });
+    }
+  }, [session, navigate]);
+
   if (!available) {
     return <p className="text-ink-muted">{t('signIn.unavailable')}</p>;
   }
@@ -45,10 +53,6 @@ export function SignInForm() {
     setMode(next);
     setProblem(undefined);
     setSent(undefined);
-  };
-
-  const signedIn = () => {
-    void navigate({ to: '/' });
   };
 
   /** Runs `work`, telling what went wrong in the Visitor's terms. */
@@ -83,23 +87,16 @@ export function SignInForm() {
     if (mode === 'password') {
       await attempt(async () => {
         await signInWithPassword(address, password);
-        signedIn();
       });
       return;
     }
-    const tooShortOrLong = lengthProblem(password);
-    if (tooShortOrLong) {
-      setProblem(tooShortOrLong);
-      return;
-    }
     await attempt(async () => {
-      if (await isKnownLeaked(password)) {
-        setProblem('leaked');
+      const passwordProblem = await newPasswordProblem(password);
+      if (passwordProblem) {
+        setProblem(passwordProblem);
         return;
       }
-      if ((await signUp(address, password)) === 'signed-in') {
-        signedIn();
-      } else {
+      if ((await signUp(address, password)) === 'confirmation-sent') {
         setSent({ email: address, kind: 'confirmation' });
       }
     });
@@ -120,11 +117,10 @@ export function SignInForm() {
 
   const creating = mode === 'create';
 
-  const signInWithAPasskey = async () => {
+  const signInByPasskey = async () => {
     setProblem(undefined);
     try {
       await signInWithPasskey();
-      signedIn();
     } catch (error) {
       const reason = error instanceof AuthFailure ? error.reason : 'failed';
       // Closing the prompt is the Visitor's choice: nothing to explain.
@@ -138,7 +134,7 @@ export function SignInForm() {
     <div className="flex max-w-sm flex-col gap-6">
       {supportsPasskeys && (
         <div className="flex flex-col gap-2">
-          <Button type="button" onClick={() => void signInWithAPasskey()}>
+          <Button type="button" onClick={() => void signInByPasskey()}>
             {t('signIn.passkey')}
           </Button>
           <p className="text-center text-sm text-ink-muted">{t('signIn.or')}</p>

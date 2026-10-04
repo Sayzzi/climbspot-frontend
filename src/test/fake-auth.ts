@@ -155,6 +155,8 @@ export const authClient: AuthClient = {
   },
   passkeys: () => Promise.resolve(passkeys.get(current?.email ?? '') ?? []),
   renamePasskey: (id, name) => {
+    const failure = passkeyFailure();
+    if (failure) return Promise.reject(failure);
     const email = current?.email ?? '';
     passkeys.set(
       email,
@@ -165,6 +167,8 @@ export const authClient: AuthClient = {
     return Promise.resolve();
   },
   removePasskey: (id) => {
+    const failure = passkeyFailure();
+    if (failure) return Promise.reject(failure);
     const email = current?.email ?? '';
     passkeys.set(
       email,

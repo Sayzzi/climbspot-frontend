@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState, type SubmitEvent } from 'react';
+import { useId, useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AuthFailure, useAuth, type AuthFailureReason, type Passkey } from '@/shared/auth';
@@ -6,67 +6,61 @@ import { Button } from '@/shared/ui/button';
 import { textInputClassName } from '@/shared/ui/text-input';
 import { useFormatters } from '@/shared/units';
 
+import { usePasskeyChange, usePasskeys } from '../api/security';
+
+/** What a passkey failure tells the Visitor; closing the prompt tells nothing. */
+const problemOf = (error: unknown): AuthFailureReason | undefined => {
+  if (!error) {
+    return undefined;
+  }
+  const reason = error instanceof AuthFailure ? error.reason : 'failed';
+  return reason === 'passkey-cancelled' ? undefined : reason;
+};
+
 /** The passkeys that sign the Visitor in: adding one on this device, naming, removing. */
 export function PasskeysSection() {
   const { t } = useTranslation('account');
-  const { supportsPasskeys, passkeys, registerPasskey } = useAuth();
-  const [listed, setListed] = useState<Passkey[]>();
-  const [problem, setProblem] = useState<AuthFailureReason>();
-
-  const reload = useCallback(async () => {
-    try {
-      setListed(await passkeys());
-    } catch (error) {
-      setProblem(error instanceof AuthFailure ? error.reason : 'failed');
-    }
-  }, [passkeys]);
-
-  useEffect(() => {
-    let current = true;
-    passkeys().then(
-      (found) => {
-        if (current) setListed(found);
-      },
-      (error: unknown) => {
-        if (current) setProblem(error instanceof AuthFailure ? error.reason : 'failed');
-      },
-    );
-    return () => {
-      current = false;
-    };
-  }, [passkeys]);
-
-  const add = async () => {
-    setProblem(undefined);
-    try {
-      await registerPasskey();
-      await reload();
-    } catch (error) {
-      const reason = error instanceof AuthFailure ? error.reason : 'failed';
-      if (reason !== 'passkey-cancelled') {
-        setProblem(reason);
-      }
-    }
-  };
+  const { supportsPasskeys, registerPasskey, renamePasskey, removePasskey } = useAuth();
+  const listed = usePasskeys();
+  const add = usePasskeyChange(registerPasskey);
+  const rename = usePasskeyChange(({ id, name }: { id: string; name: string }) =>
+    renamePasskey(id, name),
+  );
+  const remove = usePasskeyChange(removePasskey);
+  const problem = problemOf(listed.error ?? add.error ?? rename.error ?? remove.error);
 
   return (
     <div className="flex flex-col items-start gap-2">
       <h3 className="font-semibold">{t('passkeys.title')}</h3>
       <p className="text-sm text-ink-muted">{t('passkeys.explanation')}</p>
-      {listed && listed.length > 0 && (
+      {listed.data && listed.data.length > 0 && (
         <ul
           aria-label={t('passkeys.list')}
           className="flex w-full flex-col divide-y divide-pine/10"
         >
-          {listed.map((passkey) => (
+          {listed.data.map((passkey) => (
             <li key={passkey.id}>
-              <PasskeyItem passkey={passkey} onChanged={() => void reload()} />
+              <PasskeyItem
+                passkey={passkey}
+                onRename={(name) => rename.mutateAsync({ id: passkey.id, name })}
+                onRemove={() => {
+                  remove.mutate(passkey.id);
+                }}
+              />
             </li>
           ))}
         </ul>
       )}
       {supportsPasskeys ? (
-        <Button type="button" variant="secondary" size="sm" onClick={() => void add()}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={add.isPending}
+          onClick={() => {
+            add.mutate(undefined);
+          }}
+        >
           {t('passkeys.add')}
         </Button>
       ) : (
@@ -83,13 +77,13 @@ export function PasskeysSection() {
 
 interface PasskeyItemProps {
   readonly passkey: Passkey;
-  readonly onChanged: () => void;
+  readonly onRename: (name: string) => Promise<unknown>;
+  readonly onRemove: () => void;
 }
 
-function PasskeyItem({ passkey, onChanged }: PasskeyItemProps) {
+function PasskeyItem({ passkey, onRename, onRemove }: PasskeyItemProps) {
   const { t } = useTranslation('account');
   const format = useFormatters();
-  const { renamePasskey, removePasskey } = useAuth();
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState(passkey.name ?? '');
   const inputId = useId();
@@ -100,9 +94,12 @@ function PasskeyItem({ passkey, onChanged }: PasskeyItemProps) {
     if (name.trim() === '') {
       return;
     }
-    await renamePasskey(passkey.id, name.trim());
-    setRenaming(false);
-    onChanged();
+    try {
+      await onRename(name.trim());
+      setRenaming(false);
+    } catch {
+      // The section says what went wrong; the name stays to try again.
+    }
   };
 
   if (renaming) {
@@ -167,7 +164,7 @@ function PasskeyItem({ passkey, onChanged }: PasskeyItemProps) {
           variant="ghost"
           size="sm"
           aria-label={t('passkeys.remove', { name: label })}
-          onClick={() => void removePasskey(passkey.id).then(onChanged)}
+          onClick={onRemove}
         >
           {t('passkeys.removeShort')}
         </Button>

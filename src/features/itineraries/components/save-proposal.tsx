@@ -5,12 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { textLinkClassName } from '@/shared/ui/text-link';
 
 import { useSaveItinerary } from '../api/saved-itineraries';
 import type { Proposal } from '../types';
 import { NameForm } from './name-form';
-
-const linkClassName = 'font-semibold text-pine underline underline-offset-2';
 
 interface SaveProposalProps {
   readonly proposal: Proposal;
@@ -28,7 +27,7 @@ export function SaveProposal({ proposal, defaultName }: SaveProposalProps) {
 
   if (!session) {
     return (
-      <Link to="/sign-in" className={`text-sm ${linkClassName}`}>
+      <Link to="/sign-in" className={`text-sm ${textLinkClassName}`}>
         {t('saved.signInToSave')}
       </Link>
     );
@@ -37,7 +36,7 @@ export function SaveProposal({ proposal, defaultName }: SaveProposalProps) {
     return (
       <p role="status" className="text-sm text-moss">
         {t('saved.done')}{' '}
-        <Link to="/itineraries" className={linkClassName}>
+        <Link to="/itineraries" className={textLinkClassName}>
           {t('saved.title')}
         </Link>
       </p>

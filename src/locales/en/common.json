@@ -37,7 +37,9 @@
   },
   "actions": {
     "retry": "Try again",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "finishSigningIn": "Finish signing in: enter the code from your authenticator app.",
+    "enterCode": "Enter my code"
   },
   "nav": {
     "addAscent": "Add a climb"

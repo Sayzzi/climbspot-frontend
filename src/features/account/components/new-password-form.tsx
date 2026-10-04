@@ -5,7 +5,8 @@ import { AuthFailure, useAuth, type AuthFailureReason } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
 import { textInputClassName } from '@/shared/ui/text-input';
 
-import { isKnownLeaked, lengthProblem, type PasswordProblem } from '../password-rules';
+import { newPasswordProblem, type PasswordProblem } from '../password-rules';
+import { CodeField } from './code-field';
 
 type Problem = PasswordProblem | AuthFailureReason;
 
@@ -22,7 +23,7 @@ export function NewPasswordForm() {
   const [problem, setProblem] = useState<Problem>();
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
-  const ids = { password: useId(), hint: useId(), code: useId(), problem: useId() };
+  const ids = { password: useId(), hint: useId(), problem: useId() };
 
   const save = async (withCode?: string) => {
     setPending(true);
@@ -52,16 +53,11 @@ export function NewPasswordForm() {
       await save(code.trim());
       return;
     }
-    const tooShortOrLong = lengthProblem(password);
-    if (tooShortOrLong) {
-      setProblem(tooShortOrLong);
-      return;
-    }
     setPending(true);
-    const leaked = await isKnownLeaked(password);
+    const passwordProblem = await newPasswordProblem(password);
     setPending(false);
-    if (leaked) {
-      setProblem('leaked');
+    if (passwordProblem) {
+      setProblem(passwordProblem);
       return;
     }
     await save();
@@ -72,20 +68,7 @@ export function NewPasswordForm() {
       {needsCode ? (
         <>
           <p className="text-sm">{t('newPassword.codeSent', { email: session?.email ?? '' })}</p>
-          <label htmlFor={ids.code} className="font-medium">
-            {t('newPassword.code')}
-          </label>
-          <input
-            id={ids.code}
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            value={code}
-            onChange={(event) => {
-              setCode(event.target.value);
-            }}
-            aria-describedby={problem ? ids.problem : undefined}
-            className={textInputClassName}
-          />
+          <CodeField label={t('newPassword.code')} value={code} onChange={setCode} />
         </>
       ) : (
         <>

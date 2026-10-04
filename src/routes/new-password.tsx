@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NewPasswordForm } from '@/features/account';
 import { SignedInOnly } from '@/shared/auth';
+import { textLinkClassName } from '@/shared/ui/text-link';
 
 export const Route = createFileRoute('/new-password')({
   component: NewPasswordPage,
@@ -16,7 +17,7 @@ function NewPasswordPage() {
       <h1 className="text-3xl font-bold tracking-tight">{t('newPassword.title')}</h1>
       <SignedInOnly reason={t('newPassword.expired')}>
         <NewPasswordForm />
-        <Link to="/account" className="font-semibold text-pine underline underline-offset-2">
+        <Link to="/account" className={textLinkClassName}>
           {t('newPassword.toAccount')}
         </Link>
       </SignedInOnly>

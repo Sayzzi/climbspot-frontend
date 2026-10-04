@@ -107,6 +107,13 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
     for (const listener of listeners) listener(change);
   });
 
+  /** The Visitor's verified authenticator apps (TOTP), the only second factor asked for. */
+  const authenticatorApps = async () => {
+    const { data, error } = await supabase.auth.mfa.listFactors();
+    if (error) throw failureOf(error);
+    return data.totp;
+  };
+
   return {
     available: true,
     session: () => current,
@@ -176,10 +183,8 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
       if (error) throw failureOf(error);
     },
     giveSecondFactor: async (code) => {
-      const { data, error } = await supabase.auth.mfa.listFactors();
-      if (error) throw failureOf(error);
       // Each of the Visitor's apps gives its own codes: try them in turn.
-      for (const factor of data.totp) {
+      for (const factor of await authenticatorApps()) {
         const verified = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
         if (!verified.error) {
           return;
@@ -190,15 +195,9 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
       }
       throw new AuthFailure('invalid-code');
     },
-    authenticatorCount: async () => {
-      const { data, error } = await supabase.auth.mfa.listFactors();
-      if (error) throw failureOf(error);
-      return data.totp.length;
-    },
+    authenticatorCount: async () => (await authenticatorApps()).length,
     removeAuthenticators: async () => {
-      const { data, error } = await supabase.auth.mfa.listFactors();
-      if (error) throw failureOf(error);
-      for (const factor of data.totp) {
+      for (const factor of await authenticatorApps()) {
         const removed = await supabase.auth.mfa.unenroll({ factorId: factor.id });
         if (removed.error) throw failureOf(removed.error);
       }
@@ -234,10 +233,11 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
       if (error) throw passkeyFailureOf(error);
     },
     requireSecondFactor: async () => {
-      // The factor was added elsewhere: the user, refreshed, now has it.
+      // The factor was added elsewhere: the user, refreshed, now has it. If they no longer
+      // do (turned off a moment ago), the API's answer is stale: nothing to ask for.
       const { data } = await supabase.auth.refreshSession();
       const refreshed = toSession(data.session);
-      if (refreshed) {
+      if (refreshed && (await authenticatorApps()).length > 0) {
         current = { ...refreshed, secondFactor: 'required' };
         for (const listener of listeners) listener({ session: current, expired: false });
       }

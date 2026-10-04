@@ -1,9 +1,12 @@
-import { useEffect, useId, useState, type SubmitEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthFailure, useAuth, type AuthenticatorEnrolment } from '@/shared/auth';
+import { useAuth, type AuthenticatorEnrolment, type AuthFailureReason } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
-import { textInputClassName } from '@/shared/ui/text-input';
+
+import { useAuthenticatorCount, useRecountAuthenticators } from '../api/security';
+import { codeProblemOf } from '../code-problem';
+import { CodeField } from './code-field';
 
 /** At most this many authenticator apps give a Visitor's codes. */
 const MAXIMUM_APPS = 2;
@@ -14,26 +17,13 @@ const MAXIMUM_APPS = 2;
  */
 export function SecondFactorSection() {
   const { t } = useTranslation('account');
-  const { session, enrollAuthenticator, authenticatorCount } = useAuth();
+  const { session, enrollAuthenticator } = useAuth();
+  const { data: apps } = useAuthenticatorCount();
+  const recount = useRecountAuthenticators();
   const [enrolment, setEnrolment] = useState<AuthenticatorEnrolment>();
   const [turningOff, setTurningOff] = useState(false);
-  const [counted, setApps] = useState<number>();
   const [failed, setFailed] = useState(false);
   const on = session?.secondFactor === 'given';
-  const apps = on ? counted : undefined;
-
-  useEffect(() => {
-    if (!on) {
-      return;
-    }
-    let current = true;
-    void authenticatorCount().then((count) => {
-      if (current) setApps(count);
-    });
-    return () => {
-      current = false;
-    };
-  }, [on, authenticatorCount, enrolment]);
 
   const start = async () => {
     setFailed(false);
@@ -72,6 +62,7 @@ export function SecondFactorSection() {
           enrolment={enrolment}
           onDone={() => {
             setEnrolment(undefined);
+            void recount();
           }}
         />
       )}
@@ -103,64 +94,6 @@ export function SecondFactorSection() {
   );
 }
 
-/** Turning the second factor off, after a code from the app proves it is the Visitor. */
-function TurnOff({ onCancel }: { readonly onCancel: () => void }) {
-  const { t } = useTranslation('account');
-  const { giveSecondFactor, removeAuthenticators } = useAuth();
-  const [code, setCode] = useState('');
-  const [problem, setProblem] = useState<'invalid-code' | 'failed'>();
-  const ids = { code: useId(), problem: useId() };
-
-  const submit = async (event: SubmitEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    try {
-      await giveSecondFactor(code.trim());
-      await removeAuthenticators();
-    } catch (error) {
-      setProblem(
-        error instanceof AuthFailure && error.reason === 'invalid-code' ? 'invalid-code' : 'failed',
-      );
-    }
-  };
-
-  return (
-    <form
-      noValidate
-      onSubmit={(event) => void submit(event)}
-      className="flex flex-col items-start gap-2 rounded-lg bg-lichen p-4"
-    >
-      <p className="text-sm">{t('secondFactor.turnOffConfirm')}</p>
-      <label htmlFor={ids.code} className="text-sm font-medium">
-        {t('secondFactor.code')}
-      </label>
-      <input
-        id={ids.code}
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        value={code}
-        onChange={(event) => {
-          setCode(event.target.value);
-        }}
-        aria-describedby={problem ? ids.problem : undefined}
-        className={textInputClassName}
-      />
-      {problem && (
-        <p id={ids.problem} role="alert" className="text-sm text-danger">
-          {t(`signIn.problems.${problem}`)}
-        </p>
-      )}
-      <div className="flex gap-2">
-        <Button type="submit" size="sm">
-          {t('secondFactor.turnOffSubmit')}
-        </Button>
-        <Button type="button" variant="secondary" size="sm" onClick={onCancel}>
-          {t('deletion.cancel')}
-        </Button>
-      </div>
-    </form>
-  );
-}
-
 interface FirstCodeProps {
   readonly enrolment: AuthenticatorEnrolment;
   readonly onDone: () => void;
@@ -171,8 +104,7 @@ function FirstCode({ enrolment, onDone }: FirstCodeProps) {
   const { t } = useTranslation('account');
   const { verifyAuthenticator } = useAuth();
   const [code, setCode] = useState('');
-  const [problem, setProblem] = useState<'invalid-code' | 'failed'>();
-  const ids = { code: useId(), problem: useId() };
+  const [problem, setProblem] = useState<AuthFailureReason>();
 
   const submit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -180,9 +112,7 @@ function FirstCode({ enrolment, onDone }: FirstCodeProps) {
       await verifyAuthenticator(enrolment.factorId, code.trim());
       onDone();
     } catch (error) {
-      setProblem(
-        error instanceof AuthFailure && error.reason === 'invalid-code' ? 'invalid-code' : 'failed',
-      );
+      setProblem(codeProblemOf(error));
     }
   };
 
@@ -200,28 +130,52 @@ function FirstCode({ enrolment, onDone }: FirstCodeProps) {
           {enrolment.secret}
         </code>
       </p>
-      <label htmlFor={ids.code} className="mt-2 text-sm font-medium">
-        {t('secondFactor.firstCode')}
-      </label>
-      <input
-        id={ids.code}
-        inputMode="numeric"
-        autoComplete="one-time-code"
+      <CodeField
+        label={t('secondFactor.firstCode')}
         value={code}
-        onChange={(event) => {
-          setCode(event.target.value);
-        }}
-        aria-describedby={problem ? ids.problem : undefined}
-        className={textInputClassName}
+        onChange={setCode}
+        problem={problem}
       />
-      {problem && (
-        <p id={ids.problem} role="alert" className="text-sm text-danger">
-          {t(`signIn.problems.${problem}`)}
-        </p>
-      )}
       <Button type="submit" size="sm">
         {t('secondFactor.confirm')}
       </Button>
+    </form>
+  );
+}
+
+/** Turning the second factor off, after a code from the app proves it is the Visitor. */
+function TurnOff({ onCancel }: { readonly onCancel: () => void }) {
+  const { t } = useTranslation('account');
+  const { giveSecondFactor, removeAuthenticators } = useAuth();
+  const [code, setCode] = useState('');
+  const [problem, setProblem] = useState<AuthFailureReason>();
+
+  const submit = async (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      await giveSecondFactor(code.trim());
+      await removeAuthenticators();
+    } catch (error) {
+      setProblem(codeProblemOf(error));
+    }
+  };
+
+  return (
+    <form
+      noValidate
+      onSubmit={(event) => void submit(event)}
+      className="flex flex-col items-start gap-2 rounded-lg bg-lichen p-4"
+    >
+      <p className="text-sm">{t('secondFactor.turnOffConfirm')}</p>
+      <CodeField label={t('secondFactor.code')} value={code} onChange={setCode} problem={problem} />
+      <div className="flex gap-2">
+        <Button type="submit" size="sm">
+          {t('secondFactor.turnOffSubmit')}
+        </Button>
+        <Button type="button" variant="secondary" size="sm" onClick={onCancel}>
+          {t('deletion.cancel')}
+        </Button>
+      </div>
     </form>
   );
 }

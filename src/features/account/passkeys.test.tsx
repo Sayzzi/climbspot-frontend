@@ -114,6 +114,20 @@ describe('Managing passkeys', () => {
     expect(fakeAuth.passkeysOf().map((passkey) => passkey.name)).toEqual(['MacBook']);
   });
 
+  it('says when a passkey cannot be renamed or removed right now', async () => {
+    fakeAuth.withPasskey('ada@example.com', 'MacBook');
+    const { user, security } = await openPasskeys();
+    const list = within(await security.findByRole('list', { name: 'Your passkeys' }));
+    fakeAuth.passkeysDown();
+
+    await user.click(list.getByRole('button', { name: 'Remove MacBook' }));
+
+    expect(await security.findByRole('alert')).toHaveTextContent(
+      'Passkeys are unavailable right now. Use another way to sign in.',
+    );
+    expect(fakeAuth.passkeysOf()).toHaveLength(1);
+  });
+
   it('does not offer to add one where the browser cannot use passkeys', async () => {
     fakeAuth.signIn();
     await renderApp('/account');

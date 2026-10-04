@@ -30,7 +30,7 @@ pnpm install
 pnpm dev        # http://localhost:5173, talks to the API at VITE_API_URL
 ```
 
-`.env.development` points at a local API (`http://localhost:3000`). Override it in `.env.development.local` if needed; see `.env.example` for every variable. Signing in needs the Supabase project's publishable key in `.env.development.local` (`VITE_SUPABASE_PUBLISHABLE_KEY`); without it, the app works without accounts. Magic links and Google are set up once in the Supabase dashboard, as the [backend README](https://github.com/Sayzzi/climbspot-backend#accounts) describes.
+`.env.development` points at a local API (`http://localhost:3000`). Override it in `.env.development.local` if needed; see `.env.example` for every variable. Signing in needs the Supabase project's publishable key in `.env.development.local` (`VITE_SUPABASE_PUBLISHABLE_KEY`); without it, the app works without accounts. Signing in by magic link, password, Google or passkey, and the optional second factor, are set up once in the Supabase dashboard, as the [backend README](https://github.com/Sayzzi/climbspot-backend#accounts) describes. `VITE_SUPPORT_EMAIL` is shown to Visitors who lost their authenticator app.
 
 ## Scripts
 
@@ -82,16 +82,17 @@ Principles applied:
 
 - **Single responsibility**: components render, hooks hold logic, `api/` handles transport.
 - **Open/closed**: components expose variants through `cva` instead of being edited for each new look.
-- **Dependency inversion**: features consume the typed `apiClient`, never `fetch` directly; tests swap the router history and query client through factories (`createAppRouter`, `createQueryClient`).
+- **Dependency inversion**: features consume the typed `apiClient` and `shared` modules, never `fetch` directly (the one other service, Pwned Passwords, is called from `shared/api`); tests swap the router history and query client through factories (`createAppRouter`, `createQueryClient`).
 
 ## Testing
 
-Tests act like a Visitor: they render the whole app at a URL (`renderApp` in `src/test/render-app.tsx`), interact through roles, labels and text with Testing Library, and assert on what is shown or what the URL becomes. Only four boundaries are replaced:
+Tests act like a Visitor: they render the whole app at a URL (`renderApp` in `src/test/render-app.tsx`), interact through roles, labels and text with Testing Library, and assert on what is shown or what the URL becomes. Only five boundaries are replaced:
 
 - **The API**, by [MSW](https://mswjs.io/) (`src/test/server.ts`; handlers and fixtures typed from the generated schema in `src/test/api.ts`). A request without a handler fails.
 - **The browser**: geolocation (`stubGeolocation`), preferred languages (`stubLanguages`, en-GB by default) and the APIs jsdom lacks or tests must break: `scrollTo` (not implemented), file downloads (recorded, read back with `savedFiles`) and `localStorage` (made to fail when testing the fallback).
 - **The map**: MapLibre needs WebGL, which jsdom lacks, so `shared/map` is replaced by a fake that renders markers as buttons; `fakeMap.moveTo()` simulates panning. The real map is checked by hand against a running API.
-- **Signing in**: `shared/auth` is the only code that knows Supabase Auth (ADR 0009); tests replace it with a fake (`fakeAuth.signIn()`, the links and Google sign-ins it was asked for, an expired session).
+- **Signing in**: `shared/auth` is the only code that knows Supabase Auth (ADR 0009); tests replace it with a fake (`fakeAuth`): sessions, passwords and sign-ups, recovery links and e-mailed codes, second factors and their codes, passkeys and whether the browser supports them, the links and Google sign-ins it was asked for, an expired session.
+- **Pwned Passwords**, by MSW too (`pwnedPasswords()` in `src/test/pwned-passwords.ts`): no password has leaked unless a test says so.
 
 ## Styling
 

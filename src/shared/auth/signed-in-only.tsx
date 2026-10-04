@@ -12,13 +12,26 @@ interface SignedInOnlyProps {
   readonly children: ReactNode;
 }
 
-/** Shows its content to a signed-in Visitor, and invites anyone else to sign in. */
+/**
+ * Shows its content to a signed-in Visitor; invites anyone else to sign in, or to
+ * finish signing in with their second factor's code.
+ */
 export function SignedInOnly({ reason, children }: SignedInOnlyProps) {
   const { t } = useTranslation();
-  const { session } = useAuth();
+  const { session, secondFactorPending } = useAuth();
 
   if (session) {
     return children;
+  }
+  if (secondFactorPending) {
+    return (
+      <div className="flex max-w-xl flex-col items-start gap-3 rounded-lg bg-lichen p-4">
+        <p>{t('actions.finishSigningIn')}</p>
+        <Link to="/second-factor" className={buttonVariants()}>
+          {t('actions.enterCode')}
+        </Link>
+      </div>
+    );
   }
   return (
     <div className="flex max-w-xl flex-col items-start gap-3 rounded-lg bg-lichen p-4">

@@ -3,6 +3,7 @@ import createClient from 'openapi-fetch';
 import { authClient } from '@/shared/auth/auth-client';
 import { env } from '@/shared/config/env';
 
+import { isApiError } from './request';
 import type { paths } from './schema.gen';
 
 /** Typed HTTP client generated from the backend's OpenAPI document (`pnpm api:generate`). */
@@ -26,11 +27,11 @@ apiClient.use({
   },
   async onResponse({ request, response }) {
     if (response.status === 401 && request.headers.has('Authorization')) {
-      const body = (await response
+      const body: unknown = await response
         .clone()
         .json()
-        .catch(() => undefined)) as { error?: { code?: string } } | undefined;
-      await (body?.error?.code === 'SECOND_FACTOR_REQUIRED'
+        .catch(() => undefined);
+      await (isApiError(body) && body.error.code === 'SECOND_FACTOR_REQUIRED'
         ? authClient.requireSecondFactor()
         : authClient.expire());
     }

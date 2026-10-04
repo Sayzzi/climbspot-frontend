@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { errorMessageKey } from '@/shared/api/error-message';
 import { SignedInOnly } from '@/shared/auth';
+import { textLinkClassName } from '@/shared/ui/text-link';
 
 import { useConnectStrava } from '../api/strava';
 import type { StravaReturn } from '../strava-return';
-
-const linkClassName = 'font-semibold text-pine underline underline-offset-2';
 
 /** Where Strava sends the Visitor back: makes the connection, then shows their account. */
 export function StravaCallback(returned: StravaReturn) {
@@ -45,7 +44,7 @@ function Connecting({ code, state, error }: StravaReturn) {
   }, [allowed, code, state, connect, navigate]);
 
   const backToAccount = (
-    <Link to="/account" className={linkClassName}>
+    <Link to="/account" className={textLinkClassName}>
       {t('callback.back')}
     </Link>
   );

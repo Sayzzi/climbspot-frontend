@@ -1,36 +1,36 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { useEffect, useId, useState, type SubmitEvent } from 'react';
+import { useEffect, useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AuthFailure, useAuth } from '@/shared/auth';
+import { useAuth, type AuthFailureReason } from '@/shared/auth';
 import { env } from '@/shared/config/env';
 import { Button } from '@/shared/ui/button';
-import { textInputClassName } from '@/shared/ui/text-input';
+import { textLinkClassName } from '@/shared/ui/text-link';
 
-const linkClassName = 'font-semibold text-pine underline underline-offset-2';
+import { codeProblemOf } from '../code-problem';
+import { CodeField } from './code-field';
 
 /**
  * The code of the second factor, after any way of signing in: until it is given, the
  * Visitor counts as signed out.
  */
-export function SecondFactorStep() {
+export function SecondFactorStep({ then }: { readonly then?: string | undefined }) {
   const { t } = useTranslation('account');
   const { session, secondFactorPending, giveSecondFactor, signOut } = useAuth();
   const navigate = useNavigate();
   const [code, setCode] = useState('');
-  const [problem, setProblem] = useState<'invalid-code' | 'failed'>();
-  const ids = { code: useId(), problem: useId() };
+  const [problem, setProblem] = useState<AuthFailureReason>();
 
-  // Once given (or never needed), the Visitor carries on from the home page.
+  // Once given (or never needed), the Visitor carries on where they were headed.
   useEffect(() => {
     if (session) {
-      void navigate({ to: '/', replace: true });
+      void navigate({ href: withinApp(then) ?? '/', replace: true });
     }
-  }, [session, navigate]);
+  }, [session, then, navigate]);
 
   if (!secondFactorPending) {
     return (
-      <Link to="/sign-in" className={linkClassName}>
+      <Link to="/sign-in" className={textLinkClassName}>
         {t('signIn.title')}
       </Link>
     );
@@ -41,34 +41,19 @@ export function SecondFactorStep() {
     try {
       await giveSecondFactor(code.trim());
     } catch (error) {
-      setProblem(
-        error instanceof AuthFailure && error.reason === 'invalid-code' ? 'invalid-code' : 'failed',
-      );
+      setProblem(codeProblemOf(error));
     }
   };
 
   return (
     <div className="flex max-w-sm flex-col gap-6">
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-2">
-        <label htmlFor={ids.code} className="font-medium">
-          {t('secondFactor.code')}
-        </label>
-        <input
-          id={ids.code}
-          inputMode="numeric"
-          autoComplete="one-time-code"
+        <CodeField
+          label={t('secondFactor.code')}
           value={code}
-          onChange={(event) => {
-            setCode(event.target.value);
-          }}
-          aria-describedby={problem ? ids.problem : undefined}
-          className={textInputClassName}
+          onChange={setCode}
+          problem={problem}
         />
-        {problem && (
-          <p id={ids.problem} role="alert" className="text-sm text-danger">
-            {t(`signIn.problems.${problem}`)}
-          </p>
-        )}
         <Button type="submit">{t('secondFactor.continue')}</Button>
       </form>
       <p className="text-sm text-ink-muted">
@@ -76,7 +61,7 @@ export function SecondFactorStep() {
         {env.VITE_SUPPORT_EMAIL && (
           <>
             {' '}
-            <a href={`mailto:${env.VITE_SUPPORT_EMAIL}`} className={linkClassName}>
+            <a href={`mailto:${env.VITE_SUPPORT_EMAIL}`} className={textLinkClassName}>
               {env.VITE_SUPPORT_EMAIL}
             </a>
           </>
@@ -94,4 +79,9 @@ export function SecondFactorStep() {
       </Button>
     </div>
   );
+}
+
+/** `then` when it leads to a page of this app, never elsewhere. */
+function withinApp(then: string | undefined): string | undefined {
+  return then?.startsWith('/') && !then.startsWith('//') ? then : undefined;
 }

@@ -65,7 +65,7 @@ function requestError(error: unknown, response: Response): ApiRequestError {
   );
 }
 
-function isApiError(value: unknown): value is ApiError {
+export function isApiError(value: unknown): value is ApiError {
   if (typeof value !== 'object' || value === null || !('error' in value)) {
     return false;
   }

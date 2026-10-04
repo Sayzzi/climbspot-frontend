@@ -2,7 +2,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Link, Outlet, useLocation } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
-import { AccountMenu, SessionNotice, useFlatPaceSync } from '@/features/account';
+import { AccountMenu, SessionNotice, useFlatPaceSource, useFlatPaceSync } from '@/features/account';
 import { useStravaSyncOnSignIn } from '@/features/strava';
 import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
@@ -24,6 +24,7 @@ function RootLayout() {
   const isHome = useLocation({ select: (location) => location.pathname === '/' });
   const reveal = useScrollProgress();
   useFlatPaceSync();
+  const paceSource = useFlatPaceSource();
   useStravaSyncOnSignIn();
   // On the home page the big name is the brand; the small one appears as it dissolves.
   const brandOpacity = isHome ? Math.max(0, reveal * 2 - 1) : 1;
@@ -45,7 +46,7 @@ function RootLayout() {
             {t('app.name')}
           </Link>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <FlatPaceSetting />
+            <FlatPaceSetting {...paceSource} />
             <UnitSwitch />
             {/* On phones, adding a climb lives in the account menu. */}
             <Link

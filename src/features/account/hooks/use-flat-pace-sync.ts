@@ -8,7 +8,8 @@ import { useMyAccount, useUpdateMyAccount } from '../api/my-account';
 /**
  * Keeps the Flat Pace with the signed-in Visitor's account: once their account arrives,
  * its pace applies, or else the browser's is carried over to it; afterwards, every
- * change the Visitor makes is saved to it. Signed out, the browser keeps the pace.
+ * change the Visitor makes is saved to it, and every change of the account's (a new
+ * pace from Strava, going back to it) applies. Signed out, the browser keeps the pace.
  */
 export function useFlatPaceSync(): void {
   const { session } = useAuth();
@@ -17,6 +18,7 @@ export function useFlatPaceSync(): void {
   const { secondsPerKm, setSecondsPerKm } = useFlatPace();
   const reconciledFor = useRef<string | undefined>(undefined);
   const previousPace = useRef(secondsPerKm);
+  const previousAccountPace = useRef<number | null | undefined>(undefined);
 
   useEffect(() => {
     const changedByVisitor = previousPace.current !== secondsPerKm;
@@ -24,6 +26,8 @@ export function useFlatPaceSync(): void {
     if (!session || !account) {
       return;
     }
+    const accountChanged = previousAccountPace.current !== account.flatPace;
+    previousAccountPace.current = account.flatPace;
     if (reconciledFor.current !== session.accessToken) {
       reconciledFor.current = session.accessToken;
       if (account.flatPace !== null) {
@@ -36,6 +40,11 @@ export function useFlatPaceSync(): void {
     }
     if (changedByVisitor && secondsPerKm !== undefined && secondsPerKm !== account.flatPace) {
       mutate({ flatPace: secondsPerKm });
+      return;
+    }
+    if (accountChanged && account.flatPace !== null && account.flatPace !== secondsPerKm) {
+      previousPace.current = account.flatPace;
+      setSecondsPerKm(account.flatPace);
     }
   }, [session, account, secondsPerKm, setSecondsPerKm, mutate]);
 }

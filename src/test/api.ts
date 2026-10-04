@@ -197,6 +197,7 @@ export function anAccount(overrides: Partial<Account> = {}): Account {
     email: 'ada@example.com',
     flatPace: null,
     flatPaceSource: null,
+    stravaFlatPace: null,
     ...overrides,
   };
 }

@@ -103,3 +103,96 @@ describe('Flat Pace on the account', () => {
     expect(main.getByText('5:30/km')).toBeVisible();
   });
 });
+
+/**
+ * The account behind GET and PATCH /me, with a Flat Pace from Strava: a stated one
+ * applies until cleared.
+ */
+function accountWithStrava({ stated, strava }: { stated?: number; strava: number }) {
+  let statedPace = stated;
+  const changes: unknown[] = [];
+  const current = () =>
+    anAccount({
+      flatPace: statedPace ?? strava,
+      flatPaceSource: statedPace === undefined ? 'strava' : 'stated',
+      stravaFlatPace: strava,
+    });
+  server.use(
+    handlers.nearby(() => nearbyResults([])),
+    handlers.me(() => HttpResponse.json(current())),
+    handlers.updateMe(async (request) => {
+      const body = (await request.json()) as { flatPace?: number | null };
+      changes.push(body);
+      statedPace = body.flatPace ?? undefined;
+      return HttpResponse.json(current());
+    }),
+  );
+  return changes;
+}
+
+describe('Flat Pace from Strava', () => {
+  it('says in the header that it comes from Strava', async () => {
+    accountWithStrava({ strava: 312 });
+    fakeAuth.signIn();
+    await renderApp('/');
+
+    await waitFor(() => {
+      expect(paceButton()).toHaveAccessibleName('Flat pace: 5:12/km, from Strava');
+    });
+    expect(paceButton()).toHaveTextContent('5:12/km · Strava');
+  });
+
+  it('gives way to a pace the Visitor sets', async () => {
+    const changes = accountWithStrava({ strava: 312 });
+    fakeAuth.signIn();
+    const { user } = await renderApp('/');
+    await waitFor(() => {
+      expect(paceButton()).toHaveAccessibleName('Flat pace: 5:12/km, from Strava');
+    });
+
+    await setFlatPace(user, '5:30');
+
+    await waitFor(() => {
+      expect(changes).toEqual([{ flatPace: 330 }]);
+    });
+    expect(paceButton()).toHaveAccessibleName('Flat pace: 5:30/km');
+  });
+
+  it('goes back to Strava’s pace in one click', async () => {
+    const changes = accountWithStrava({ stated: 330, strava: 312 });
+    fakeAuth.signIn();
+    const { user } = await renderApp('/');
+    await waitFor(() => {
+      expect(paceButton()).toHaveAccessibleName('Flat pace: 5:30/km');
+    });
+
+    await user.click(paceButton());
+    await user.click(
+      within(screen.getByRole('dialog', { name: 'Flat pace' })).getByRole('button', {
+        name: 'Use Strava’s pace (5:12/km)',
+      }),
+    );
+
+    await waitFor(() => {
+      expect(paceButton()).toHaveAccessibleName('Flat pace: 5:12/km, from Strava');
+    });
+    expect(changes).toEqual([{ flatPace: null }]);
+  });
+
+  it('offers no way back without a pace from Strava', async () => {
+    accountApi(330);
+    fakeAuth.signIn();
+    const { user } = await renderApp('/');
+    await waitFor(() => {
+      expect(paceButton()).toHaveAccessibleName('Flat pace: 5:30/km');
+    });
+
+    await user.click(paceButton());
+
+    expect(
+      within(screen.getByRole('dialog', { name: 'Flat pace' })).queryByRole('button', {
+        name: /Strava/,
+      }),
+    ).not.toBeInTheDocument();
+  });
+});

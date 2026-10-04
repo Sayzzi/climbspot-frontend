@@ -42,5 +42,9 @@
     "yes": "Yes, delete my account",
     "cancel": "Cancel",
     "done": "Your account has been deleted."
+  },
+  "flatPace": {
+    "strava": "Strava",
+    "useStrava": "Use Strava’s pace ({{pace}})"
   }
 }

@@ -83,6 +83,7 @@
   "pace": {
     "unset": "Set pace",
     "current": "Flat pace: {{pace}}",
+    "currentFrom": "Flat pace: {{pace}}, from {{source}}",
     "dialog": "Flat pace",
     "per": {
       "metric": "{{pace}}/km",

@@ -7,8 +7,20 @@ import { useFormatters, useUnits } from '@/shared/units';
 import { paceBounds, parsePace, type PaceProblem } from './pace';
 import { useFlatPace } from './use-flat-pace';
 
+/** Another pace the Visitor may go back to, e.g. the one worked out from their runs. */
+export interface PaceToRevertTo {
+  readonly label: string;
+  readonly onRevert: () => void;
+}
+
+interface FlatPaceSettingProps {
+  /** Where the pace shown comes from, when not from the Visitor (e.g. "Strava"). */
+  readonly source?: string | undefined;
+  readonly revertTo?: PaceToRevertTo | undefined;
+}
+
 /** The Flat Pace in the header: shows it, or invites to set it, and opens a small form. */
-export function FlatPaceSetting() {
+export function FlatPaceSetting({ source, revertTo }: FlatPaceSettingProps = {}) {
   const { t } = useTranslation();
   const { system } = useUnits();
   const format = useFormatters();
@@ -25,12 +37,20 @@ export function FlatPaceSetting() {
         aria-expanded={isSettingOpen}
         // Once set, the name says what the figure is; until then the visible words name it.
         aria-label={
-          currentPace === undefined ? undefined : t('pace.current', { pace: currentPace })
+          currentPace === undefined
+            ? undefined
+            : source === undefined
+              ? t('pace.current', { pace: currentPace })
+              : t('pace.currentFrom', { pace: currentPace, source })
         }
         onClick={isSettingOpen ? closeSetting : openSetting}
         className="rounded-full bg-white px-2.5 py-1.5 text-sm whitespace-nowrap shadow-sm ring-1 ring-pine/15 focus-visible:outline-2 focus-visible:outline-pine sm:px-3"
       >
-        {currentPace ?? t('pace.unset')}
+        {currentPace === undefined
+          ? t('pace.unset')
+          : source === undefined
+            ? currentPace
+            : `${currentPace} · ${source}`}
       </button>
       {isSettingOpen && (
         <PaceForm
@@ -40,6 +60,15 @@ export function FlatPaceSetting() {
             closeSetting();
           }}
           onClose={closeSetting}
+          {...(revertTo && {
+            revertTo: {
+              ...revertTo,
+              onRevert: () => {
+                revertTo.onRevert();
+                closeSetting();
+              },
+            },
+          })}
         />
       )}
     </div>
@@ -50,9 +79,10 @@ interface PaceFormProps {
   readonly initial: string;
   readonly onSave: (secondsPerKm: number) => void;
   readonly onClose: () => void;
+  readonly revertTo?: PaceToRevertTo;
 }
 
-function PaceForm({ initial, onSave, onClose }: PaceFormProps) {
+function PaceForm({ initial, onSave, onClose, revertTo }: PaceFormProps) {
   const { t } = useTranslation();
   const { system } = useUnits();
   const format = useFormatters();
@@ -120,6 +150,17 @@ function PaceForm({ initial, onSave, onClose }: PaceFormProps) {
           {t('pace.save')}
         </Button>
       </form>
+      {revertTo && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mt-2 w-full"
+          onClick={revertTo.onRevert}
+        >
+          {revertTo.label}
+        </Button>
+      )}
     </div>
   );
 }

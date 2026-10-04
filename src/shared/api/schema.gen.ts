@@ -312,6 +312,11 @@ export interface components {
             flatPace: number | null;
             /** @enum {string|null} */
             flatPaceSource: "stated" | "strava" | null;
+            /**
+             * @description The Flat Pace from Strava, even when a stated one applies.
+             * @example 330
+             */
+            stravaFlatPace: number | null;
         };
         AccountChanges: {
             displayName?: string;

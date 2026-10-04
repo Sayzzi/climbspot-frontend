@@ -3,6 +3,7 @@ import { createRootRouteWithContext, Link, Outlet, useLocation } from '@tanstack
 import { useTranslation } from 'react-i18next';
 
 import { AccountMenu, SessionNotice, useFlatPaceSync } from '@/features/account';
+import { useStravaSyncOnSignIn } from '@/features/strava';
 import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
 import { buttonVariants } from '@/shared/ui/button-variants';
@@ -23,6 +24,7 @@ function RootLayout() {
   const isHome = useLocation({ select: (location) => location.pathname === '/' });
   const reveal = useScrollProgress();
   useFlatPaceSync();
+  useStravaSyncOnSignIn();
   // On the home page the big name is the brand; the small one appears as it dissolves.
   const brandOpacity = isHome ? Math.max(0, reveal * 2 - 1) : 1;
 

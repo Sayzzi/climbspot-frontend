@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
-import { anAccount, apiErrorResponse, handlers, recorder, stravaApi } from '@/test/api';
+import { anAccount, apiErrorResponse, handlers, recorder } from '@/test/api';
 import { FAKE_TOKEN, fakeAuth } from '@/test/fake-auth';
 import { renderApp } from '@/test/render-app';
 import { server } from '@/test/server';
@@ -10,8 +10,6 @@ import { server } from '@/test/server';
 function accountApi(
   answer: () => HttpResponse<never> = () => new HttpResponse(null, { status: 204 }),
 ) {
-  // The Account page shows the Strava section too.
-  stravaApi();
   const deletions = recorder();
   server.use(
     handlers.me(() => HttpResponse.json(anAccount())),

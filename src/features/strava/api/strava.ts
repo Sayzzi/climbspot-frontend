@@ -62,3 +62,23 @@ export function useEndStravaConnection() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: connectionQuery(token).queryKey }),
   });
 }
+
+/**
+ * Imports the Recorded Runs started since the latest one. What they change (the Flat
+ * Pace, Ascent Times) is fetched again; a lost connection shows as lost.
+ */
+export function useSyncStrava() {
+  const queryClient = useQueryClient();
+  const keep = useKeepConnection();
+  const { token } = useToken();
+  return useMutation({
+    mutationFn: () => unwrap(apiClient.POST('/strava/sync')),
+    onSuccess: async (connection) => {
+      keep(connection);
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] !== 'strava-connection',
+      });
+    },
+    onError: () => queryClient.invalidateQueries({ queryKey: connectionQuery(token).queryKey }),
+  });
+}

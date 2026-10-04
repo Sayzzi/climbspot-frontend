@@ -17,5 +17,14 @@
     "denied": "Strava was not connected: ClimbSpot was not allowed to read your runs.",
     "back": "Back to your account",
     "signedOut": "Sign in to connect your Strava account."
+  },
+  "lost": "The Strava connection was lost: ClimbSpot is no longer allowed to read your runs.",
+  "sync": {
+    "state_one": "{{count}} run imported",
+    "state_other": "{{count}} runs imported",
+    "last": "last synchronised {{date}}",
+    "action": "Synchronise",
+    "pending": "Synchronising…",
+    "unavailable": "Strava is unavailable right now, or its limits are reached: the import carries on at the next synchronisation."
   }
 }

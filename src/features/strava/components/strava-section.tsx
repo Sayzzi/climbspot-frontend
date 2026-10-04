@@ -1,11 +1,17 @@
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ApiRequestError } from '@/shared/api/request';
 import { useAuth } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
 
-import { useAuthorizeStrava, useEndStravaConnection, useStravaConnection } from '../api/strava';
+import {
+  useAuthorizeStrava,
+  useEndStravaConnection,
+  useStravaConnection,
+  useSyncStrava,
+} from '../api/strava';
 import type { StravaConnection } from '../types';
 import { ConnectWithStrava, PoweredByStrava } from './strava-brand';
 
@@ -41,20 +47,42 @@ function Connection() {
   if (!connection.data) {
     return <p className="text-sm text-ink-muted">{t('loading')}</p>;
   }
-  return connection.data.status === 'none' ? (
-    <NotConnected />
-  ) : (
-    <Connected connection={connection.data} />
-  );
+  switch (connection.data.status) {
+    case 'none':
+      return <NotConnected />;
+    case 'lost':
+      return <Lost />;
+    case 'connected':
+      return <Connected connection={connection.data} />;
+  }
 }
 
 function NotConnected() {
   const { t } = useTranslation('strava');
-  const authorize = useAuthorizeStrava();
-
   return (
     <>
       <p className="text-sm text-ink-muted">{t('explanation')}</p>
+      <Connect />
+    </>
+  );
+}
+
+/** The Visitor withdrew ClimbSpot at Strava: they may connect again, or end it here. */
+function Lost() {
+  const { t } = useTranslation('strava');
+  return (
+    <>
+      <p className="text-sm font-medium">{t('lost')}</p>
+      <Connect />
+      <EndConnection />
+    </>
+  );
+}
+
+function Connect() {
+  const authorize = useAuthorizeStrava();
+  return (
+    <>
       <ConnectWithStrava
         disabled={authorize.isPending}
         onClick={() => {
@@ -82,8 +110,55 @@ function Connected({ connection }: { readonly connection: StravaConnection }) {
         {t('connectedAs', { name: connection.athlete?.name ?? '' })}
       </p>
       <PoweredByStrava />
+      <Synchronise connection={connection} />
       <EndConnection />
     </>
+  );
+}
+
+function Synchronise({ connection }: { readonly connection: StravaConnection }) {
+  const { t, i18n } = useTranslation('strava');
+  const sync = useSyncStrava();
+  const lastSync =
+    connection.lastSyncAt &&
+    new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(
+      new Date(connection.lastSyncAt),
+    );
+  // Strava down or its limits reached: nothing to retry now, the import carries on later.
+  const unavailable =
+    sync.error instanceof ApiRequestError && sync.error.code === 'STRAVA_UNAVAILABLE';
+
+  return (
+    <div className="flex flex-col items-start gap-2">
+      <p className="text-sm text-ink-muted">
+        {t('sync.state', { count: connection.recordedRuns })}
+        {lastSync && ` · ${t('sync.last', { date: lastSync })}`}
+      </p>
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        disabled={sync.isPending}
+        onClick={() => {
+          sync.mutate();
+        }}
+      >
+        {sync.isPending ? t('sync.pending') : t('sync.action')}
+      </Button>
+      {unavailable && (
+        <p role="alert" className="rounded-lg bg-lichen p-3 text-sm">
+          {t('sync.unavailable')}
+        </p>
+      )}
+      {sync.error && !unavailable && (
+        <ErrorNotice
+          error={sync.error}
+          onRetry={() => {
+            sync.mutate();
+          }}
+        />
+      )}
+    </div>
   );
 }
 

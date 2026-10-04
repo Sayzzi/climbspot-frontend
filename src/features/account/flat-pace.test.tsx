@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
-import { anAccount, handlers, nearbyResults, stravaApi } from '@/test/api';
+import { anAccount, handlers, nearbyResults } from '@/test/api';
 import { fakeAuth } from '@/test/fake-auth';
 import { setFlatPace } from '@/test/pace';
 import { renderApp } from '@/test/render-app';
@@ -11,8 +11,6 @@ import { server } from '@/test/server';
 const paceButton = () => screen.getByRole('button', { name: /^(Set pace|Flat pace: .+)$/ });
 
 function accountApi(flatPace: number | null) {
-  // The Account page shows the Strava section too.
-  stravaApi();
   const changes: unknown[] = [];
   server.use(
     handlers.nearby(() => nearbyResults([])),

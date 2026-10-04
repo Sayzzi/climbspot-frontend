@@ -6,7 +6,8 @@ export interface MapMarker {
   /** Accessible name of the marker. */
   readonly label: string;
   readonly selected?: boolean;
-  readonly tone?: 'default' | 'start' | 'top';
+  /** `waymark` (the default): a climb's Start, or its Top; `start`: where an itinerary starts. */
+  readonly tone?: 'waymark' | 'start';
 }
 
 /** What a panel adds to the map while it is shown: its markers, lines, and clicks. */

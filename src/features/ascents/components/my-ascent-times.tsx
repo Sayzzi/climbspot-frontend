@@ -1,6 +1,8 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { cn } from '@/shared/lib/cn';
+import { plateClassName } from '@/shared/ui/plate';
 import { PoweredByStrava } from '@/shared/ui/strava-brand';
 import { useFormatters } from '@/shared/units';
 
@@ -19,8 +21,8 @@ export function MyAscentTimes({ ascentId }: { readonly ascentId: string }) {
   const best = Math.min(...times.map((time) => time.seconds));
 
   return (
-    <section aria-labelledby={headingId} className="rounded-xl bg-white p-4">
-      <h2 id={headingId} className="mb-3 text-lg font-semibold">
+    <section aria-labelledby={headingId} className={cn(plateClassName, 'p-4')}>
+      <h2 id={headingId} className="mb-3 text-xl">
         {t('myTimes.title')}
       </h2>
       <ol className="flex flex-col divide-y divide-pine/10 text-sm">

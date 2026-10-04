@@ -116,7 +116,7 @@ describe('Units', () => {
 
     await renderApp(`/ascents/${anAscent().id}`);
 
-    const measurements = within(await screen.findByRole('region', { name: 'Measurements' }));
-    expect(measurements.getByText('Elevation gain').nextSibling).toHaveTextContent('315 ft');
+    const page = within(await screen.findByRole('article'));
+    expect(page.getByText('Elevation gain').nextSibling).toHaveTextContent('315 ft');
   });
 });

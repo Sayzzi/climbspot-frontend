@@ -36,13 +36,12 @@ const MAX_ZOOM = 16;
 /** How long an itinerary takes to trace itself along its path. */
 const TRACE_MS = 700;
 
-/** Starts of climbs are waymarks; a selected itinerary's ends are plain dots. */
+/** Climbs are marked with waymarks; where an itinerary starts, with a plain dot. */
 const markerLooks: Record<NonNullable<MapMarker['tone']>, string> = {
   // A red-and-white waymark plate, as painted on long-distance trails.
-  default:
+  waymark:
     'h-3.5 w-[18px] rounded-[3px] border-2 border-pine bg-[linear-gradient(var(--color-white)_0_50%,var(--color-blaze)_50%)]',
   start: 'size-4 rounded-full border-[3px] border-white bg-start',
-  top: 'size-4 rounded-full border-[3px] border-white bg-pine',
 };
 
 /** The only component allowed to know about the map library. */
@@ -252,7 +251,7 @@ export function MapView({
                 aria-hidden="true"
                 className={cn(
                   'block shadow-[0_1px_3px_rgb(23_51_42/0.45)] transition-transform duration-200 group-hover:scale-125',
-                  markerLooks[marker.tone ?? 'default'],
+                  markerLooks[marker.tone ?? 'waymark'],
                   marker.selected && 'scale-150 group-hover:scale-150',
                 )}
               />

@@ -11,7 +11,10 @@ import { ascentQuery } from '../api/ascent';
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { BackToSearch } from './back-to-search';
 import { MyAscentTimes } from './my-ascent-times';
+import { cn } from '@/shared/lib/cn';
 import { FactList } from '@/shared/ui/fact-list';
+import { plateClassName } from '@/shared/ui/plate';
+import { SignFigures } from '@/shared/ui/sign-figures';
 import { ElevationProfileChart } from '@/shared/ui/elevation-profile-chart';
 
 /** Everything about one Ascent; its data is loaded by the route beforehand. */
@@ -26,16 +29,20 @@ export function AscentDetail({ id }: { readonly id: string }) {
 
   // GeoJSON pairs are [longitude, latitude].
   const path = ascent.path.coordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
-  const facts = [
+  const headline = [
     { term: t('facts.length'), value: format.distance(ascent.length) },
     { term: t('facts.elevationGain'), value: format.elevation(ascent.elevationGain) },
-    ...effortFacts,
     { term: t('facts.averageGradient'), value: format.gradient(ascent.averageGradient) },
+  ];
+  const facts = [
+    ...effortFacts,
     { term: t('facts.maximumGradient'), value: format.gradient(ascent.maximumGradient) },
     { term: t('facts.difficultyScore'), value: format.number(ascent.difficultyScore) },
-    { term: t('facts.category'), value: labels.category(ascent.category) },
-    { term: t('facts.surface'), value: labels.surface(ascent.surface) },
-    { term: t('facts.activities'), value: labels.activities(ascent.activities) },
+  ];
+  const about = [
+    labels.surface(ascent.surface),
+    labels.category(ascent.category),
+    ...ascent.activities.map((activity) => labels.activity(activity)),
   ];
 
   return (
@@ -43,8 +50,20 @@ export function AscentDetail({ id }: { readonly id: string }) {
       <div>
         <BackToSearch />
       </div>
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">{ascent.name}</h1>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-3">
+          <h1 className="text-4xl leading-none font-extrabold">{ascent.name}</h1>
+          <ul aria-label={t('detail.about')} className="flex flex-wrap gap-2">
+            {about.map((label) => (
+              <li
+                key={label}
+                className="rounded-full bg-white px-3 py-1 text-sm ring-1 ring-pine/15"
+              >
+                {label}
+              </li>
+            ))}
+          </ul>
+        </div>
         <a
           href={`geo:${String(ascent.start.latitude)},${String(ascent.start.longitude)}`}
           className={buttonVariants({ variant: 'secondary' })}
@@ -52,6 +71,8 @@ export function AscentDetail({ id }: { readonly id: string }) {
           {t('detail.openInMaps')}
         </a>
       </header>
+
+      <SignFigures facts={headline} />
 
       <MapView
         label={t('detail.map', { name: ascent.name })}
@@ -61,21 +82,14 @@ export function AscentDetail({ id }: { readonly id: string }) {
         line={path}
         markers={[
           { id: 'start', position: ascent.start, label: t('detail.start'), tone: 'start' },
-          { id: 'top', position: ascent.top, label: t('detail.top'), tone: 'top' },
+          { id: 'top', position: ascent.top, label: t('detail.top'), tone: 'waymark' },
         ]}
-        className="h-80 lg:h-[28rem]"
+        className={cn(plateClassName, 'h-80 overflow-hidden lg:h-[28rem]')}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <section aria-labelledby={measurementsId} className="rounded-xl bg-white p-4">
-          <h2 id={measurementsId} className="mb-3 text-lg font-semibold">
-            {t('detail.measurements')}
-          </h2>
-          <FactList facts={facts} className="grid-cols-2 gap-y-2" />
-        </section>
-
-        <section aria-labelledby={profileId} className="rounded-xl bg-white p-4">
-          <h2 id={profileId} className="mb-3 text-lg font-semibold">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <section aria-labelledby={profileId} className={cn(plateClassName, 'p-4')}>
+          <h2 id={profileId} className="mb-3 text-xl">
             {t('detail.profile.title')}
           </h2>
           <ElevationProfileChart
@@ -88,6 +102,13 @@ export function AscentDetail({ id }: { readonly id: string }) {
               steepest: format.gradient(ascent.maximumGradient),
             })}
           />
+        </section>
+
+        <section aria-labelledby={measurementsId} className={cn(plateClassName, 'p-4')}>
+          <h2 id={measurementsId} className="mb-3 text-xl">
+            {t('detail.measurements')}
+          </h2>
+          <FactList facts={facts} className="grid-cols-2 gap-y-2" />
         </section>
       </div>
 

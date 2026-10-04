@@ -55,7 +55,8 @@
     "profile": {
       "title": "Elevation profile",
       "summary": "Elevation profile: {{length}} from {{start}} to {{top}}, steepest stretch at {{steepest}}."
-    }
+    },
+    "about": "About this climb"
   },
   "upload": {
     "title": "Add a climb",

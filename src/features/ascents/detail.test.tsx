@@ -63,17 +63,18 @@ describe('Ascent page', () => {
     await renderApp(`/ascents/${ID}`);
     await screen.findByRole('heading', { level: 1 });
 
+    const page = within(screen.getByRole('article'));
+    expect(page.getByText('Length').nextSibling).toHaveTextContent('1.2 km');
+    expect(page.getByText('Elevation gain').nextSibling).toHaveTextContent('96 m');
+    expect(page.getByText('Average gradient').nextSibling).toHaveTextContent('8%');
     const measurements = facts();
-    expect(measurements.getByText('Length').nextSibling).toHaveTextContent('1.2 km');
-    expect(measurements.getByText('Elevation gain').nextSibling).toHaveTextContent('96 m');
-    expect(measurements.getByText('Average gradient').nextSibling).toHaveTextContent('8%');
     expect(measurements.getByText('Maximum gradient').nextSibling).toHaveTextContent('10.5%');
     expect(measurements.getByText('Difficulty score').nextSibling).toHaveTextContent('9,600');
-    expect(measurements.getByText('Category').nextSibling).toHaveTextContent('Cat 4');
-    expect(measurements.getByText('Surface').nextSibling).toHaveTextContent('Trail');
-    expect(measurements.getByText('Activities').nextSibling).toHaveTextContent(
-      'Trail running, Mountain biking',
-    );
+    expect(
+      within(page.getByRole('list', { name: 'About this climb' }))
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual(['Trail', 'Cat 4', 'Trail running', 'Mountain biking']);
   });
 
   it('draws the path on a map framed on it, with its Start and Top', async () => {

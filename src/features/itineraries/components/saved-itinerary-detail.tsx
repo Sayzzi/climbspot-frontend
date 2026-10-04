@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { MapView } from '@/shared/map';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { cn } from '@/shared/lib/cn';
 import { FactList } from '@/shared/ui/fact-list';
+import { plateClassName } from '@/shared/ui/plate';
+import { SignFigures } from '@/shared/ui/sign-figures';
 
 import {
   useDeleteSavedItinerary,
@@ -47,7 +50,8 @@ function Details({ saved }: { readonly saved: SavedItinerary }) {
 
   return (
     <article className="flex min-w-0 flex-col gap-4">
-      <h2 className="text-2xl font-bold tracking-tight">{saved.name}</h2>
+      <h2 className="text-3xl leading-none font-extrabold">{saved.name}</h2>
+      <SignFigures facts={facts.slice(0, 3)} />
 
       {change === undefined && (
         <div className="flex flex-wrap gap-2">
@@ -146,11 +150,13 @@ function Details({ saved }: { readonly saved: SavedItinerary }) {
           fitTo={[...(warmUp ?? []), ...path]}
           line={path}
           {...(warmUp && { dashedLine: warmUp })}
-          className="h-72 lg:h-96"
+          className={cn(plateClassName, 'h-72 overflow-hidden lg:h-96')}
         />
       )}
-      <ProposalProfile proposal={proposal} />
-      <FactList className="grid-cols-2 sm:grid-cols-3" facts={facts} />
+      <div className={cn(plateClassName, 'p-4')}>
+        <ProposalProfile proposal={proposal} />
+      </div>
+      <FactList className="grid-cols-2 sm:grid-cols-3" facts={facts.slice(3)} />
     </article>
   );
 }

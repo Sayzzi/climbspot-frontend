@@ -12,10 +12,14 @@ export function readStoredFlatPace(): number | undefined {
   }
 }
 
-/** Saves the Flat Pace; a per-browser convenience, silently skipped when storage is blocked. */
-export function storeFlatPace(secondsPerKm: number): void {
+/** Saves the Flat Pace, or forgets it; a per-browser convenience, skipped when storage is blocked. */
+export function storeFlatPace(secondsPerKm: number | undefined): void {
   try {
-    localStorage.setItem(STORAGE_KEY, String(secondsPerKm));
+    if (secondsPerKm === undefined) {
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      localStorage.setItem(STORAGE_KEY, String(secondsPerKm));
+    }
   } catch {
     // Private browsing or blocked storage: the pace lasts for this visit only.
   }

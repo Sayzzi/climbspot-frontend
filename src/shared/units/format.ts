@@ -24,6 +24,8 @@ export interface Formatters {
   duration(minutes: number): string;
   /** A time taken, to the second, as a stopwatch shows it: "5:12", "1:02:05". */
   clock(seconds: number): string;
+  /** A day, from an ISO date-time: "Oct 2, 2026". */
+  date(isoDateTime: string): string;
   /** A distance as typed in a field, in km or miles, up to two decimals and no unit. */
   distanceInput(metres: number): string;
   /** A bound of a typed distance, in km or miles, up to two decimals. */
@@ -44,6 +46,7 @@ export function createFormatters(system: UnitSystem, locale: string): Formatters
   const typed = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: false });
   const bound = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: false });
   const [hours, minutes] = [unit('hour', 0), unit('minute', 0)];
+  const day = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' });
 
   return {
     ...(system === 'imperial' ? imperial(unit) : metric(unit)),
@@ -53,6 +56,7 @@ export function createFormatters(system: UnitSystem, locale: string): Formatters
     },
     distanceInput: (metres) => typed.format(metres / metresPerDistanceUnit(system)),
     distanceBound: (value) => bound.format(value),
+    date: (isoDateTime) => day.format(new Date(isoDateTime)),
     clock: (total) => {
       const seconds = Math.round(total);
       const [h, m, s] = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60];

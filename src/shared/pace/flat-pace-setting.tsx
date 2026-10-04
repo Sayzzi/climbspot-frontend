@@ -1,4 +1,4 @@
-import { useId, useState, type SubmitEvent } from 'react';
+import { useId, useState, type ReactNode, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/shared/ui/button';
@@ -16,11 +16,13 @@ export interface PaceToRevertTo {
 interface FlatPaceSettingProps {
   /** Where the pace shown comes from, when not from the Visitor (e.g. "Strava"). */
   readonly source?: string | undefined;
+  /** Shown in the setting with a pace from elsewhere, e.g. the attribution its source requires. */
+  readonly attribution?: ReactNode;
   readonly revertTo?: PaceToRevertTo | undefined;
 }
 
 /** The Flat Pace in the header: shows it, or invites to set it, and opens a small form. */
-export function FlatPaceSetting({ source, revertTo }: FlatPaceSettingProps = {}) {
+export function FlatPaceSetting({ source, attribution, revertTo }: FlatPaceSettingProps = {}) {
   const { t } = useTranslation();
   const { system } = useUnits();
   const format = useFormatters();
@@ -39,18 +41,17 @@ export function FlatPaceSetting({ source, revertTo }: FlatPaceSettingProps = {})
         aria-label={
           currentPace === undefined
             ? undefined
-            : source === undefined
-              ? t('pace.current', { pace: currentPace })
-              : t('pace.currentFrom', { pace: currentPace, source })
+            : t(source === undefined ? 'pace.current' : 'pace.currentFrom', {
+                pace: currentPace,
+                source,
+              })
         }
         onClick={isSettingOpen ? closeSetting : openSetting}
         className="rounded-full bg-white px-2.5 py-1.5 text-sm whitespace-nowrap shadow-sm ring-1 ring-pine/15 focus-visible:outline-2 focus-visible:outline-pine sm:px-3"
       >
         {currentPace === undefined
           ? t('pace.unset')
-          : source === undefined
-            ? currentPace
-            : `${currentPace} · ${source}`}
+          : [currentPace, source].filter(Boolean).join(' · ')}
       </button>
       {isSettingOpen && (
         <PaceForm
@@ -60,6 +61,7 @@ export function FlatPaceSetting({ source, revertTo }: FlatPaceSettingProps = {})
             closeSetting();
           }}
           onClose={closeSetting}
+          attribution={source === undefined ? undefined : attribution}
           {...(revertTo && {
             revertTo: {
               ...revertTo,
@@ -80,9 +82,10 @@ interface PaceFormProps {
   readonly onSave: (secondsPerKm: number) => void;
   readonly onClose: () => void;
   readonly revertTo?: PaceToRevertTo;
+  readonly attribution?: ReactNode;
 }
 
-function PaceForm({ initial, onSave, onClose, revertTo }: PaceFormProps) {
+function PaceForm({ initial, onSave, onClose, revertTo, attribution }: PaceFormProps) {
   const { t } = useTranslation();
   const { system } = useUnits();
   const format = useFormatters();
@@ -150,6 +153,7 @@ function PaceForm({ initial, onSave, onClose, revertTo }: PaceFormProps) {
           {t('pace.save')}
         </Button>
       </form>
+      {attribution && <div className="mt-2">{attribution}</div>}
       {revertTo && (
         <Button
           type="button"

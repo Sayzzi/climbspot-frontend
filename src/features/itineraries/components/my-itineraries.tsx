@@ -74,11 +74,9 @@ interface SavedItineraryItemProps {
 }
 
 function SavedItineraryItem({ itinerary, selected, onSelect }: SavedItineraryItemProps) {
-  const { t, i18n } = useTranslation('itineraries');
+  const { t } = useTranslation('itineraries');
   const format = useFormatters();
-  const savedOn = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(
-    new Date(itinerary.savedAt),
-  );
+  const savedOn = format.date(itinerary.savedAt);
 
   return (
     <button

@@ -6,13 +6,7 @@ import { errorMessageKey } from '@/shared/api/error-message';
 import { SignedInOnly } from '@/shared/auth';
 
 import { useConnectStrava } from '../api/strava';
-
-/** What Strava sends the Visitor back with: a code and the state, or why not. */
-export interface StravaReturn {
-  readonly code?: string | undefined;
-  readonly state?: string | undefined;
-  readonly error?: string | undefined;
-}
+import type { StravaReturn } from '../strava-return';
 
 const linkClassName = 'font-semibold text-pine underline underline-offset-2';
 

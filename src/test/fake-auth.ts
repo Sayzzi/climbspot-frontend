@@ -45,7 +45,17 @@ export const authClient: AuthClient = {
 export const fakeAuth = {
   /** Starts the test signed in (call before rendering) or signs in during it. */
   signIn(email = 'ada@example.com') {
-    current = { accessToken: FAKE_TOKEN, email };
+    current = { visitorId: `visitor-${email}`, accessToken: FAKE_TOKEN, email };
+    act(() => {
+      notify({ session: current, expired: false });
+    });
+  },
+  /** Renews the signed-in Visitor's token, as Supabase does about every hour. */
+  renewToken() {
+    if (!current) {
+      throw new Error('Nobody is signed in.');
+    }
+    current = { ...current, accessToken: `${FAKE_TOKEN}-renewed` };
     act(() => {
       notify({ session: current, expired: false });
     });

@@ -53,7 +53,9 @@ describe('Ascent Times', () => {
       throw new Error('two Ascents expected');
     }
     expect(await within(mur).findByText('Your best: 5:12 · up 3 times')).toBeInTheDocument();
+    expect(within(mur).getByText('Powered by Strava')).toBeInTheDocument();
     expect(within(bosse).queryByText(/Your best/)).not.toBeInTheDocument();
+    expect(within(bosse).queryByText('Powered by Strava')).not.toBeInTheDocument();
   });
 
   it('list every Ascent Time on the Ascent’s page, newest first, the best marked', async () => {

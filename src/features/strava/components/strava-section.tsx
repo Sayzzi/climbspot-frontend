@@ -5,6 +5,7 @@ import { ApiRequestError } from '@/shared/api/request';
 import { useAuth } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { useFormatters } from '@/shared/units';
 import { ConnectWithStrava, PoweredByStrava } from '@/shared/ui/strava-brand';
 
 import {
@@ -117,13 +118,10 @@ function Connected({ connection }: { readonly connection: StravaConnection }) {
 }
 
 function Synchronise({ connection }: { readonly connection: StravaConnection }) {
-  const { t, i18n } = useTranslation('strava');
+  const { t } = useTranslation('strava');
+  const format = useFormatters();
   const sync = useSyncStrava();
-  const lastSync =
-    connection.lastSyncAt &&
-    new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(
-      new Date(connection.lastSyncAt),
-    );
+  const lastSync = connection.lastSyncAt && format.date(connection.lastSyncAt);
   // Strava down or its limits reached: nothing to retry now, the import carries on later.
   const unavailable =
     sync.error instanceof ApiRequestError && sync.error.code === 'STRAVA_UNAVAILABLE';
@@ -134,6 +132,10 @@ function Synchronise({ connection }: { readonly connection: StravaConnection }) 
         {t('sync.state', { count: connection.recordedRuns })}
         {lastSync && ` · ${t('sync.last', { date: lastSync })}`}
       </p>
+      {/* Never synchronised in full: the first import stopped at Strava's limits. */}
+      {connection.lastSyncAt === null && !sync.isPending && (
+        <p className="rounded-lg bg-lichen p-3 text-sm">{t('sync.incomplete')}</p>
+      )}
       <Button
         type="button"
         variant="secondary"

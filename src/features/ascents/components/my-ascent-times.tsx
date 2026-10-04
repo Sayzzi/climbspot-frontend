@@ -8,7 +8,7 @@ import { useMyAscentTimes } from '../api/my-ascent-times';
 
 /** The signed-in Visitor's own Ascent Times on an Ascent; nothing without any. */
 export function MyAscentTimes({ ascentId }: { readonly ascentId: string }) {
-  const { t, i18n } = useTranslation('ascents');
+  const { t } = useTranslation('ascents');
   const format = useFormatters();
   const { data: times } = useMyAscentTimes(ascentId);
   const headingId = useId();
@@ -17,7 +17,6 @@ export function MyAscentTimes({ ascentId }: { readonly ascentId: string }) {
     return null;
   }
   const best = Math.min(...times.map((time) => time.seconds));
-  const date = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' });
 
   return (
     <section aria-labelledby={headingId} className="rounded-xl bg-white p-4">
@@ -28,7 +27,7 @@ export function MyAscentTimes({ ascentId }: { readonly ascentId: string }) {
         {times.map((time) => (
           <li key={time.startedAt} className="flex items-baseline gap-3 py-1.5">
             <time dateTime={time.startedAt} className="w-28 text-ink-muted">
-              {date.format(new Date(time.startedAt))}
+              {format.date(time.startedAt)}
             </time>{' '}
             <span className="font-semibold tabular-nums">{format.clock(time.seconds)}</span>
             {time.seconds === best && (

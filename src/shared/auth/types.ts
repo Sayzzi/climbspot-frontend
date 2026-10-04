@@ -1,6 +1,8 @@
 /** A signed-in Visitor's session, as far as the app needs it. */
 export interface AuthSession {
-  /** Sent to the API to prove who the Visitor is. */
+  /** Who is signed in: the same across the session, while its token is renewed. */
+  readonly visitorId: string;
+  /** Sent to the API to prove who the Visitor is; renewed about every hour. */
   readonly accessToken: string;
   readonly email: string | undefined;
 }

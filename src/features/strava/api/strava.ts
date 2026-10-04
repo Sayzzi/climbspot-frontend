@@ -1,4 +1,10 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from '@tanstack/react-query';
 
 import { apiClient } from '@/shared/api/client';
 import { unwrap, unwrapEmpty } from '@/shared/api/request';
@@ -7,29 +13,41 @@ import { leaveFor } from '@/shared/lib/leave-for';
 
 import type { StravaConnection } from '../types';
 
-const connectionQuery = (token: string) =>
+const CONNECTION = 'strava-connection';
+
+// Keyed by who is signed in: another Visitor never sees this one's connection.
+const connectionQuery = (visitorId: string) =>
   queryOptions({
-    queryKey: ['strava-connection', token],
+    queryKey: [CONNECTION, visitorId],
     queryFn: async () => unwrap(apiClient.GET('/strava/connection')),
   });
 
-function useToken() {
+function useVisitor() {
   const { session } = useAuth();
-  return { signedIn: session !== undefined, token: session?.accessToken ?? '' };
+  return { signedIn: session !== undefined, visitorId: session?.visitorId ?? '' };
+}
+
+/**
+ * Fetches again what Strava feeds, now that the connection changed: the account's
+ * Flat Pace, the Ascent Times on Ascents.
+ */
+function refreshWhatStravaGives(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] !== CONNECTION });
 }
 
 /** The signed-in Visitor's Strava Connection; nothing while signed out. */
 export function useStravaConnection() {
-  const { signedIn, token } = useToken();
-  return useQuery({ ...connectionQuery(token), enabled: signedIn });
+  const { signedIn, visitorId } = useVisitor();
+  return useQuery({ ...connectionQuery(visitorId), enabled: signedIn });
 }
 
-/** Keeps the connection the API answered with, as the one shown. */
-function useKeepConnection() {
+/** Keeps the connection the API answered with, as the one shown, and what it feeds. */
+function useConnectionChanged() {
   const queryClient = useQueryClient();
-  const { token } = useToken();
-  return (connection: StravaConnection) => {
-    queryClient.setQueryData(connectionQuery(token).queryKey, connection);
+  const { visitorId } = useVisitor();
+  return async (connection: StravaConnection) => {
+    queryClient.setQueryData(connectionQuery(visitorId).queryKey, connection);
+    await refreshWhatStravaGives(queryClient);
   };
 }
 
@@ -45,21 +63,20 @@ export function useAuthorizeStrava() {
 
 /** Makes the connection with the code Strava sent the Visitor back with. */
 export function useConnectStrava() {
-  const keep = useKeepConnection();
+  const changed = useConnectionChanged();
   return useMutation({
     mutationFn: (returned: { code: string; state: string }) =>
       unwrap(apiClient.POST('/strava/connection', { body: returned })),
-    onSuccess: keep,
+    onSuccess: changed,
   });
 }
 
 /** Ends the connection: ClimbSpot erases everything it had from Strava. */
 export function useEndStravaConnection() {
   const queryClient = useQueryClient();
-  const { token } = useToken();
   return useMutation({
     mutationFn: () => unwrapEmpty(apiClient.DELETE('/strava/connection')),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: connectionQuery(token).queryKey }),
+    onSuccess: () => queryClient.invalidateQueries(),
   });
 }
 
@@ -69,16 +86,11 @@ export function useEndStravaConnection() {
  */
 export function useSyncStrava() {
   const queryClient = useQueryClient();
-  const keep = useKeepConnection();
-  const { token } = useToken();
+  const changed = useConnectionChanged();
+  const { visitorId } = useVisitor();
   return useMutation({
     mutationFn: () => unwrap(apiClient.POST('/strava/sync')),
-    onSuccess: async (connection) => {
-      keep(connection);
-      await queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] !== 'strava-connection',
-      });
-    },
-    onError: () => queryClient.invalidateQueries({ queryKey: connectionQuery(token).queryKey }),
+    onSuccess: changed,
+    onError: () => queryClient.invalidateQueries({ queryKey: connectionQuery(visitorId).queryKey }),
   });
 }

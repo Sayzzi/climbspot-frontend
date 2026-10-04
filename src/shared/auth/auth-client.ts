@@ -5,7 +5,9 @@ import { env } from '@/shared/config/env';
 import type { AuthChange, AuthClient, AuthSession } from './types';
 
 const toSession = (session: Session | null): AuthSession | undefined =>
-  session ? { accessToken: session.access_token, email: session.user.email } : undefined;
+  session
+    ? { visitorId: session.user.id, accessToken: session.access_token, email: session.user.email }
+    : undefined;
 
 function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
   // Picks up the session from the link or Google's redirect on its own.

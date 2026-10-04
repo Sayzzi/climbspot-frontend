@@ -8,6 +8,7 @@ import { useFormatters } from '@/shared/units';
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import type { NearbyAscent } from '../types';
 import { FactList } from '@/shared/ui/fact-list';
+import { PoweredByStrava } from '@/shared/ui/strava-brand';
 
 interface AscentListItemProps {
   readonly ascent: NearbyAscent;
@@ -64,12 +65,15 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
           ]}
         />
         {ascent.myAscentTimes && (
-          <p className="mt-2 text-sm font-semibold text-moss">
-            {t('myTimes.summary', {
-              time: format.clock(ascent.myAscentTimes.best),
-              count: ascent.myAscentTimes.count,
-            })}
-          </p>
+          <div className="mt-2 flex flex-wrap items-baseline gap-x-3">
+            <p className="text-sm font-semibold text-moss">
+              {t('myTimes.summary', {
+                time: format.clock(ascent.myAscentTimes.best),
+                count: ascent.myAscentTimes.count,
+              })}
+            </p>
+            <PoweredByStrava />
+          </div>
         )}
         <AscentLink ascent={ascent} className="mt-3 inline-block" />
       </article>

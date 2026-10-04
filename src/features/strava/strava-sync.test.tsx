@@ -83,6 +83,35 @@ describe('Synchronising Recorded Runs', () => {
     expect(strava.requestsTo('POST', '/strava/sync')).toHaveLength(1);
   });
 
+  it('does not synchronise again as the session’s token is renewed', async () => {
+    const strava = stravaApi(aStravaConnection());
+    fakeAuth.signIn();
+    await renderApp('/');
+    await waitFor(() => {
+      expect(strava.requestsTo('POST', '/strava/sync')).toHaveLength(1);
+    });
+
+    fakeAuth.renewToken();
+    await screen.findByRole('button', { name: 'Ada’s menu' });
+
+    expect(strava.requestsTo('POST', '/strava/sync')).toHaveLength(1);
+  });
+
+  it('does not synchronise again when the page reloads', async () => {
+    const strava = stravaApi(aStravaConnection());
+    fakeAuth.signIn();
+    const first = await renderApp('/');
+    await waitFor(() => {
+      expect(strava.requestsTo('POST', '/strava/sync')).toHaveLength(1);
+    });
+    first.unmount();
+
+    await renderApp('/');
+    await screen.findByRole('button', { name: 'Ada’s menu' });
+
+    expect(strava.requestsTo('POST', '/strava/sync')).toHaveLength(1);
+  });
+
   it('says the import will carry on when Strava is unavailable', async () => {
     stravaApi(aStravaConnection(), {
       sync: () => apiErrorResponse(503, 'STRAVA_UNAVAILABLE'),

@@ -6,9 +6,9 @@ import { useAuth } from '@/shared/auth';
 
 import type { AccountChanges } from '../types';
 
-const myAccountQuery = (token: string) =>
+const myAccountQuery = (visitorId: string) =>
   queryOptions({
-    queryKey: ['me', token],
+    queryKey: ['me', visitorId],
     queryFn: async () => unwrap(apiClient.GET('/me')),
   });
 
@@ -16,7 +16,7 @@ const myAccountQuery = (token: string) =>
 export function useMyAccount() {
   const { session } = useAuth();
   return useQuery({
-    ...myAccountQuery(session?.accessToken ?? ''),
+    ...myAccountQuery(session?.visitorId ?? ''),
     enabled: session !== undefined,
   });
 }
@@ -29,7 +29,7 @@ export function useUpdateMyAccount() {
     mutationFn: async (changes: AccountChanges) =>
       unwrap(apiClient.PATCH('/me', { body: changes })),
     onSuccess: (account) => {
-      queryClient.setQueryData(myAccountQuery(session?.accessToken ?? '').queryKey, account);
+      queryClient.setQueryData(myAccountQuery(session?.visitorId ?? '').queryKey, account);
     },
   });
 }

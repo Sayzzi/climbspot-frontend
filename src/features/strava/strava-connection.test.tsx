@@ -147,3 +147,90 @@ describe('Coming back from Strava', () => {
     );
   });
 });
+
+describe('What Strava gives, as the connection comes and goes', () => {
+  const paceButton = () =>
+    within(screen.getByRole('banner')).getByRole('button', { name: /^(Set pace|Flat pace: .+)$/ });
+
+  /** The account and the Strava Connection, Strava's Flat Pace following the connection. */
+  function connectionWithPace(connected: boolean) {
+    let isConnected = connected;
+    const changes: unknown[] = [];
+    const account = () =>
+      anAccount(
+        isConnected
+          ? { flatPace: 312, flatPaceSource: 'strava', stravaFlatPace: 312 }
+          : { flatPace: null, flatPaceSource: null, stravaFlatPace: null },
+      );
+    server.use(
+      handlers.me(() => HttpResponse.json(account())),
+      handlers.updateMe(async (request) => {
+        changes.push(await request.json());
+        return HttpResponse.json(account());
+      }),
+    );
+    const strava = stravaApi(connected ? aStravaConnection() : undefined, {
+      connect: () => {
+        isConnected = true;
+        strava.set(aStravaConnection());
+        return HttpResponse.json(aStravaConnection());
+      },
+      end: () => {
+        isConnected = false;
+        strava.set({
+          status: 'none',
+          athlete: null,
+          connectedAt: null,
+          lastSyncAt: null,
+          recordedRuns: 0,
+        });
+        return new HttpResponse(null, { status: 204 }) as never;
+      },
+    });
+    return { changes };
+  }
+
+  it('lets go of Strava’s Flat Pace when the connection ends', async () => {
+    const { changes } = connectionWithPace(true);
+    fakeAuth.signIn();
+    const { user } = await openAccount();
+    await waitFor(() => {
+      expect(paceButton()).toHaveAccessibleName('Flat pace: 5:12/km, from Strava');
+    });
+
+    await user.click(await section().findByRole('button', { name: 'End the connection' }));
+    await user.click(section().getByRole('button', { name: 'Yes, end it' }));
+
+    await waitFor(() => {
+      expect(paceButton()).toHaveAccessibleName('Set pace');
+    });
+    fakeAuth.renewToken();
+    await section().findByRole('button', { name: 'Connect with Strava' });
+    expect(changes).toEqual([]);
+  });
+
+  it('takes up Strava’s Flat Pace once connected', async () => {
+    connectionWithPace(false);
+    fakeAuth.signIn();
+    await renderApp('/strava/callback?code=the-code&state=the-state');
+
+    await waitFor(() => {
+      expect(paceButton()).toHaveAccessibleName('Flat pace: 5:12/km, from Strava');
+    });
+  });
+
+  it('says when the first import stopped at Strava’s limits', async () => {
+    // Strava's limits are still reached when signing in synchronises.
+    stravaApi(aStravaConnection({ lastSyncAt: null, recordedRuns: 4 }), {
+      sync: () => apiErrorResponse(503, 'STRAVA_UNAVAILABLE'),
+    });
+    signedIn();
+    await openAccount();
+
+    expect(
+      await section().findByText(
+        'Not all your runs are imported yet: Strava’s limits were reached. The import carries on at the next synchronisation.',
+      ),
+    ).toBeVisible();
+  });
+});

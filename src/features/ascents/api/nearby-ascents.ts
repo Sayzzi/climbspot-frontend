@@ -23,7 +23,7 @@ export function useNearbyAscents(criteria: NearbyCriteria | undefined) {
   const { session } = useAuth();
 
   return useQuery({
-    queryKey: ['ascents', 'nearby', session?.accessToken ?? null, query ?? null],
+    queryKey: ['ascents', 'nearby', session?.visitorId ?? null, query ?? null],
     queryFn: query
       ? async ({ signal }) =>
           (await unwrap(apiClient.GET('/ascents/nearby', { params: { query }, signal }))).ascents

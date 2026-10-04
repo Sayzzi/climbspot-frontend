@@ -27,6 +27,8 @@
   --color-ink-muted: var(--color-granite);
   --color-start: var(--color-moss);
   --color-danger: #a82828;
+  /* Strava's orange, as its brand guidelines require for its button and marks. */
+  --color-strava: #fc5200;
 }
 
 /* Read at runtime by the map, which cannot use utility classes: always emitted. */

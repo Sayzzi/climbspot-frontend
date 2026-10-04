@@ -23,6 +23,7 @@
     "last": "last synchronised {{date}}",
     "action": "Synchronise",
     "pending": "Synchronising…",
-    "unavailable": "Strava is unavailable right now, or its limits are reached: the import carries on at the next synchronisation."
+    "unavailable": "Strava is unavailable right now, or its limits are reached: the import carries on at the next synchronisation.",
+    "incomplete": "Not all your runs are imported yet: Strava’s limits were reached. The import carries on at the next synchronisation."
   }
 }

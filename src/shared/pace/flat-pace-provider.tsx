@@ -15,6 +15,10 @@ export function FlatPaceProvider({ children }: { readonly children: ReactNode })
         setSecondsPerKmState(next);
         storeFlatPace(next);
       },
+      clearSecondsPerKm: () => {
+        setSecondsPerKmState(undefined);
+        storeFlatPace(undefined);
+      },
       isSettingOpen,
       openSetting: () => {
         setSettingOpen(true);

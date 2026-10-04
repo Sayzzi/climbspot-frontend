@@ -1,15 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
 
-import { StravaCallback } from '@/features/strava';
-
-/** What Strava adds to the address when it sends the Visitor back. */
-const stravaReturnSchema = z.object({
-  code: z.string().optional(),
-  state: z.string().optional(),
-  error: z.string().optional(),
-});
+import { StravaCallback, stravaReturnSchema } from '@/features/strava';
 
 export const Route = createFileRoute('/strava/callback')({
   validateSearch: stravaReturnSchema,

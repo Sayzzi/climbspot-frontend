@@ -8,6 +8,7 @@ import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
 import { buttonVariants } from '@/shared/ui/button-variants';
 import { FlatPaceSetting } from '@/shared/pace';
+import { PoweredByStrava } from '@/shared/ui/strava-brand';
 import { UnitSwitch } from '@/shared/units';
 
 export interface RouterContext {
@@ -46,7 +47,7 @@ function RootLayout() {
             {t('app.name')}
           </Link>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <FlatPaceSetting {...paceSource} />
+            <FlatPaceSetting {...paceSource} attribution={<PoweredByStrava />} />
             <UnitSwitch />
             {/* On phones, adding a climb lives in the account menu. */}
             <Link

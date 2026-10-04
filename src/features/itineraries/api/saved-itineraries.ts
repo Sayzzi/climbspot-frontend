@@ -7,7 +7,7 @@ import { useAuth } from '@/shared/auth';
 import type { Proposal, SavedItinerary, SavedItinerarySummary } from '../types';
 import { proposalWithPairs } from './with-pairs';
 
-// Keyed by the session's token: another Visitor signing in never sees these.
+// Keyed by who is signed in: another Visitor signing in never sees these.
 const savedKey = (token: string) => ['saved-itineraries', token] as const;
 
 const savedListQuery = (token: string) =>
@@ -28,26 +28,26 @@ const savedItineraryQuery = (token: string, id: string) =>
     },
   });
 
-function useToken() {
+function useVisitor() {
   const { session } = useAuth();
-  return { signedIn: session !== undefined, token: session?.accessToken ?? '' };
+  return { signedIn: session !== undefined, token: session?.visitorId ?? '' };
 }
 
 /** The signed-in Visitor's Saved Itineraries, newest first; nothing while signed out. */
 export function useSavedItineraries() {
-  const { signedIn, token } = useToken();
+  const { signedIn, token } = useVisitor();
   return useQuery({ ...savedListQuery(token), enabled: signedIn });
 }
 
 /** One of the signed-in Visitor's Saved Itineraries, with its proposal. */
 export function useSavedItinerary(id: string | undefined) {
-  const { signedIn, token } = useToken();
+  const { signedIn, token } = useVisitor();
   return useQuery({ ...savedItineraryQuery(token, id ?? ''), enabled: signedIn && !!id });
 }
 
 function useSavedItinerariesChange<T>(change: (variables: T) => Promise<unknown>) {
   const queryClient = useQueryClient();
-  const { token } = useToken();
+  const { token } = useVisitor();
   return useMutation({
     mutationFn: change,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: savedKey(token) }),

@@ -8,7 +8,7 @@ import { useAuth } from '@/shared/auth';
 export function useMyAscentTimes(ascentId: string) {
   const { session } = useAuth();
   return useQuery({
-    queryKey: ['ascents', ascentId, 'my-times', session?.accessToken ?? null],
+    queryKey: ['ascents', ascentId, 'my-times', session?.visitorId ?? null],
     queryFn: async ({ signal }) =>
       (
         await unwrap(

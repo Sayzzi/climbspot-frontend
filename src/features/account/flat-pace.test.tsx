@@ -142,6 +142,21 @@ describe('Flat Pace from Strava', () => {
     expect(paceButton()).toHaveTextContent('5:12/km · Strava');
   });
 
+  it('is powered by Strava, as the Flat Pace setting says', async () => {
+    accountWithStrava({ strava: 312 });
+    fakeAuth.signIn();
+    const { user } = await renderApp('/');
+    await waitFor(() => {
+      expect(paceButton()).toHaveAccessibleName('Flat pace: 5:12/km, from Strava');
+    });
+
+    await user.click(paceButton());
+
+    expect(
+      within(screen.getByRole('dialog', { name: 'Flat pace' })).getByText('Powered by Strava'),
+    ).toBeVisible();
+  });
+
   it('gives way to a pace the Visitor sets', async () => {
     const changes = accountWithStrava({ strava: 312 });
     fakeAuth.signIn();

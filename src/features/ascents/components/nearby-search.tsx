@@ -116,6 +116,7 @@ export function NearbySearch({
         onMarkerSelect={setSelectedId}
         onAreaChange={setMovedTo}
         interactive={!behindWelcome}
+        covered={panelCover()}
         // Zoom buttons sit below the floating header (beating MapLibre's own stylesheet).
         className="size-full rounded-none [&_.maplibregl-ctrl-top-right]:top-16!"
       />
@@ -180,4 +181,14 @@ function SelectedAscent({ ascent }: { readonly ascent: NearbyAscent }) {
       <AscentLink ascent={ascent} />
     </section>
   );
+}
+
+/**
+ * What the search panel and the header cover of the map: a column on the left on wide
+ * screens, the lower part of the screen on phones (as the panel's classes lay it out).
+ */
+function panelCover() {
+  const wide =
+    typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 1024px)').matches;
+  return wide ? { top: 64, left: 416 } : { top: 64, bottom: Math.round(window.innerHeight * 0.55) };
 }

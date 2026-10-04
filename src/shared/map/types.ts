@@ -40,5 +40,15 @@ export interface MapViewProps {
   readonly interactive?: boolean;
   /** Called with the new centre once the Visitor (not the app) has moved the map. */
   readonly onAreaChange?: (center: Position) => void;
+  /**
+   * Pixels of the map hidden by what floats over it (a panel, the header): a new line
+   * is framed clear of them.
+   */
+  readonly covered?: {
+    readonly top?: number;
+    readonly right?: number;
+    readonly bottom?: number;
+    readonly left?: number;
+  };
   readonly className?: string;
 }

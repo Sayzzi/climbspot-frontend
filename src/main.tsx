@@ -1,7 +1,5 @@
-import '@fontsource/barlow/400.css';
-import '@fontsource/barlow/500.css';
-import '@fontsource/barlow/600.css';
-import '@fontsource/barlow-condensed/600.css';
+import '@fontsource-variable/atkinson-hyperlegible-next';
+import '@fontsource/barlow-condensed/700.css';
 import '@fontsource/barlow-condensed/800.css';
 import '@/app/styles.css';
 import '@/shared/i18n/i18n';

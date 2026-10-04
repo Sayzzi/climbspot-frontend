@@ -20,7 +20,7 @@ export function EstimatedTime({
       <button
         type="button"
         onClick={openSetting}
-        className="text-left font-medium text-moss underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-pine"
+        className="text-left font-medium text-moss underline underline-offset-2 focus-visible:outline-3 focus-visible:outline-pine"
       >
         {t('pace.invite')}
       </button>

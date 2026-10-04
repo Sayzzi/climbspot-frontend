@@ -5,19 +5,40 @@
  * through Tailwind utilities (e.g. `bg-pine`, `text-ink-muted`), never raw values.
  */
 @theme {
-  --font-sans: 'Barlow', ui-sans-serif, system-ui, sans-serif;
+  /* Designed for legibility (Braille Institute): text, figures and forms. */
+  --font-sans: 'Atkinson Hyperlegible Next Variable', ui-sans-serif, system-ui, sans-serif;
   /* Condensed signpost lettering, for the name and headings. */
-  --font-display: 'Barlow Condensed', 'Barlow', ui-sans-serif, sans-serif;
+  --font-display: 'Barlow Condensed', ui-sans-serif, sans-serif;
 
-  /* Stone and lichen: backgrounds. */
-  --color-lichen: #e9ece6;
+  /* A 1.25 (major third) scale from 16 px; `sm` stays for dense interface text. */
+  --text-xs: 0.8rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.45;
+  --text-base: 1rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.5625rem;
+  --text-xl--line-height: 1.25;
+  --text-2xl: 1.953rem;
+  --text-2xl--line-height: 1.15;
+  --text-3xl: 2.441rem;
+  --text-3xl--line-height: 1.1;
+  --text-4xl: 3.052rem;
+  --text-4xl--line-height: 1.05;
+  --text-5xl: 3.815rem;
+  --text-5xl--line-height: 1;
+
+  /* Lichen on stone: backgrounds. */
+  --color-lichen: #eef1ea;
   /* Forest: text and dark surfaces. */
-  --color-pine: #1f3a2e;
+  --color-pine: #17332a;
   /* Secondary greens: selected filters, the Start of an Ascent. */
-  --color-moss: #5f6d40;
-  /* Muted text, dark enough for 4.5:1 on lichen. */
-  --color-granite: #5c6057;
-  /* Hiking signpost yellow: the main action on a screen. */
+  --color-moss: #56683a;
+  /* Muted text, at least 4.5:1 on lichen and on white. */
+  --color-granite: #525a50;
+  /* Hiking signpost yellow: the one main action on a screen, with pine text. */
   --color-signpost: #f2c230;
   /* Red waymark of long-distance trails: routes and Starts on maps. */
   --color-blaze: #c62f2f;
@@ -44,6 +65,29 @@
   h1,
   h2,
   h3 {
-    @apply font-display;
+    @apply font-display font-bold;
+  }
+
+  /* One clearly visible focus for every control, kept off the page by its offset. */
+  :focus-visible {
+    outline: 3px solid var(--color-pine);
+    outline-offset: 2px;
+  }
+
+  /* Measurements line up in lists and tables. */
+  dd,
+  td {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

@@ -47,7 +47,7 @@ export function FlatPaceSetting({ source, attribution, revertTo }: FlatPaceSetti
               })
         }
         onClick={isSettingOpen ? closeSetting : openSetting}
-        className="rounded-full bg-white px-2.5 py-1.5 text-sm whitespace-nowrap shadow-sm ring-1 ring-pine/15 focus-visible:outline-2 focus-visible:outline-pine sm:px-3"
+        className="rounded-full bg-white px-2.5 py-1.5 text-sm whitespace-nowrap shadow-sm ring-1 ring-pine/15 focus-visible:outline-3 focus-visible:outline-pine sm:px-3"
       >
         {currentPace === undefined
           ? t('pace.unset')
@@ -136,7 +136,7 @@ function PaceForm({ initial, onSave, onClose, revertTo, attribution }: PaceFormP
           }}
           aria-invalid={problem !== undefined}
           aria-describedby={problem === undefined ? undefined : problemId}
-          className="rounded-md border border-pine/25 px-2 py-1.5 focus-visible:outline-2 focus-visible:outline-pine"
+          className="rounded-md border border-pine/25 px-2 py-1.5 focus-visible:outline-3 focus-visible:outline-pine"
         />
         {problem !== undefined && (
           <p id={problemId} role="alert" className="text-danger">

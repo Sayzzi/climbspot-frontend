@@ -16,7 +16,7 @@ export function ConnectWithStrava({ onClick, disabled = false }: ConnectWithStra
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'inline-flex h-12 items-center rounded-md bg-strava px-5 font-bold text-white shadow-sm hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine disabled:opacity-60',
+        'inline-flex h-12 items-center rounded-md bg-strava px-5 font-bold text-white shadow-sm hover:brightness-95 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-pine disabled:opacity-60',
       )}
     >
       {t('strava.connect')}

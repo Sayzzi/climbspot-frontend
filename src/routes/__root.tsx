@@ -13,6 +13,7 @@ import { useStravaSyncOnSignIn } from '@/features/strava';
 import { useScrollProgress } from '@/shared/hooks/use-scroll-progress';
 import { cn } from '@/shared/lib/cn';
 import { buttonVariants } from '@/shared/ui/button-variants';
+import { LogoMark } from '@/shared/ui/logo';
 import { FlatPaceSetting } from '@/shared/pace';
 import { PoweredByStrava } from '@/shared/ui/strava-brand';
 import { UnitSwitch } from '@/shared/units';
@@ -39,6 +40,17 @@ function RootLayout() {
 
   return (
     <div className="flex min-h-dvh flex-col">
+      <a
+        href="#content"
+        // Not every browser moves the focus to an anchor's target: move it here.
+        onClick={(event) => {
+          event.preventDefault();
+          document.getElementById('content')?.focus();
+        }}
+        className="sr-only z-50 rounded-md bg-signpost px-4 py-3 font-semibold text-pine focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+      >
+        {t('nav.skip')}
+      </a>
       <header
         className={cn(
           'fixed inset-x-0 top-0 z-20',
@@ -49,8 +61,9 @@ function RootLayout() {
           <Link
             to="/"
             style={{ opacity: brandOpacity }}
-            className="font-display text-2xl font-extrabold text-pine focus-visible:outline-2 focus-visible:outline-pine"
+            className="flex min-h-11 items-center gap-2 font-display text-2xl font-extrabold text-pine"
           >
+            <LogoMark />
             {t('app.name')}
           </Link>
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -71,7 +84,14 @@ function RootLayout() {
         </nav>
         <SessionNotice />
       </header>
-      <main className={cn('flex-1', !isHome && 'mx-auto w-full max-w-5xl px-4 pt-24 pb-12')}>
+      <main
+        id="content"
+        tabIndex={-1}
+        className={cn(
+          'flex-1 focus:outline-none',
+          !isHome && 'mx-auto w-full max-w-5xl px-4 pt-24 pb-12',
+        )}
+      >
         <Outlet />
       </main>
     </div>

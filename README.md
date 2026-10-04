@@ -96,17 +96,13 @@ Tests act like a Visitor: they render the whole app at a URL (`renderApp` in `sr
 
 ## Styling
 
-The **Balise** theme borrows from trail signage: lichen and pine for surfaces and text, moss for selections, hiking-signpost yellow (`signpost`) for the one main action of a screen, and the red waymark of long-distance trails (`blaze`) for routes and Starts on maps. Headings and the app's name use Barlow Condensed (signpost lettering), text uses Barlow; both are self-hosted with `@fontsource`.
+The **Balise** identity borrows from trail signage. Tokens are declared once in `src/app/styles.css` (`@theme`) and components use only token-based utilities, never raw values:
 
-The home page opens on the app's name over a veiled map; scrolling dissolves the name in place and reveals the map, with results and filters in a tabbed panel (a bottom sheet on small screens). The map only takes zoom and pan gestures once revealed.
-
-Tailwind CSS v4 with design tokens declared once in `src/app/styles.css` (`@theme`). Components only use token-based utilities (`bg-pine`, `text-ink-muted`), never raw colour values. Why Tailwind over the alternatives:
-
-- **vs. CSS Modules / BEM**: styles live next to the markup they affect, there is no naming to maintain and no dead CSS. Tokens prevent the one-off values that utilities are often blamed for.
-- **vs. styled-components / CSS-in-JS**: no runtime cost, no extra bundle and no server-rendering pitfalls. Most CSS-in-JS libraries are in maintenance mode.
-- **Variants** are declared with `class-variance-authority` (`src/shared/ui/button-variants.ts`), and `cn()` merges caller classes so later utilities win.
-- Prettier sorts classes automatically (`prettier-plugin-tailwindcss`).
-- Third-party stylesheets (e.g. the map library) are imported as plain CSS.
+- **Colours**: lichen (backgrounds), pine (text and dark surfaces), granite (secondary text, AA on lichen and white), signpost yellow (the one main action of a screen, with pine text), waymark red (`blaze`: routes and Starts on maps), moss (selections, Starts).
+- **Type**: Barlow Condensed for the name and headings, in sentence case, like signpost lettering; Atkinson Hyperlegible Next for text, chosen for legibility, with tabular figures for measurements. A 1.25 type scale from 16 px; lines under about 70 characters. Both self-hosted with `@fontsource`.
+- **Mark**: a red-and-white waymark set on a contour line (`LogoMark`), also the favicon and app icons. The elevation profile and contour lines are the identity's motif, spent in one place at a time.
+- **Accessibility**: WCAG 2.2 AA. A "Skip to content" link, one clearly visible focus (3 px pine outline, offset), controls at least 44 px high, motion off under `prefers-reduced-motion`. Every main page runs axe in the tests (`expectAccessible`); colour contrast, which jsdom cannot compute, is checked in the browser.
+- **Motion**: answers what the Visitor does (opening, switching, confirming); the only motion not triggered by the Visitor is the home page's opening sequence.
 
 ## Internationalisation
 

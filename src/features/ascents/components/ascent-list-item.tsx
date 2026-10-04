@@ -39,7 +39,7 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
               onClick={() => {
                 onSelect(ascent.id);
               }}
-              className="text-left hover:underline focus-visible:outline-2 focus-visible:outline-pine"
+              className="text-left hover:underline focus-visible:outline-3 focus-visible:outline-pine"
             >
               {ascent.name}
             </button>
@@ -98,7 +98,7 @@ export function AscentLink({
       state={{ fromSearch: true }}
       aria-label={t('search.viewDetails', { name: ascent.name })}
       className={cn(
-        'text-sm font-semibold text-pine underline decoration-pine/30 underline-offset-4 hover:decoration-pine focus-visible:outline-2 focus-visible:outline-pine',
+        'text-sm font-semibold text-pine underline decoration-pine/30 underline-offset-4 hover:decoration-pine focus-visible:outline-3 focus-visible:outline-pine',
         className,
       )}
     >

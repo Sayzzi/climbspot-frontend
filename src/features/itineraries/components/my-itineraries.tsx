@@ -85,7 +85,7 @@ function SavedItineraryItem({ itinerary, selected, onSelect }: SavedItineraryIte
       aria-label={t('show', { name: itinerary.name })}
       onClick={onSelect}
       className={cn(
-        'flex w-full flex-col border-l-4 px-3 py-2 text-left focus-visible:outline-2 focus-visible:outline-pine',
+        'flex w-full flex-col border-l-4 px-3 py-2 text-left focus-visible:outline-3 focus-visible:outline-pine',
         selected ? 'border-blaze bg-lichen/60' : 'border-transparent hover:bg-lichen/40',
       )}
     >

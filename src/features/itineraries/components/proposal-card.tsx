@@ -35,7 +35,7 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
           aria-pressed={selected}
           aria-label={t('show', { name })}
           onClick={onSelect}
-          className="text-left hover:underline focus-visible:outline-2 focus-visible:outline-pine"
+          className="text-left hover:underline focus-visible:outline-3 focus-visible:outline-pine"
         >
           {name}
         </button>

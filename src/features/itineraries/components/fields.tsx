@@ -10,7 +10,7 @@ import {
 } from '@/shared/units';
 
 export const selectClassName =
-  'w-full rounded-md border border-pine/25 bg-white px-2 py-1.5 focus-visible:outline-2 focus-visible:outline-pine';
+  'w-full rounded-md border border-pine/25 bg-white px-2 py-1.5 focus-visible:outline-3 focus-visible:outline-pine';
 
 export function Field({
   label,

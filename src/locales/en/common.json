@@ -42,7 +42,8 @@
     "enterCode": "Enter my code"
   },
   "nav": {
-    "addAscent": "Add a climb"
+    "addAscent": "Add a climb",
+    "skip": "Skip to content"
   },
   "units": {
     "label": "Units",

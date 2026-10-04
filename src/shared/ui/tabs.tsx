@@ -62,7 +62,7 @@ export function Tabs({ label, tabs, onSelect, className }: TabsProps) {
               onKeyDown(event, index);
             }}
             className={cn(
-              'flex-1 border-b-[3px] px-4 py-3 font-semibold transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-pine',
+              'flex-1 border-b-[3px] px-4 py-3 font-semibold transition-colors focus-visible:outline-3 focus-visible:-outline-offset-2 focus-visible:outline-pine',
               tab.id === selected
                 ? 'border-blaze text-pine'
                 : 'border-transparent text-ink-muted hover:text-pine',

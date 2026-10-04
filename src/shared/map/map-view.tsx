@@ -207,7 +207,7 @@ export function MapView({
               aria-pressed={marker.selected ?? false}
               onClick={() => onMarkerSelect?.(marker.id)}
               className={cn(
-                'size-4 rounded-full border-[3px] border-white shadow-md transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine',
+                'size-4 rounded-full border-[3px] border-white shadow-md transition-transform focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-pine',
                 markerTones[marker.tone ?? 'default'],
                 marker.selected && 'scale-150',
               )}

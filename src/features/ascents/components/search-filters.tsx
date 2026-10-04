@@ -38,7 +38,7 @@ export function SearchFilters({ value, onChange }: SearchFiltersProps) {
       <label className="flex items-center gap-3 text-sm font-medium">
         {t('filters.radius')}
         <select
-          className="rounded-md border border-pine/25 bg-white px-2 py-1 focus-visible:outline-2 focus-visible:outline-pine"
+          className="rounded-md border border-pine/25 bg-white px-2 py-1 focus-visible:outline-3 focus-visible:outline-pine"
           value={radius}
           onChange={(event) => {
             const chosen = Number(event.target.value);
@@ -98,7 +98,7 @@ function CheckboxGroup<T extends string>({
         {options.map((option) => (
           <label
             key={option}
-            className="flex cursor-pointer items-center gap-2 rounded-full border border-moss/60 px-3 py-1 text-sm has-checked:border-moss has-checked:bg-moss has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-pine"
+            className="flex cursor-pointer items-center gap-2 rounded-full border border-moss/60 px-3 py-1 text-sm has-checked:border-moss has-checked:bg-moss has-checked:text-white has-focus-visible:outline-3 has-focus-visible:outline-pine"
           >
             <input
               type="checkbox"

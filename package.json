@@ -24,7 +24,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@fontsource/barlow": "^5.3.0",
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
     "@fontsource/barlow-condensed": "^5.3.0",
     "@garmin/fitsdk": "^21.217.0",
     "@supabase/supabase-js": "^2.117.2",
@@ -58,6 +58,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^5.0.3",
+    "axe-core": "^4.13.0",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",

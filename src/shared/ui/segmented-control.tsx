@@ -28,7 +28,7 @@ export function SegmentedControl<Value extends string>({
         {options.map((option) => (
           <label
             key={option}
-            className="flex-1 cursor-pointer rounded-full px-3 py-1 text-center has-checked:bg-pine has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-pine"
+            className="flex-1 cursor-pointer rounded-full px-3 py-1 text-center has-checked:bg-pine has-checked:text-white has-focus-visible:outline-3 has-focus-visible:outline-pine"
           >
             <input
               type="radio"

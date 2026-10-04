@@ -8,7 +8,7 @@ importers:
 
   .:
     dependencies:
-      '@fontsource/barlow':
+      '@fontsource-variable/atkinson-hyperlegible-next':
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource/barlow-condensed':
@@ -105,6 +105,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^5.0.3
         version: 5.0.3(vitest@5.0.3)
+      axe-core:
+        specifier: ^4.13.0
+        version: 4.13.0
       eslint:
         specifier: ^10.11.0
         version: 10.11.0(jiti@2.7.0)(supports-color@10.2.2)
@@ -446,11 +449,11 @@ packages:
       '@noble/hashes':
         optional: true
 
+  '@fontsource-variable/atkinson-hyperlegible-next@5.3.0':
+    resolution: {integrity: sha512-UnLzNUy1RWoLDfydAatP4NaRm99X/WbQEph7q/PymJnCFIOOwKOx3pBmp5ys8trO0dM+CKGuJgeZP9fAR4mQpA==}
+
   '@fontsource/barlow-condensed@5.3.0':
     resolution: {integrity: sha512-RA7MmIx0v3eQ6Gcf74qLVLOwLB0GpPOzx+eU9iG/AmCnSJGcIWYeU8y6CEMGZ210MGwGg5CZhzLkkvyZdTTk1g==}
-
-  '@fontsource/barlow@5.3.0':
-    resolution: {integrity: sha512-tGR0y6QObRtKv71MOth44222+mdNFM/ZWFWDV1VLzNbG4oK9PNRlyJzmkck4vHAi9ibHBXgt4SlY51amFP55CA==}
 
   '@garmin/fitsdk@21.217.0':
     resolution: {integrity: sha512-oIkDo28Yrv8ZhJiOTBZWn8Cb9kIkcAx7oVfNtgqRuNvzbCyFWdLg1StUVECjIo9rbtpvTDuW8Jqd3PTnVapiAw==}
@@ -3700,9 +3703,9 @@ snapshots:
 
   '@exodus/bytes@1.16.0': {}
 
-  '@fontsource/barlow-condensed@5.3.0': {}
+  '@fontsource-variable/atkinson-hyperlegible-next@5.3.0': {}
 
-  '@fontsource/barlow@5.3.0': {}
+  '@fontsource/barlow-condensed@5.3.0': {}
 
   '@garmin/fitsdk@21.217.0': {}
 

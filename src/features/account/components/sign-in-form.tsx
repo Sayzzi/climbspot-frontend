@@ -25,6 +25,8 @@ export function SignInForm() {
     signInWithPassword,
     signUp,
     sendPasswordReset,
+    supportsPasskeys,
+    signInWithPasskey,
   } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>('link');
@@ -118,8 +120,30 @@ export function SignInForm() {
 
   const creating = mode === 'create';
 
+  const signInWithAPasskey = async () => {
+    setProblem(undefined);
+    try {
+      await signInWithPasskey();
+      signedIn();
+    } catch (error) {
+      const reason = error instanceof AuthFailure ? error.reason : 'failed';
+      // Closing the prompt is the Visitor's choice: nothing to explain.
+      if (reason !== 'passkey-cancelled') {
+        setProblem(reason);
+      }
+    }
+  };
+
   return (
     <div className="flex max-w-sm flex-col gap-6">
+      {supportsPasskeys && (
+        <div className="flex flex-col gap-2">
+          <Button type="button" onClick={() => void signInWithAPasskey()}>
+            {t('signIn.passkey')}
+          </Button>
+          <p className="text-center text-sm text-ink-muted">{t('signIn.or')}</p>
+        </div>
+      )}
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-2">
         <label htmlFor={ids.email} className="font-medium">
           {t('signIn.email')}

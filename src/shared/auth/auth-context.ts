@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { AuthenticatorEnrolment, AuthSession, SignUpOutcome } from './types';
+import type { AuthenticatorEnrolment, AuthSession, Passkey, SignUpOutcome } from './types';
 
 export interface AuthContextValue {
   readonly available: boolean;
@@ -22,6 +22,12 @@ export interface AuthContextValue {
   readonly giveSecondFactor: (code: string) => Promise<void>;
   readonly authenticatorCount: () => Promise<number>;
   readonly removeAuthenticators: () => Promise<void>;
+  readonly supportsPasskeys: boolean;
+  readonly signInWithPasskey: () => Promise<void>;
+  readonly registerPasskey: () => Promise<Passkey>;
+  readonly passkeys: () => Promise<Passkey[]>;
+  readonly renamePasskey: (id: string, name: string) => Promise<void>;
+  readonly removePasskey: (id: string) => Promise<void>;
   readonly signOut: () => Promise<void>;
 }
 

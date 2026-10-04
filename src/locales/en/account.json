@@ -19,7 +19,10 @@
       "weak-password": "This password is not accepted. Choose a longer one.",
       "failed": "That did not work. Please try again in a moment.",
       "reauthentication-needed": "Confirm it is you with the code we sent by e-mail.",
-      "invalid-code": "Wrong or expired code."
+      "invalid-code": "Wrong or expired code.",
+      "passkey-cancelled": "No passkey was used.",
+      "passkey-exists": "This device already has a passkey for your account.",
+      "passkeys-unavailable": "Passkeys are unavailable right now. Use another way to sign in."
     },
     "password": {
       "continue": "Continue with a password",
@@ -33,7 +36,8 @@
       "confirm": "Check your inbox: confirm your address with the link sent to {{email}}.",
       "forgot": "Forgot your password?",
       "resetSent": "Check your inbox: we sent a link to choose a new password to {{email}}."
-    }
+    },
+    "passkey": "Sign in with a passkey"
   },
   "menu": {
     "label": "{{name}}’s menu",
@@ -110,5 +114,19 @@
     "turnOff": "Turn off the second factor",
     "turnOffConfirm": "Enter a code from your app to turn the second factor off.",
     "turnOffSubmit": "Turn it off"
+  },
+  "passkeys": {
+    "title": "Passkeys",
+    "explanation": "Sign in with Face ID, Touch ID, Windows Hello or a security key, without a password.",
+    "list": "Your passkeys",
+    "add": "Add a passkey",
+    "unsupported": "This browser cannot use passkeys.",
+    "unnamed": "Passkey",
+    "added": "Added {{date}}",
+    "name": "Passkey name",
+    "rename": "Rename {{name}}",
+    "renameShort": "Rename",
+    "remove": "Remove {{name}}",
+    "removeShort": "Remove"
   }
 }

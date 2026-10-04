@@ -5,6 +5,7 @@ import {
   type AuthChange,
   type AuthClient,
   type AuthSession,
+  type Passkey,
 } from '@/shared/auth/types';
 
 /** The access token the fake gives a signed-in Visitor. */
@@ -29,6 +30,10 @@ const ENROLMENT = {
   qrCode: 'data:image/svg+xml;base64,PHN2Zy8+',
   secret: 'JBSWY3DPEHPK3PXP',
 };
+/** Each account's passkeys, and how the fake's passkeys behave. */
+const passkeys = new Map<string, Passkey[]>();
+const passkeyControl = { supported: false, down: false, cancelled: false, next: 1 };
+
 /** How many authenticator apps each account with a second factor has. */
 const secondFactors = new Map<string, number>();
 
@@ -126,6 +131,47 @@ export const authClient: AuthClient = {
     }
     return Promise.resolve();
   },
+  supportsPasskeys: () => passkeyControl.supported,
+  signInWithPasskey: () => {
+    const failure = passkeyFailure();
+    if (failure) return Promise.reject(failure);
+    // The browser offers the passkeys it holds: the fake holds the first account's.
+    const [email] = [...passkeys.entries()].find(([, held]) => held.length > 0) ?? [];
+    if (email === undefined) return Promise.reject(new AuthFailure('passkey-cancelled'));
+    fakeAuth.signIn(email);
+    return Promise.resolve();
+  },
+  registerPasskey: () => {
+    const failure = passkeyFailure();
+    if (failure) return Promise.reject(failure);
+    const email = current?.email ?? '';
+    const passkey: Passkey = {
+      id: `passkey-${String(passkeyControl.next++)}`,
+      name: undefined,
+      createdAt: '2026-10-04T08:00:00.000Z',
+    };
+    passkeys.set(email, [...(passkeys.get(email) ?? []), passkey]);
+    return Promise.resolve(passkey);
+  },
+  passkeys: () => Promise.resolve(passkeys.get(current?.email ?? '') ?? []),
+  renamePasskey: (id, name) => {
+    const email = current?.email ?? '';
+    passkeys.set(
+      email,
+      (passkeys.get(email) ?? []).map((passkey) =>
+        passkey.id === id ? { ...passkey, name } : passkey,
+      ),
+    );
+    return Promise.resolve();
+  },
+  removePasskey: (id) => {
+    const email = current?.email ?? '';
+    passkeys.set(
+      email,
+      (passkeys.get(email) ?? []).filter((passkey) => passkey.id !== id),
+    );
+    return Promise.resolve();
+  },
   requireSecondFactor: () => {
     if (current) {
       current = { ...current, secondFactor: 'required', accessToken: FAKE_TOKEN };
@@ -144,6 +190,12 @@ export const authClient: AuthClient = {
     return Promise.resolve();
   },
 };
+
+function passkeyFailure(): AuthFailure | undefined {
+  if (passkeyControl.down) return new AuthFailure('passkeys-unavailable');
+  if (passkeyControl.cancelled) return new AuthFailure('passkey-cancelled');
+  return undefined;
+}
 
 function notifyCurrent() {
   act(() => {
@@ -203,6 +255,26 @@ export const fakeAuth = {
     secondFactors.set(email, 1);
   },
   hasSecondFactor: (email = 'ada@example.com') => secondFactors.has(email),
+  /** The browser can use passkeys (jsdom, like old browsers, cannot). */
+  supportPasskeys() {
+    passkeyControl.supported = true;
+  },
+  /** Supabase's passkeys cannot be used right now. */
+  passkeysDown() {
+    passkeyControl.down = true;
+  },
+  /** The account already has a passkey on this device. */
+  withPasskey(email = 'ada@example.com', name = 'MacBook') {
+    passkeys.set(email, [
+      ...(passkeys.get(email) ?? []),
+      {
+        id: `passkey-${String(passkeyControl.next++)}`,
+        name,
+        createdAt: '2026-10-01T08:00:00.000Z',
+      },
+    ]);
+  },
+  passkeysOf: (email = 'ada@example.com') => passkeys.get(email) ?? [],
   /** The signed-in Visitor gives their second factor's code. */
   giveSecondFactorNow: () => authClient.giveSecondFactor(FAKE_TOTP_CODE),
   resetLinks: () => resetLinks,
@@ -227,5 +299,7 @@ export const fakeAuth = {
     reauthenticationRequired = false;
     codesSent = 0;
     secondFactors.clear();
+    passkeys.clear();
+    Object.assign(passkeyControl, { supported: false, down: false, cancelled: false, next: 1 });
   },
 };

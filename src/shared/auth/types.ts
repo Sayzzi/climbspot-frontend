@@ -12,6 +12,14 @@ export interface AuthSession {
   readonly secondFactor: 'none' | 'required' | 'given';
 }
 
+/** A passkey that signs the Visitor in. */
+export interface Passkey {
+  readonly id: string;
+  readonly name: string | undefined;
+  /** ISO date-time. */
+  readonly createdAt: string;
+}
+
 /** What an authenticator app needs to start giving codes. */
 export interface AuthenticatorEnrolment {
   readonly factorId: string;
@@ -29,6 +37,12 @@ export type AuthFailureReason =
   /** Changing the password needs the code just sent by e-mail ("Secure password change"). */
   | 'reauthentication-needed'
   | 'invalid-code'
+  /** The Visitor closed the passkey prompt: nothing to explain. */
+  | 'passkey-cancelled'
+  /** This device already holds a passkey for the account. */
+  | 'passkey-exists'
+  /** Supabase's passkeys (in beta) cannot be used right now. */
+  | 'passkeys-unavailable'
   | 'failed';
 
 export class AuthFailure extends Error {
@@ -99,6 +113,15 @@ export interface AuthClient {
   removeAuthenticators(): Promise<void>;
   /** The API says this session must give the second factor's code: ask for it. */
   requireSecondFactor(): Promise<void>;
+  /** Whether this browser can use passkeys at all. */
+  supportsPasskeys(): boolean;
+  /** @throws {AuthFailure} `passkey-cancelled`, `passkeys-unavailable` */
+  signInWithPasskey(): Promise<void>;
+  /** Adds a passkey on this device for the signed-in Visitor. @throws {AuthFailure} */
+  registerPasskey(): Promise<Passkey>;
+  passkeys(): Promise<Passkey[]>;
+  renamePasskey(id: string, name: string): Promise<void>;
+  removePasskey(id: string): Promise<void>;
   signOut(): Promise<void>;
   /** Ends a session the API refused; like any session the Visitor did not end, it expired. */
   expire(): Promise<void>;

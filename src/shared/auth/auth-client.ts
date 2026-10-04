@@ -1,8 +1,14 @@
-import { createClient, type AuthError, type Session } from '@supabase/supabase-js';
+import { createClient, isAuthError, type AuthError, type Session } from '@supabase/supabase-js';
 
 import { env } from '@/shared/config/env';
 
-import { AuthFailure, type AuthChange, type AuthClient, type AuthSession } from './types';
+import {
+  AuthFailure,
+  type AuthChange,
+  type AuthClient,
+  type AuthSession,
+  type Passkey,
+} from './types';
 
 /** The session's authenticator assurance level, read from its access token. */
 function assuranceOf(accessToken: string): string | undefined {
@@ -54,6 +60,33 @@ function failureOf(error: AuthError): AuthFailure {
       return new AuthFailure('failed');
   }
 }
+
+/**
+ * A passkey ceremony's error: the Visitor closing the prompt, a passkey already on this
+ * device, or anything else making passkeys (in beta) unusable for now.
+ */
+function passkeyFailureOf(error: unknown): AuthFailure {
+  const { code, cause } = (error ?? {}) as { code?: string; cause?: { name?: string } };
+  if (code === 'ERROR_CEREMONY_ABORTED' || cause?.name === 'NotAllowedError') {
+    return new AuthFailure('passkey-cancelled');
+  }
+  if (code === 'ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED') {
+    return new AuthFailure('passkey-exists');
+  }
+  return isAuthError(error) && error.code === 'mfa_verification_failed'
+    ? failureOf(error)
+    : new AuthFailure('passkeys-unavailable');
+}
+
+const toPasskey = (passkey: {
+  id: string;
+  friendly_name?: string;
+  created_at: string;
+}): Passkey => ({
+  id: passkey.id,
+  name: passkey.friendly_name,
+  createdAt: passkey.created_at,
+});
 
 function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
   // Picks up the session from the link or Google's redirect on its own.
@@ -172,6 +205,34 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
       // The session's user now has no factor: refreshing tells the listeners.
       await supabase.auth.refreshSession();
     },
+    supportsPasskeys: () => typeof window.PublicKeyCredential === 'function',
+    signInWithPasskey: async () => {
+      const { error } = await supabase.auth.signInWithPasskey().catch((thrown: unknown) => ({
+        error: thrown,
+      }));
+      if (error) throw passkeyFailureOf(error);
+    },
+    registerPasskey: async () => {
+      const { data, error } = await supabase.auth.registerPasskey().catch((thrown: unknown) => ({
+        data: null,
+        error: thrown,
+      }));
+      if (error || !data) throw passkeyFailureOf(error);
+      return toPasskey(data);
+    },
+    passkeys: async () => {
+      const { data, error } = await supabase.auth.passkey.list();
+      if (error) throw passkeyFailureOf(error);
+      return data.map(toPasskey);
+    },
+    renamePasskey: async (id, name) => {
+      const { error } = await supabase.auth.passkey.update({ passkeyId: id, friendlyName: name });
+      if (error) throw passkeyFailureOf(error);
+    },
+    removePasskey: async (id) => {
+      const { error } = await supabase.auth.passkey.delete({ passkeyId: id });
+      if (error) throw passkeyFailureOf(error);
+    },
     requireSecondFactor: async () => {
       // The factor was added elsewhere: the user, refreshed, now has it.
       const { data } = await supabase.auth.refreshSession();
@@ -214,6 +275,12 @@ const unavailable: AuthClient = {
   authenticatorCount: () => Promise.resolve(0),
   removeAuthenticators: () => Promise.reject(new AuthFailure('failed')),
   requireSecondFactor: () => Promise.resolve(),
+  supportsPasskeys: () => false,
+  signInWithPasskey: () => Promise.reject(new AuthFailure('passkeys-unavailable')),
+  registerPasskey: () => Promise.reject(new AuthFailure('passkeys-unavailable')),
+  passkeys: () => Promise.resolve([]),
+  renamePasskey: () => Promise.reject(new AuthFailure('passkeys-unavailable')),
+  removePasskey: () => Promise.reject(new AuthFailure('passkeys-unavailable')),
   signOut: () => Promise.resolve(),
   expire: () => Promise.resolve(),
 };

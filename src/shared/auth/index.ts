@@ -6,5 +6,6 @@ export {
   type AuthenticatorEnrolment,
   type AuthFailureReason,
   type AuthSession,
+  type Passkey,
 } from './types';
 export { useAuth } from './use-auth';

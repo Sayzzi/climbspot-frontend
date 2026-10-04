@@ -1,7 +1,9 @@
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
+import { plateClassName } from '@/shared/ui/plate';
 import { ErrorNotice } from '@/shared/ui/error-notice';
 
 import type { useDeleteMyAccount } from '../api/my-account';
@@ -23,9 +25,10 @@ export function AccountDeletion({
   return (
     <section
       aria-labelledby={headingId}
-      className="flex flex-col items-start gap-3 border-t border-pine/10 pt-6"
+      // A danger plate: its edge in the danger colour.
+      className={cn(plateClassName, 'flex flex-col items-start gap-3 border-danger p-5')}
     >
-      <h2 id={headingId} className="text-lg font-semibold">
+      <h2 id={headingId} className="text-xl">
         {t('deletion.title')}
       </h2>
       <p className="text-sm text-ink-muted">{t('deletion.explanation')}</p>

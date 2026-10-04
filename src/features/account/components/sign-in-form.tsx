@@ -3,7 +3,10 @@ import { useEffect, useId, useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AuthFailure, useAuth, type AuthFailureReason } from '@/shared/auth';
+import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
+import { Confirmation } from '@/shared/ui/confirmation';
+import { plateClassName } from '@/shared/ui/plate';
 import { textInputClassName } from '@/shared/ui/text-input';
 
 import { newPasswordProblem, type PasswordProblem } from '../password-rules';
@@ -131,7 +134,7 @@ export function SignInForm() {
   };
 
   return (
-    <div className="flex max-w-sm flex-col gap-6">
+    <div className={cn(plateClassName, 'flex max-w-md flex-col gap-6 p-6')}>
       {supportsPasskeys && (
         <div className="flex flex-col gap-2">
           <Button type="button" onClick={() => void signInByPasskey()}>
@@ -242,7 +245,7 @@ export function SignInForm() {
         )}
 
         {sent && (
-          <p role="status" className="text-sm text-moss">
+          <Confirmation>
             {t(
               (
                 {
@@ -253,7 +256,7 @@ export function SignInForm() {
               )[sent.kind],
               { email: sent.email },
             )}
-          </p>
+          </Confirmation>
         )}
       </form>
       <div className="flex flex-col gap-2">

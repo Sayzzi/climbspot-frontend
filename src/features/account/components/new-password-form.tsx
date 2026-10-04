@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AuthFailure, useAuth, type AuthFailureReason } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
+import { Confirmation } from '@/shared/ui/confirmation';
 import { textInputClassName } from '@/shared/ui/text-input';
 
 import { newPasswordProblem, type PasswordProblem } from '../password-rules';
@@ -99,11 +100,7 @@ export function NewPasswordForm() {
       <Button type="submit" size="sm" disabled={pending} className="self-start">
         {needsCode ? t('newPassword.confirm') : t('newPassword.save')}
       </Button>
-      {saved && (
-        <p role="status" className="text-sm text-moss">
-          {t('newPassword.saved')}
-        </p>
-      )}
+      {saved && <Confirmation className="self-start">{t('newPassword.saved')}</Confirmation>}
     </form>
   );
 }

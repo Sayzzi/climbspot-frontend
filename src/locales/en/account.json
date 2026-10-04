@@ -1,7 +1,7 @@
 {
   "signIn": {
     "title": "Sign in",
-    "intro": "Save your itineraries and add climbs. No password: we send you a link.",
+    "intro": "Save your itineraries, connect Strava and add climbs. Use a password, a link by e-mail, Google or a passkey.",
     "email": "E-mail",
     "sendLink": "Send me a sign-in link",
     "sent": "Check your inbox: we sent a sign-in link to {{email}}.",
@@ -59,7 +59,8 @@
     "changeFlatPace": "Change the flat pace",
     "displayName": "Display name",
     "save": "Save",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "profile": "Profile"
   },
   "deletion": {
     "title": "Delete my account",

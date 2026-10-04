@@ -1,10 +1,13 @@
-import { useId, useState, type SubmitEvent } from 'react';
+import { useId, useState, type ReactNode, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SignedInOnly } from '@/shared/auth';
 import { useFlatPace } from '@/shared/pace';
 import { Button } from '@/shared/ui/button';
+import { cn } from '@/shared/lib/cn';
+import { Confirmation } from '@/shared/ui/confirmation';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { plateClassName } from '@/shared/ui/plate';
 import { textInputClassName } from '@/shared/ui/text-input';
 import { useFormatters, useUnits } from '@/shared/units';
 
@@ -12,29 +15,35 @@ import { useDeleteMyAccount, useMyAccount, useUpdateMyAccount } from '../api/my-
 import { AccountDeletion } from './account-deletion';
 import { SecuritySection } from './security-section';
 
-/** The signed-in Visitor's account; an invitation to sign in otherwise. */
-export function AccountDetails() {
+/**
+ * The signed-in Visitor's account; an invitation to sign in otherwise. `children`
+ * (e.g. the Strava Connection) come before deleting the account, always last.
+ */
+export function AccountDetails({ children }: { readonly children?: ReactNode }) {
   const { t } = useTranslation('account');
   // Kept here, above the signed-out view, so that the Visitor is told once signed out.
   const deletion = useDeleteMyAccount();
 
   if (deletion.isSuccess) {
-    return (
-      <p role="status" className="rounded-lg bg-lichen p-4">
-        {t('deletion.done')}
-      </p>
-    );
+    return <Confirmation className="max-w-xl">{t('deletion.done')}</Confirmation>;
   }
   return (
     <SignedInOnly reason={t('account.signedOut')}>
-      <Account deletion={deletion} />
+      <Account deletion={deletion}>{children}</Account>
     </SignedInOnly>
   );
 }
 
-function Account({ deletion }: { readonly deletion: ReturnType<typeof useDeleteMyAccount> }) {
+function Account({
+  deletion,
+  children,
+}: {
+  readonly deletion: ReturnType<typeof useDeleteMyAccount>;
+  readonly children?: ReactNode;
+}) {
   const { t } = useTranslation('account');
   const account = useMyAccount();
+  const profileId = useId();
 
   if (account.error) {
     return <ErrorNotice error={account.error} onRetry={() => void account.refetch()} />;
@@ -43,14 +52,23 @@ function Account({ deletion }: { readonly deletion: ReturnType<typeof useDeleteM
     return <p className="text-ink-muted">{t('account.loading')}</p>;
   }
   return (
-    <div className="flex max-w-md flex-col gap-6">
-      <dl className="text-sm">
-        <dt className="text-ink-muted">{t('account.email')}</dt>
-        <dd className="font-medium">{account.data.email}</dd>
-      </dl>
-      <FlatPace />
-      <DisplayNameForm current={account.data.displayName} />
+    <div className="flex max-w-2xl flex-col gap-6">
+      <section
+        aria-labelledby={profileId}
+        className={cn(plateClassName, 'flex flex-col gap-5 p-5')}
+      >
+        <h2 id={profileId} className="text-xl">
+          {t('account.profile')}
+        </h2>
+        <dl className="text-sm">
+          <dt className="text-ink-muted">{t('account.email')}</dt>
+          <dd className="font-medium">{account.data.email}</dd>
+        </dl>
+        <DisplayNameForm current={account.data.displayName} />
+        <FlatPace />
+      </section>
       <SecuritySection />
+      {children}
       <AccountDeletion deletion={deletion} />
     </div>
   );
@@ -84,11 +102,7 @@ function DisplayNameForm({ current }: { readonly current: string }) {
       <Button type="submit" size="sm" disabled={update.isPending} className="self-start">
         {t('account.save')}
       </Button>
-      {update.isSuccess && (
-        <p role="status" className="text-sm text-moss">
-          {t('account.saved')}
-        </p>
-      )}
+      {update.isSuccess && <Confirmation className="self-start">{t('account.saved')}</Confirmation>}
       {update.error && (
         <ErrorNotice
           error={update.error}

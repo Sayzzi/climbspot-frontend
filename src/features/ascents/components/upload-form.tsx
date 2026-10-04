@@ -2,7 +2,9 @@ import { useId, useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { errorMessageKey } from '@/shared/api/error-message';
+import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
+import { plateClassName } from '@/shared/ui/plate';
 
 import { useCreateAscent } from '../api/create-ascent';
 import { surfaces } from '@/shared/domain/values';
@@ -52,11 +54,18 @@ export function UploadForm({ onCreated }: UploadFormProps) {
   };
 
   return (
-    <form noValidate onSubmit={submit} className="flex max-w-xl flex-col gap-6">
+    <form
+      noValidate
+      onSubmit={submit}
+      className={cn(plateClassName, 'flex max-w-xl flex-col gap-6 p-6')}
+    >
       <div className="flex flex-col gap-1">
-        <label htmlFor={ids.name} className="font-medium">
-          {t('upload.name')}
-        </label>
+        <div className="flex items-center gap-2">
+          <Step number={1} />
+          <label htmlFor={ids.name} className="font-medium">
+            {t('upload.name')}
+          </label>
+        </div>
         <input
           id={ids.name}
           value={name}
@@ -76,8 +85,9 @@ export function UploadForm({ onCreated }: UploadFormProps) {
         aria-describedby={errors.surface && `${ids.surface}-error`}
         className="flex flex-col gap-2"
       >
-        <legend id={ids.surface} className="mb-1 font-medium">
-          {t('upload.surface')}
+        <legend className="mb-1 flex items-center gap-2 font-medium">
+          <Step number={2} />
+          <span id={ids.surface}>{t('upload.surface')}</span>
         </legend>
         {surfaces.map((option) => (
           <label
@@ -106,9 +116,12 @@ export function UploadForm({ onCreated }: UploadFormProps) {
       </fieldset>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor={ids.gpx} className="font-medium">
-          {t('upload.file')}
-        </label>
+        <div className="flex items-center gap-2">
+          <Step number={3} />
+          <label htmlFor={ids.gpx} className="font-medium">
+            {t('upload.file')}
+          </label>
+        </div>
         <input
           id={ids.gpx}
           type="file"
@@ -118,12 +131,13 @@ export function UploadForm({ onCreated }: UploadFormProps) {
           }}
           aria-invalid={errors.gpx !== undefined}
           aria-describedby={errors.gpx && `${ids.gpx}-error`}
+          className="text-sm file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-md file:border-0 file:bg-pine file:px-4 file:font-semibold file:text-white hover:file:bg-pine/90"
         />
         <FieldError id={`${ids.gpx}-error`} message={errors.gpx} />
       </div>
 
       {createAscent.isError && (
-        <p role="alert" className="rounded-lg border-l-4 border-blaze bg-white p-3">
+        <p role="alert" className="rounded-md border-l-4 border-danger bg-white p-3">
           {tCommon(errorMessageKey(createAscent.error))}
         </p>
       )}
@@ -149,4 +163,16 @@ function FieldError({
       {message}
     </p>
   ) : null;
+}
+
+/** The step's number in a sequence the Visitor follows; its label names the step. */
+function Step({ number }: { readonly number: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="grid size-6 place-items-center rounded-full bg-pine text-xs font-bold text-white"
+    >
+      {number}
+    </span>
+  );
 }

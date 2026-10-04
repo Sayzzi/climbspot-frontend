@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import { ApiRequestError } from '@/shared/api/request';
 import { useAuth } from '@/shared/auth';
+import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { plateClassName } from '@/shared/ui/plate';
 import { useFormatters } from '@/shared/units';
 import { ConnectWithStrava, PoweredByStrava } from '@/shared/ui/strava-brand';
 
@@ -28,9 +30,9 @@ export function StravaSection() {
   return (
     <section
       aria-labelledby={headingId}
-      className="flex max-w-md flex-col items-start gap-3 border-t border-pine/10 pt-6"
+      className={cn(plateClassName, 'flex flex-col items-start gap-3 p-5')}
     >
-      <h2 id={headingId} className="text-lg font-semibold">
+      <h2 id={headingId} className="text-xl">
         {t('title')}
       </h2>
       <Connection />

@@ -13,8 +13,9 @@ function AccountPage() {
   return (
     <section className="flex flex-col gap-6">
       <h1 className="text-3xl font-bold tracking-tight">{t('account.title')}</h1>
-      <AccountDetails />
-      <StravaSection />
+      <AccountDetails>
+        <StravaSection />
+      </AccountDetails>
     </section>
   );
 }

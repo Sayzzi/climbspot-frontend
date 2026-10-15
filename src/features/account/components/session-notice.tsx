@@ -4,19 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/shared/auth';
 import { Confirmation } from '@/shared/ui/confirmation';
 
-/** Confirms signing in; says when a session has ended, inviting to sign in again. */
+/** Says when a session has ended, inviting to sign in again. */
 export function SessionNotice() {
   const { t } = useTranslation('account');
-  const { expired, session, justSignedIn } = useAuth();
+  const { expired, session } = useAuth();
 
-  if (justSignedIn) {
-    return (
-      // White, to stay legible over the map.
-      <Confirmation className="mx-auto mt-2 w-fit bg-white shadow-plate ring-1 ring-pine/15">
-        {t('session.signedIn')}
-      </Confirmation>
-    );
-  }
   if (!expired || session) {
     return null;
   }
@@ -27,5 +19,24 @@ export function SessionNotice() {
         {t('signIn.title')}
       </Link>
     </p>
+  );
+}
+
+/**
+ * Confirms signing in for a few seconds, at the foot of the screen: the top belongs to
+ * the header and the map's own buttons.
+ */
+export function SignedInConfirmation() {
+  const { t } = useTranslation('account');
+  const { justSignedIn } = useAuth();
+
+  if (!justSignedIn) {
+    return null;
+  }
+  return (
+    // White, to stay legible over the map.
+    <Confirmation className="fixed bottom-6 left-1/2 z-30 w-max -translate-x-1/2 bg-white shadow-plate ring-1 ring-pine/15">
+      {t('session.signedIn')}
+    </Confirmation>
   );
 }

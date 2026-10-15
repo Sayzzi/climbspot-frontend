@@ -5,5 +5,5 @@ export { SecondFactorStep } from './components/second-factor-step';
 export { useSecondFactorStep } from './hooks/use-second-factor-step';
 export { useFlatPaceSource } from './hooks/use-flat-pace-source';
 export { useFlatPaceSync } from './hooks/use-flat-pace-sync';
-export { SessionNotice } from './components/session-notice';
+export { SessionNotice, SignedInConfirmation } from './components/session-notice';
 export { SignInForm } from './components/sign-in-form';

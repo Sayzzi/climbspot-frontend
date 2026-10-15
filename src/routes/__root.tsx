@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   AccountMenu,
   SessionNotice,
+  SignedInConfirmation,
   useFlatPaceSource,
   useFlatPaceSync,
   useSecondFactorStep,
@@ -91,6 +92,7 @@ function RootLayout() {
       >
         <Outlet />
       </main>
+      <SignedInConfirmation />
     </div>
   );
 }

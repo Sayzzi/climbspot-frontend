@@ -10,7 +10,6 @@ import { server } from '@/test/server';
 const PASSPHRASE = 'correct horse battery staple';
 
 const field = (name: string) => screen.getByLabelText(name, { selector: 'input' });
-const header = () => within(screen.getByRole('banner'));
 
 beforeEach(() => {
   server.use(
@@ -42,7 +41,7 @@ describe('Confirmations', () => {
     await user.type(field('Password'), PASSPHRASE);
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(await header().findByRole('status')).toHaveTextContent('You’re signed in.');
+    expect(await screen.findByRole('status')).toHaveTextContent('You’re signed in.');
   });
 
   it('confirms signing in once the second factor’s code is given, not before', async () => {
@@ -55,12 +54,12 @@ describe('Confirmations', () => {
     await user.type(field('Password'), PASSPHRASE);
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
     await screen.findByRole('heading', { level: 1, name: 'Enter your code' });
-    expect(header().queryByText('You’re signed in.')).not.toBeInTheDocument();
+    expect(screen.queryByText('You’re signed in.')).not.toBeInTheDocument();
 
     await user.type(field('Code from your authenticator app'), FAKE_TOTP_CODE);
     await user.click(screen.getByRole('button', { name: 'Continue' }));
 
-    expect(await header().findByText('You’re signed in.')).toBeVisible();
+    expect(await screen.findByText('You’re signed in.')).toBeVisible();
   });
 
   it('says nothing of a session found on opening the site', async () => {
@@ -68,7 +67,7 @@ describe('Confirmations', () => {
     await renderApp('/account');
     await screen.findByRole('heading', { level: 1, name: 'Your account' });
 
-    expect(header().queryByText('You’re signed in.')).not.toBeInTheDocument();
+    expect(screen.queryByText('You’re signed in.')).not.toBeInTheDocument();
   });
 
   it('confirms turning the second factor on', async () => {

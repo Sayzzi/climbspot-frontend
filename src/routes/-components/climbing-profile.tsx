@@ -37,7 +37,7 @@ export function ClimbingProfile({ className }: { readonly className?: string }) 
       <g className="origin-[520px_74px] animate-waymark-in opacity-0">
         <path d="M520 74 V36" stroke="var(--color-pine)" strokeWidth="5" strokeLinecap="round" />
         <rect x="490" y="0" width="60" height="44" rx="5" fill="var(--color-pine)" />
-        <rect x="497" y="7" width="46" height="14" fill="#ffffff" />
+        <rect x="497" y="7" width="46" height="14" className="fill-white" />
         <rect x="497" y="23" width="46" height="14" fill="var(--color-blaze)" />
       </g>
     </svg>

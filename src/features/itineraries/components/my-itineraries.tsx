@@ -6,6 +6,7 @@ import { SignedInOnly } from '@/shared/auth';
 import { cn } from '@/shared/lib/cn';
 import { buttonVariants } from '@/shared/ui/button-variants';
 import { ErrorNotice } from '@/shared/ui/error-notice';
+import { plateClassName } from '@/shared/ui/plate';
 import { useFormatters } from '@/shared/units';
 
 import { useSavedItineraries } from '../api/saved-itineraries';
@@ -36,7 +37,7 @@ function SavedItineraries() {
   }
   if (saved.data.length === 0) {
     return (
-      <div className="flex max-w-xl flex-col items-start gap-3 rounded-lg bg-lichen p-4">
+      <div className={cn(plateClassName, 'flex max-w-xl flex-col items-start gap-3 p-6')}>
         <p>{t('saved.empty')}</p>
         <Link to="/" className={buttonVariants()}>
           {t('saved.plan')}
@@ -49,7 +50,10 @@ function SavedItineraries() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
-      <ul aria-label={t('saved.list')} className="flex flex-col divide-y divide-pine/10">
+      <ul
+        aria-label={t('saved.list')}
+        className={cn(plateClassName, 'flex flex-col divide-y divide-pine/10 self-start')}
+      >
         {saved.data.map((itinerary) => (
           <li key={itinerary.id}>
             <SavedItineraryItem
@@ -85,7 +89,7 @@ function SavedItineraryItem({ itinerary, selected, onSelect }: SavedItineraryIte
       aria-label={t('show', { name: itinerary.name })}
       onClick={onSelect}
       className={cn(
-        'flex w-full flex-col border-l-4 px-3 py-2 text-left focus-visible:outline-3 focus-visible:outline-pine',
+        'flex min-h-11 w-full flex-col border-l-4 px-4 py-3 text-left focus-visible:outline-3 focus-visible:outline-pine',
         selected ? 'border-blaze bg-lichen/60' : 'border-transparent hover:bg-lichen/40',
       )}
     >

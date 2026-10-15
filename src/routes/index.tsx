@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
 import { z } from 'zod';
 
 import {
@@ -52,10 +53,16 @@ function SearchPage() {
     });
   };
 
+  // A first visit asks for the location only once the Visitor chooses "Climbs near me".
+  const [locationWanted, setLocationWanted] = useState(!welcome.open);
   // Replace the position-less entry: going back should not ask for the location again.
-  const located = useLocateVisitor(position, (center) => {
-    searchAround(center, true);
-  });
+  const located = useLocateVisitor(
+    position,
+    (center) => {
+      searchAround(center, true);
+    },
+    locationWanted,
+  );
 
   return (
     <>
@@ -81,7 +88,8 @@ function SearchPage() {
       {welcome.open && (
         <HomeHero
           closing={welcome.closing}
-          onShowClimbs={() => {
+          onShowAscents={() => {
+            setLocationWanted(true);
             welcome.close(() => {
               focus(SEARCH_PANEL_ID);
             });

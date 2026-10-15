@@ -10,27 +10,54 @@ const returnTo = () => `${window.location.origin}/`;
 /** Where a link to choose a new password brings the Visitor. */
 const newPasswordPage = () => `${window.location.origin}/new-password`;
 
+/** How long signing in is confirmed for. */
+const SIGNED_IN_MS = 5000;
+
+/** Signed in as far as the app is concerned: with the second factor's code, if needed. */
+const complete = (session: AuthSession | undefined) =>
+  session?.secondFactor === 'required' ? undefined : session;
+
 /** Holds the signed-in Visitor's session for the whole app. */
 export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | undefined>(() => authClient.session());
   const [expired, setExpired] = useState(false);
+  const [justSignedIn, setJustSignedIn] = useState(false);
 
-  useEffect(
-    () =>
-      authClient.onChange((change) => {
-        setSession(change.session);
-        setExpired(change.expired);
-      }),
-    [],
-  );
+  useEffect(() => {
+    let before = complete(authClient.session());
+    return authClient.onChange((change) => {
+      const after = complete(change.session);
+      if (!before && after && !change.restored) {
+        setJustSignedIn(true);
+      } else if (!after) {
+        setJustSignedIn(false);
+      }
+      before = after;
+      setSession(change.session);
+      setExpired(change.expired);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!justSignedIn) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      setJustSignedIn(false);
+    }, SIGNED_IN_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [justSignedIn]);
 
   const value = useMemo(
     () => ({
       available: authClient.available,
       // Until the second factor's code is given, the Visitor counts as signed out.
-      session: session?.secondFactor === 'required' ? undefined : session,
+      session: complete(session),
       secondFactorPending: session?.secondFactor === 'required',
       expired,
+      justSignedIn,
       sendMagicLink: (email: string) => authClient.sendMagicLink(email, returnTo()),
       signInWithGoogle: () => authClient.signInWithGoogle(returnTo()),
       signInWithPassword: (email: string, password: string) =>
@@ -54,7 +81,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
       removePasskey: (id: string) => authClient.removePasskey(id),
       signOut: () => authClient.signOut(),
     }),
-    [session, expired],
+    [session, expired, justSignedIn],
   );
 
   return <AuthContext value={value}>{children}</AuthContext>;

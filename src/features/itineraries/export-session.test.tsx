@@ -60,7 +60,7 @@ describe('Exporting a Hill Session', () => {
   it('saves the session as a structured FIT workout a watch follows step by step', async () => {
     const user = await sessionProposed();
 
-    await user.click(plan().getByRole('button', { name: 'Download workout (FIT)' }));
+    await user.click(plan().getByRole('button', { name: 'Download for your watch (FIT)' }));
     // The FIT SDK loads on demand.
     await waitFor(() => {
       expect(savedFiles()).toHaveLength(1);

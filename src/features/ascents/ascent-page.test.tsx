@@ -9,8 +9,8 @@ import { server } from '@/test/server';
 
 const ID = '00000000-0000-4000-8000-000000000001';
 
-describe('A climb’s page', () => {
-  it('gives the climb’s key figures first, and what it is, like a trail sign', async () => {
+describe('An Ascent’s page', () => {
+  it('gives the Ascent’s key figures first, and what it is, like a trail sign', async () => {
     server.use(
       handlers.ascent(() =>
         HttpResponse.json(anAscent({ id: ID, name: 'Le Mur', surface: 'paved', category: 'cat2' })),

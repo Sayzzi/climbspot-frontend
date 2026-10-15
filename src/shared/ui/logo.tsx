@@ -23,7 +23,7 @@ export function LogoMark({ className }: { readonly className?: string }) {
         opacity="0.45"
       />
       <rect x="13" y="5" width="14" height="13" rx="2" fill="currentColor" />
-      <rect x="15" y="7" width="10" height="4" fill="#ffffff" />
+      <rect x="15" y="7" width="10" height="4" className="fill-white" />
       <rect x="15" y="11.5" width="10" height="4" fill="var(--color-blaze)" />
       <path d="M20 18 V24" stroke="currentColor" strokeWidth="2.5" />
     </svg>

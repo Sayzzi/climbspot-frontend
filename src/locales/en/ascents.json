@@ -1,5 +1,6 @@
 {
   "search": {
+    "title": "Find climbs",
     "results": "Nearby climbs",
     "map": "Map of nearby climbs",
     "loading": "Looking for climbs…",
@@ -30,6 +31,7 @@
     "activities": "Activities"
   },
   "locate": {
+    "idle": "Move the map to where you want to climb, then choose “Search this area”.",
     "locating": "Finding your location…",
     "failures": {
       "denied": "Location access is turned off.",

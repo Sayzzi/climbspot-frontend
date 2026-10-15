@@ -45,9 +45,9 @@ export function ProposalCard({ proposal, selected, onSelect }: ProposalCardProps
         {proposal.exact ? t('exact') : <Differences proposal={proposal} />}
       </p>
       <div className="mt-3">
-        <SignFigures facts={facts.slice(0, 3)} />
+        <SignFigures facts={facts.key} />
       </div>
-      <FactList className="mt-3 grid-cols-3 border-t border-pine/10 pt-3" facts={facts.slice(3)} />
+      <FactList className="mt-3 grid-cols-3 border-t border-pine/10 pt-3" facts={facts.more} />
       {selected && (
         <div className="mt-3 flex flex-col gap-3">
           <div className="flex flex-wrap gap-2">

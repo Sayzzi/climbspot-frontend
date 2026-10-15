@@ -38,7 +38,7 @@ describe('Deleting my account', () => {
 
     expect(
       deletion().getByText(
-        'Deleting your account erases your e-mail, display name, Flat Pace and saved itineraries. The climbs you added stay on ClimbSpot, without your name.',
+        'Deleting your account erases your e-mail, display name, flat pace and saved itineraries. The climbs you added stay on ClimbSpot, without your name.',
       ),
     ).toBeVisible();
   });

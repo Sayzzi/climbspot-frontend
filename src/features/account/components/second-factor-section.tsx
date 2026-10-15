@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useAuth, type AuthenticatorEnrolment, type AuthFailureReason } from '@/shared/auth';
 import { Button } from '@/shared/ui/button';
+import { Confirmation } from '@/shared/ui/confirmation';
 
 import { useAuthenticatorCount, useRecountAuthenticators } from '../api/security';
 import { codeProblemOf } from '../code-problem';
@@ -23,10 +24,12 @@ export function SecondFactorSection() {
   const [enrolment, setEnrolment] = useState<AuthenticatorEnrolment>();
   const [turningOff, setTurningOff] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [done, setDone] = useState<'turnedOn' | 'added'>();
   const on = session?.secondFactor === 'given';
 
   const start = async () => {
     setFailed(false);
+    setDone(undefined);
     try {
       setEnrolment(await enrollAuthenticator());
     } catch {
@@ -61,6 +64,7 @@ export function SecondFactorSection() {
         <FirstCode
           enrolment={enrolment}
           onDone={() => {
+            setDone(on ? 'added' : 'turnedOn');
             setEnrolment(undefined);
             void recount();
           }}
@@ -72,6 +76,7 @@ export function SecondFactorSection() {
           variant="ghost"
           size="sm"
           onClick={() => {
+            setDone(undefined);
             setTurningOff(true);
           }}
         >
@@ -85,6 +90,7 @@ export function SecondFactorSection() {
           }}
         />
       )}
+      {done && <Confirmation>{t(`secondFactor.${done}`)}</Confirmation>}
       {failed && (
         <p role="alert" className="text-sm text-danger">
           {t('signIn.problems.failed')}

@@ -107,8 +107,12 @@ export function NearbySearch({
   );
 
   return (
-    <div id={SEARCH_MAP_ID} tabIndex={-1} className="fixed inset-0 focus:outline-none">
+    // Behind the welcome screen, nothing here takes the focus or the pointer.
+    <div inert={behindWelcome} className="fixed inset-0">
+      {/* The welcome screen has its own title; the map and panel need one too. */}
+      {!behindWelcome && <h1 className="sr-only">{t('search.title')}</h1>}
       <MapView
+        id={SEARCH_MAP_ID}
         label={t('search.map')}
         center={criteria?.position ?? OVERVIEW.center}
         zoom={criteria ? SEARCH_ZOOM : OVERVIEW.zoom}
@@ -152,7 +156,6 @@ export function NearbySearch({
         id={SEARCH_PANEL_ID}
         tabIndex={-1}
         aria-label={t('search.panel')}
-        inert={behindWelcome}
         className={cn(
           // Above the map's own controls (attribution, zoom).
           plateClassName,

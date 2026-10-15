@@ -5,14 +5,15 @@ import { useCurrentPosition, type GeolocationState } from '@/shared/hooks/use-cu
 import type { Position } from '../types';
 
 /**
- * Asks for the Visitor's position while the search has none, and reports it once
- * the browser answers.
+ * Asks for the Visitor's position while the search has none and they want it found,
+ * and reports it once the browser answers.
  */
 export function useLocateVisitor(
   position: Position | undefined,
   onLocated: (located: Position) => void,
+  wanted = true,
 ): GeolocationState {
-  const state = useCurrentPosition(position === undefined);
+  const state = useCurrentPosition(wanted && position === undefined);
   const located = state.status === 'located' ? state.position : undefined;
 
   useEffect(() => {

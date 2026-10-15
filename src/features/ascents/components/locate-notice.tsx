@@ -17,5 +17,6 @@ export function LocateNotice({ state }: { readonly state: GeolocationState }) {
       </div>
     );
   }
-  return null;
+  // Not asked for (the Visitor chose to explore the map): say how to find climbs.
+  return <p className="text-ink-muted">{t('locate.idle')}</p>;
 }

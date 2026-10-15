@@ -2,7 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import '@/shared/i18n/i18n';
 
 import { cleanup } from '@testing-library/react';
-import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, vi } from 'vitest';
 
 import './downloads';
 import './geolocation';
@@ -22,6 +22,12 @@ vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
 // A request without a handler is a test bug: MSW fails it and reports it instead of hitting the network.
 beforeAll(() => {
   server.listen({ onUnhandledFrame: 'error' });
+});
+
+// Most tests are of a returning Visitor, the search open on the map; the welcome
+// screen's own tests clear this to see it as a first visit does.
+beforeEach(() => {
+  localStorage.setItem('climbspot.welcomed', 'yes');
 });
 
 afterEach(() => {

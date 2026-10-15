@@ -18,11 +18,11 @@ export function UnitSwitch() {
       <span id={labelId} className="sr-only">
         {t('units.label')}
       </span>
-      <div className="flex rounded-full bg-white p-0.5 shadow-sm ring-1 ring-pine/15">
+      <div className="flex rounded-full bg-white shadow-sm ring-1 ring-pine/15">
         {systems.map((option) => (
           <label
             key={option}
-            className="flex min-h-10 cursor-pointer items-center rounded-full px-2.5 has-checked:bg-pine has-checked:text-white has-focus-visible:outline-3 has-focus-visible:outline-pine sm:px-3"
+            className="flex min-h-11 cursor-pointer items-center rounded-full px-2.5 has-checked:bg-pine has-checked:text-white has-focus-visible:outline-3 has-focus-visible:outline-pine sm:px-3"
           >
             <input
               type="radio"

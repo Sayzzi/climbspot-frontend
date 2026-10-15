@@ -99,10 +99,6 @@ function DisplayNameForm({ current }: { readonly current: string }) {
         }}
         className={textInputClassName}
       />
-      <Button type="submit" size="sm" disabled={update.isPending} className="self-start">
-        {t('account.save')}
-      </Button>
-      {update.isSuccess && <Confirmation className="self-start">{t('account.saved')}</Confirmation>}
       {update.error && (
         <ErrorNotice
           error={update.error}
@@ -111,6 +107,10 @@ function DisplayNameForm({ current }: { readonly current: string }) {
           }}
         />
       )}
+      <Button type="submit" size="sm" disabled={update.isPending} className="self-start">
+        {t('account.save')}
+      </Button>
+      {update.isSuccess && <Confirmation className="self-start">{t('account.saved')}</Confirmation>}
     </form>
   );
 }

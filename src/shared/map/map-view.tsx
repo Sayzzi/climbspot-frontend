@@ -45,13 +45,30 @@ const markerLooks: Record<NonNullable<MapMarker['tone']>, string> = {
 };
 
 /** The only component allowed to know about the map library. */
-export function MapView({
+export function MapView(props: MapViewProps) {
+  const style = useBaliseStyle();
+  if (!style) {
+    return (
+      <section
+        id={props.id}
+        tabIndex={-1}
+        aria-label={props.label}
+        className={cn('overflow-hidden rounded-xl bg-lichen', props.className)}
+      />
+    );
+  }
+  // Mounted once the style is there, so that it opens on the view asked for by then.
+  return <StyledMap {...props} style={style} />;
+}
+
+function StyledMap({
+  id,
   label,
   center,
   zoom,
   fitTo,
   markers = [],
-  line,
+  line: newLine,
   alternatives,
   dashedLine,
   onMarkerSelect,
@@ -60,10 +77,12 @@ export function MapView({
   interactive = true,
   covered,
   className,
-}: MapViewProps) {
+  style,
+}: MapViewProps & { readonly style: StyleSpecification | string }) {
   const mapRef = useRef<MapRef>(null);
   const routeColour = useThemeColour('--color-route');
-  const style = useBaliseStyle();
+  // The same path, recomputed by a page that re-renders, is not a new line.
+  const line = useSamePositions(newLine);
   const traced = useTrace(line);
 
   // Read once: later changes go through `flyTo` below.
@@ -159,17 +178,19 @@ export function MapView({
     [alternatives],
   );
 
-  if (!style) {
-    return (
-      <section
-        aria-label={label}
-        className={cn('overflow-hidden rounded-xl bg-lichen', className)}
-      />
-    );
-  }
-
   return (
-    <section aria-label={label} className={cn('overflow-hidden rounded-xl', className)}>
+    <section
+      id={id}
+      tabIndex={-1}
+      aria-label={label}
+      // The map's keys (arrows, + and −) listen on its canvas: focus goes there.
+      onFocus={(event) => {
+        if (event.target === event.currentTarget) {
+          mapRef.current?.getCanvas().focus();
+        }
+      }}
+      className={cn('overflow-hidden rounded-xl', className)}
+    >
       <Map
         ref={mapRef}
         mapLib={maplibre}
@@ -250,7 +271,7 @@ export function MapView({
               <span
                 aria-hidden="true"
                 className={cn(
-                  'block shadow-[0_1px_3px_rgb(23_51_42/0.45)] transition-transform duration-200 group-hover:scale-125',
+                  'block shadow-waymark transition-transform duration-200 group-hover:scale-125',
                   markerLooks[marker.tone ?? 'waymark'],
                   marker.selected && 'scale-150 group-hover:scale-150',
                 )}
@@ -281,6 +302,31 @@ function boundsOf(positions: readonly Position[] | undefined): LngLatBoundsLike 
     [Math.min(...longitudes), Math.min(...latitudes)],
     [Math.max(...longitudes), Math.max(...latitudes)],
   ];
+}
+
+/** `positions`, kept as the same array for as long as they are the same positions. */
+function useSamePositions(
+  positions: readonly Position[] | undefined,
+): readonly Position[] | undefined {
+  const [kept, setKept] = useState(positions);
+  if (positions !== kept && !samePositions(positions, kept)) {
+    setKept(positions);
+    return positions;
+  }
+  return kept;
+}
+
+function samePositions(
+  a: readonly Position[] | undefined,
+  b: readonly Position[] | undefined,
+): boolean {
+  return (
+    a?.length === b?.length &&
+    (a ?? []).every(
+      (position, index) =>
+        position.latitude === b?.[index]?.latitude && position.longitude === b[index].longitude,
+    )
+  );
 }
 
 /** The Balise map style, once loaded; nothing until then. */

@@ -45,16 +45,15 @@ describe('The search panel', () => {
     server.use(handlers.nearby(() => nearbyResults([anAscentSummary({ name: 'Le Mur' })])));
     await renderApp(HERE);
 
-    const [climb] = await panel().findAllByRole('article');
-    if (!climb) throw new Error('a climb expected');
-    const terms = within(climb)
+    const [ascent] = await panel().findAllByRole('article');
+    if (!ascent) throw new Error('an Ascent expected');
+    const terms = within(ascent)
       .getAllByRole('term')
       .map((term) => term.textContent);
     expect(terms.slice(0, 3)).toEqual(['Length', 'Elevation gain', 'Average gradient']);
-    expect(within(climb).getByRole('link', { name: 'View Le Mur' })).toHaveTextContent(
+    expect(within(ascent).getByRole('link', { name: 'View Le Mur' })).toHaveTextContent(
       'View details',
     );
-    expect(within(climb).getByRole('link', { name: 'View Le Mur' }).textContent).not.toContain('→');
   });
 
   it('stays accessible with results', async () => {

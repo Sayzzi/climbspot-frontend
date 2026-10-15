@@ -10,6 +10,8 @@ export interface AuthContextValue {
   readonly secondFactorPending: boolean;
   /** True once a session ended because the API no longer accepted it. */
   readonly expired: boolean;
+  /** True for a few seconds after the Visitor signed in (with the second factor, if any). */
+  readonly justSignedIn: boolean;
   readonly sendMagicLink: (email: string) => Promise<void>;
   readonly signInWithGoogle: () => Promise<void>;
   readonly signInWithPassword: (email: string, password: string) => Promise<void>;

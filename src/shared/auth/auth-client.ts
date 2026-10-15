@@ -95,7 +95,7 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
   let current: AuthSession | undefined;
   let signingOut = false;
 
-  supabase.auth.onAuthStateChange((_event, session) => {
+  supabase.auth.onAuthStateChange((event, session) => {
     const previous = current;
     current = toSession(session);
     // A session that ends without the Visitor signing out has expired: the API refused
@@ -103,6 +103,7 @@ function supabaseAuthClient(url: string, publishableKey: string): AuthClient {
     const change = {
       session: current,
       expired: previous !== undefined && current === undefined && !signingOut,
+      restored: event === 'INITIAL_SESSION',
     };
     for (const listener of listeners) listener(change);
   });

@@ -9,7 +9,7 @@ import { buttonVariants } from '@/shared/ui/button-variants';
 import { useMyAccount } from '../api/my-account';
 
 const itemClassName =
-  'block w-full rounded-md px-3 py-2 text-left text-sm hover:bg-lichen focus-visible:outline-3 focus-visible:outline-pine';
+  'flex min-h-11 w-full items-center rounded-md px-3 text-left text-sm hover:bg-lichen focus-visible:outline-3 focus-visible:outline-pine';
 
 /** The header's way into the account: Sign in, or the signed-in Visitor's menu. */
 export function AccountMenu() {

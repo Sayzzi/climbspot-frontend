@@ -56,7 +56,9 @@ describe('Plan tab: Uphill Itineraries', () => {
 
     await submit(user);
 
-    expect(plan().getByText('Place your starting point on the map first.')).toBeInTheDocument();
+    expect(
+      plan().getByText('Place your starting point first: on the map, or with your location.'),
+    ).toBeInTheDocument();
     expect(sent).toHaveLength(0);
   });
 

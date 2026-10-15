@@ -2,6 +2,8 @@ import { cleanup, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { anAscentSummary, handlers, nearbyResults } from '@/test/api';
+import { expectAccessible } from '@/test/axe';
+import { stubGeolocation } from '@/test/geolocation';
 import { renderApp } from '@/test/render-app';
 import { server } from '@/test/server';
 
@@ -9,6 +11,7 @@ const HERE = '/?latitude=45&longitude=6';
 const HEADLINE = 'Find the hills worth climbing near you.';
 
 beforeEach(() => {
+  localStorage.removeItem('climbspot.welcomed');
   server.use(handlers.nearby(() => nearbyResults([anAscentSummary({ name: 'Le Mur' })])));
   reduceMotion(false);
 });
@@ -52,11 +55,40 @@ describe('The welcome screen', () => {
     await user.click(await screen.findByRole('button', { name: 'Explore the map' }));
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('region', { name: 'Map of nearby climbs' }).parentElement,
-      ).toHaveFocus();
+      expect(screen.getByRole('region', { name: 'Map of nearby climbs' })).toHaveFocus();
     });
     expect(welcome()).not.toBeInTheDocument();
+  });
+
+  it('asks for the location only once the Visitor chooses the climbs near them', async () => {
+    stubGeolocation({ position: { latitude: 45.5, longitude: 6.5 } });
+    const { user, router } = await renderApp('/');
+
+    await user.click(await screen.findByRole('button', { name: 'Climbs near me' }));
+
+    await waitFor(() => {
+      expect(router.state.location.search).toMatchObject({ latitude: 45.5, longitude: 6.5 });
+    });
+  });
+
+  it('leaves the location unasked when the Visitor explores the map', async () => {
+    stubGeolocation({ position: { latitude: 45.5, longitude: 6.5 } });
+    const { user, router } = await renderApp('/');
+
+    await user.click(await screen.findByRole('button', { name: 'Explore the map' }));
+
+    await screen.findByRole('heading', { level: 1, name: 'Find climbs' });
+    expect(router.state.location.search).not.toHaveProperty('latitude');
+    expect(
+      screen.getByText('Move the map to where you want to climb, then choose “Search this area”.'),
+    ).toBeVisible();
+  });
+
+  it('is accessible', async () => {
+    await renderApp(HERE);
+    await screen.findByRole('heading', { level: 1, name: HEADLINE });
+
+    await expectAccessible();
   });
 
   it('lifts at once when the Visitor asked to reduce motion', async () => {

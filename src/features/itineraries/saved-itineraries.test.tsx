@@ -184,7 +184,7 @@ describe('My itineraries', () => {
     await screen.findByRole('heading', { level: 2, name: 'Hill repeats' });
 
     await user.click(main().getByRole('button', { name: 'Download GPX' }));
-    await user.click(main().getByRole('button', { name: 'Download workout (FIT)' }));
+    await user.click(main().getByRole('button', { name: 'Download for your watch (FIT)' }));
 
     await vi.waitFor(() => {
       expect(savedFiles().map((file) => file.name)).toEqual([
@@ -200,7 +200,7 @@ describe('My itineraries', () => {
 
     expect(main().getByRole('button', { name: 'Download GPX' })).toBeInTheDocument();
     expect(
-      main().queryByRole('button', { name: 'Download workout (FIT)' }),
+      main().queryByRole('button', { name: 'Download for your watch (FIT)' }),
     ).not.toBeInTheDocument();
   });
 

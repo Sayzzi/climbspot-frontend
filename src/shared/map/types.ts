@@ -22,6 +22,8 @@ export interface MapOverlay {
 export interface MapViewProps {
   /** Accessible name of the map region. */
   readonly label: string;
+  /** Lets the page move the keyboard focus to the map, where its keys work. */
+  readonly id?: string;
   /** Centre of the map, followed when it changes; ignored while `fitTo` is set. */
   readonly center: Position;
   readonly zoom: number;

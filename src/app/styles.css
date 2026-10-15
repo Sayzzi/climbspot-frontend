@@ -51,6 +51,10 @@
   /* Strava's orange, as its brand guidelines require for its button and marks. */
   --color-strava: #fc5200;
 
+  /* A sign's thickness under plates, and the lift of a waymark off the map. */
+  --shadow-plate: 0 3px 0 0 color-mix(in oklab, var(--color-pine) 14%, transparent);
+  --shadow-waymark: 0 1px 3px color-mix(in oklab, var(--color-pine) 45%, transparent);
+
   /* The home page's opening move: the profile climbs, then the waymark appears. */
   --animate-profile-draw: profile-draw 1.6s cubic-bezier(0.55, 0, 0.25, 1) 0.2s forwards;
   --animate-waymark-in: waymark-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) 1.65s forwards;
@@ -116,8 +120,10 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0s !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
       scroll-behavior: auto !important;
     }
   }

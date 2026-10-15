@@ -7,9 +7,9 @@
     "session": "Hill session"
   },
   "start": {
-    "hint": "Click or tap the map to place your starting point.",
+    "hint": "Click or tap the map to place your starting point, or use your location.",
     "placed": "Starting point placed. Click the map to move it.",
-    "missing": "Place your starting point on the map first.",
+    "missing": "Place your starting point first: on the map, or with your location.",
     "marker": "Starting point",
     "useMyLocation": "Use my location",
     "locationFailed": "Your location is not available: place your starting point on the map."
@@ -64,7 +64,7 @@
     "repeatMaximumGradient": "Repeat max gradient"
   },
   "download": "Download GPX",
-  "downloadWorkout": "Download workout (FIT)",
+  "downloadWorkout": "Download for your watch (FIT)",
   "workout": {
     "warmUp": "Warm-up",
     "repeat": "Repeat {{index}}/{{count}}",

@@ -136,7 +136,7 @@ function PaceForm({ initial, onSave, onClose, revertTo, attribution }: PaceFormP
           }}
           aria-invalid={problem !== undefined}
           aria-describedby={problem === undefined ? undefined : problemId}
-          className="rounded-md border border-pine/25 px-2 py-1.5 focus-visible:outline-3 focus-visible:outline-pine"
+          className="min-h-11 rounded-md border border-pine/60 px-2 focus-visible:outline-3 focus-visible:outline-pine"
         />
         {problem !== undefined && (
           <p id={problemId} role="alert" className="text-danger">

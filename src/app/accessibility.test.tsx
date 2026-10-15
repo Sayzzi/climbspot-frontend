@@ -28,17 +28,26 @@ beforeEach(() => {
 
 describe('Accessibility (WCAG 2.2 AA)', () => {
   it.each([
-    [
-      'the home page and its panels',
-      '/?latitude=45&longitude=6',
-      'heading',
-      'Find the hills worth climbing near you.',
-    ],
+    ['the search page', '/?latitude=45&longitude=6', 'heading', 'Find climbs'],
     ['a climb’s page', `/ascents/${ID}`, 'heading', 'Le Mur'],
     ['the sign-in page', '/sign-in', 'heading', 'Sign in'],
   ])('holds on %s', async (_, path, role, name) => {
     await renderApp(path);
     await screen.findByRole(role, { name, level: 1 });
+
+    await expectAccessible();
+  });
+
+  it.each([
+    ['Climbs', 'list'],
+    ['Filters', 'radiogroup'],
+    ['Plan', 'radiogroup'],
+  ])('holds on the search page with its %s tab open', async (tab, role) => {
+    const { user } = await renderApp('/?latitude=45&longitude=6');
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+
+    await user.click(screen.getByRole('tab', { name: tab }));
+    await screen.findAllByRole(role);
 
     await expectAccessible();
   });

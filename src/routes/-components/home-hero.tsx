@@ -8,7 +8,7 @@ import { ClimbingProfile } from './climbing-profile';
 interface HomeHeroProps {
   /** Fading away after the Visitor chose a way in; gone once that is done. */
   readonly closing: boolean;
-  readonly onShowClimbs: () => void;
+  readonly onShowAscents: () => void;
   readonly onExploreMap: () => void;
 }
 
@@ -16,7 +16,7 @@ interface HomeHeroProps {
  * The welcome screen, over a veiled map: what ClimbSpot does, an elevation profile
  * climbing to a waymark, and the two ways in, each of which lifts it.
  */
-export function HomeHero({ closing, onShowClimbs, onExploreMap }: HomeHeroProps) {
+export function HomeHero({ closing, onShowAscents, onExploreMap }: HomeHeroProps) {
   const { t } = useTranslation();
 
   return (
@@ -35,8 +35,8 @@ export function HomeHero({ closing, onShowClimbs, onExploreMap }: HomeHeroProps)
           </h1>
           <p className="max-w-[36ch] text-lg text-ink-muted">{t('home.intro')}</p>
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" onClick={onShowClimbs}>
-              {t('home.showClimbs')}
+            <Button size="lg" onClick={onShowAscents}>
+              {t('home.showAscents')}
             </Button>
             <Button size="lg" variant="secondary" onClick={onExploreMap}>
               {t('home.exploreMap')}

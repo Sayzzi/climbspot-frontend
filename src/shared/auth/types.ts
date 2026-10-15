@@ -62,6 +62,8 @@ export interface AuthChange {
   readonly session: AuthSession | undefined;
   /** True when the session ended because the API no longer accepted it. */
   readonly expired: boolean;
+  /** True for the session found on opening the site, rather than one just signed into. */
+  readonly restored?: boolean;
 }
 
 /** Signing in and out with the identity provider (ADR 0009); the only code that knows it. */

@@ -9,7 +9,7 @@ import { fakeMap } from './fake-map-control';
  * exposed as text. Tests drive it through `fakeMap`.
  */
 export function MapView(props: MapViewProps) {
-  const { label, markers = [], line, alternatives = [], dashedLine, onMarkerSelect } = props;
+  const { id, label, markers = [], line, alternatives = [], dashedLine, onMarkerSelect } = props;
 
   useEffect(() => {
     fakeMap.register(props);
@@ -19,7 +19,7 @@ export function MapView(props: MapViewProps) {
   });
 
   return (
-    <section aria-label={label}>
+    <section id={id} tabIndex={-1} aria-label={label}>
       {markers.map((marker) => (
         <button
           key={marker.id}

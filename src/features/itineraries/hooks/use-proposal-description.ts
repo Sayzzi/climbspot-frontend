@@ -5,6 +5,7 @@ import { useEffortFacts } from '@/shared/pace';
 import { useFormatters } from '@/shared/units';
 
 import type { Proposal } from '../types';
+import type { Fact } from '@/shared/ui/fact-list';
 
 /** The name a proposal goes by until the Visitor gives it one. */
 export function useProposalName(proposal: Proposal): string {
@@ -28,8 +29,11 @@ export function useProposalName(proposal: Proposal): string {
   }
 }
 
-/** What a proposal measures, as facts to list: the three key figures first. */
-export function useProposalFacts(proposal: Proposal) {
+/** What a proposal measures: its three key figures, then the rest. */
+export function useProposalFacts(proposal: Proposal): {
+  readonly key: readonly [Fact, Fact, Fact];
+  readonly more: readonly Fact[];
+} {
   const { t } = useTranslation('itineraries');
   const format = useFormatters();
   const labels = useDomainLabels();
@@ -40,40 +44,50 @@ export function useProposalFacts(proposal: Proposal) {
 
   switch (proposal.kind) {
     case 'session':
-      return [
-        { term: t('facts.totalLength'), value: format.distance(proposal.totals.length) },
-        { term: t('facts.heightGained'), value: format.elevation(proposal.totals.heightGained) },
-        {
-          term: t('facts.repeatGradient'),
-          value: format.gradient(proposal.repeat.averageGradient),
-        },
-        ...effort,
-        { term: t('facts.repeatLength'), value: format.distance(proposal.repeat.length) },
-        {
-          term: t('facts.repeatMaximumGradient'),
-          value: format.gradient(proposal.repeat.maximumGradient),
-        },
-        { term: t('facts.warmUp'), value: format.distance(proposal.warmUp.length) },
-      ];
+      return {
+        key: [
+          { term: t('facts.totalLength'), value: format.distance(proposal.totals.length) },
+          { term: t('facts.heightGained'), value: format.elevation(proposal.totals.heightGained) },
+          {
+            term: t('facts.repeatGradient'),
+            value: format.gradient(proposal.repeat.averageGradient),
+          },
+        ],
+        more: [
+          ...effort,
+          { term: t('facts.repeatLength'), value: format.distance(proposal.repeat.length) },
+          {
+            term: t('facts.repeatMaximumGradient'),
+            value: format.gradient(proposal.repeat.maximumGradient),
+          },
+          { term: t('facts.warmUp'), value: format.distance(proposal.warmUp.length) },
+        ],
+      };
     case 'loop':
-      return [
-        { term: t('facts.length'), value: format.distance(proposal.length) },
-        { term: t('facts.heightGained'), value: format.elevation(proposal.heightGained) },
-        { term: t('facts.relief'), value: labels.relief(proposal.relief) },
-        ...effort,
-      ];
+      return {
+        key: [
+          { term: t('facts.length'), value: format.distance(proposal.length) },
+          { term: t('facts.heightGained'), value: format.elevation(proposal.heightGained) },
+          { term: t('facts.relief'), value: labels.relief(proposal.relief) },
+        ],
+        more: effort,
+      };
     case 'uphill':
-      return [
-        { term: t('facts.length'), value: format.distance(proposal.length) },
-        { term: t('facts.elevationGain'), value: format.elevation(proposal.elevationGain) },
-        { term: t('facts.averageGradient'), value: format.gradient(proposal.averageGradient) },
-        ...effort,
-        { term: t('facts.maximumGradient'), value: format.gradient(proposal.maximumGradient) },
-        { term: t('facts.category'), value: labels.category(proposal.category) },
-        {
-          term: t('facts.distanceToStart'),
-          value: t('away', { distance: format.distance(proposal.distanceToStart) }),
-        },
-      ];
+      return {
+        key: [
+          { term: t('facts.length'), value: format.distance(proposal.length) },
+          { term: t('facts.elevationGain'), value: format.elevation(proposal.elevationGain) },
+          { term: t('facts.averageGradient'), value: format.gradient(proposal.averageGradient) },
+        ],
+        more: [
+          ...effort,
+          { term: t('facts.maximumGradient'), value: format.gradient(proposal.maximumGradient) },
+          { term: t('facts.category'), value: labels.category(proposal.category) },
+          {
+            term: t('facts.distanceToStart'),
+            value: t('away', { distance: format.distance(proposal.distanceToStart) }),
+          },
+        ],
+      };
   }
 }

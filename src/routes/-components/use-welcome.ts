@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { prefersReducedMotion } from '@/shared/hooks/prefers-reduced-motion';
 
@@ -29,23 +29,44 @@ function rememberWelcomed() {
 export function useWelcome(asked: boolean, onClosed: () => void) {
   const [welcomed, setWelcomed] = useState(wasWelcomed);
   const [closing, setClosing] = useState(false);
+  const fade = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const afterClose = useRef<() => void>(undefined);
+  const open = asked || !welcomed || closing;
+
+  // Leaving the page mid-fade must not finish closing (and navigate) afterwards.
+  useEffect(
+    () => () => {
+      clearTimeout(fade.current);
+    },
+    [],
+  );
+
+  // Once lifted, the map and panel take input again: only then can they take the focus.
+  useEffect(() => {
+    if (!open && afterClose.current) {
+      afterClose.current();
+      afterClose.current = undefined;
+    }
+  }, [open]);
 
   const close = (then: () => void) => {
+    if (closing) {
+      return;
+    }
     rememberWelcomed();
+    afterClose.current = then;
     const done = () => {
       setWelcomed(true);
       setClosing(false);
       onClosed();
-      // Once the map and panel take input again.
-      setTimeout(then, 0);
     };
     if (prefersReducedMotion()) {
       done();
       return;
     }
     setClosing(true);
-    setTimeout(done, FADE_MS);
+    fade.current = setTimeout(done, FADE_MS);
   };
 
-  return { open: asked || !welcomed || closing, closing, close };
+  return { open, closing, close };
 }

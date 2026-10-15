@@ -23,7 +23,7 @@ Web app for ClimbSpot: find uphill paths (**Ascents**) near you for running, tra
 
 ## Getting started
 
-Requirements: Node.js ≥ 22.12 (see `.nvmrc`) and pnpm (`corepack enable`).
+Requirements: Node.js ≥ 26 (see `.nvmrc`) and pnpm (`corepack enable`).
 
 ```bash
 pnpm install

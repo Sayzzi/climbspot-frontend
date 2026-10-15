@@ -115,6 +115,7 @@ describe('Adding an Ascent', () => {
     expect(sent[0]?.surface).toBe('gravel');
     expect(sent[0]?.authorization).toBe(`Bearer ${FAKE_TOKEN}`);
     expect(await (sent[0]?.gpx as File).text()).toBe('<gpx/>');
+    expect((sent[0]?.gpx as File).name).toBe('le-mur.gpx');
   });
 
   it('leads back to the search page, not to the form, from the new Ascent', async () => {

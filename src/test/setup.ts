@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest';
+import './node-files';
 import '@/shared/i18n/i18n';
 
 import { cleanup } from '@testing-library/react';

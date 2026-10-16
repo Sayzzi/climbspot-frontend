@@ -1,17 +1,22 @@
 import { useTranslation } from 'react-i18next';
 
+import { useAuth } from '@/shared/auth';
+
 import { useFormatters } from '@/shared/units';
 
 import { activities, categories } from '@/shared/domain/values';
 
 import { DEFAULT_RADIUS, SEARCH_RADII } from '../domain';
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
+import { StarIcon } from './star-icon';
 import type { Activity, Category } from '@/shared/domain/values';
 
 export interface SearchFilterValues {
   readonly radius?: number | undefined;
   readonly activities?: readonly Activity[] | undefined;
   readonly categories?: readonly Category[] | undefined;
+  /** Only the signed-in Visitor's Favourite Ascents. */
+  readonly favouritesOnly?: boolean | undefined;
 }
 
 interface SearchFiltersProps {
@@ -19,11 +24,12 @@ interface SearchFiltersProps {
   readonly onChange: (value: SearchFilterValues) => void;
 }
 
-/** Radius, Activity and Category filters of the nearby search. */
+/** Favourites (signed in), radius, Activity and Category filters of the nearby search. */
 export function SearchFilters({ value, onChange }: SearchFiltersProps) {
   const { t } = useTranslation('ascents');
   const format = useFormatters();
   const labels = useDomainLabels();
+  const { session } = useAuth();
   const radius = value.radius ?? DEFAULT_RADIUS;
   // A shared URL may carry any radius: list it so the control shows what is searched.
   const radii = [...new Set([...SEARCH_RADII, radius])].sort((a, b) => a - b);
@@ -35,6 +41,21 @@ export function SearchFilters({ value, onChange }: SearchFiltersProps) {
         event.preventDefault();
       }}
     >
+      {session && (
+        <label className="flex min-h-11 cursor-pointer items-center gap-3 self-start rounded-full border border-moss px-4 text-sm font-medium has-checked:bg-moss has-checked:text-white has-focus-visible:outline-3 has-focus-visible:outline-pine">
+          <input
+            type="checkbox"
+            className="sr-only"
+            checked={value.favouritesOnly === true}
+            onChange={(event) => {
+              onChange({ ...value, favouritesOnly: event.target.checked || undefined });
+            }}
+          />
+          <StarIcon className="size-4" pathClassName="fill-current stroke-current" />
+          {t('filters.favouritesOnly')}
+        </label>
+      )}
+
       <label className="flex items-center gap-3 text-sm font-medium">
         {t('filters.radius')}
         <select

@@ -1539,6 +1539,8 @@ export interface operations {
                 activity?: components["schemas"]["Activity"][];
                 /** @description Only Ascents in one of these Categories. Repeatable. */
                 category?: components["schemas"]["Category"][];
+                /** @description `true`: only the signed-in Visitor's Favourite Ascents. Needs a signed-in Visitor. */
+                favourite?: boolean;
             };
             header?: never;
             path?: never;

@@ -82,6 +82,13 @@ function SearchPage() {
         }
         notice={position ? undefined : <LocateNotice state={located} />}
         onSearchArea={searchAround}
+        onShowEveryAscent={() => {
+          void navigate({
+            search: (previous) => withFilters(previous, { ...filters, favouritesOnly: undefined }),
+            replace: true,
+            resetScroll: false,
+          });
+        }}
         behindWelcome={welcome.open}
         extraTabs={[planner]}
       />

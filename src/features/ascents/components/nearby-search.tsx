@@ -1,6 +1,7 @@
 import { useId, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useAuth } from '@/shared/auth';
 import { cn } from '@/shared/lib/cn';
 import { MapView, type MapOverlay } from '@/shared/map';
 import { Button } from '@/shared/ui/button';
@@ -33,6 +34,8 @@ interface NearbySearchProps {
   readonly notice?: ReactNode;
   /** The Visitor asked to search around another position. */
   readonly onSearchArea: (center: Position) => void;
+  /** The Visitor asked to see every climb, not only their favourites. */
+  readonly onShowEveryAscent: () => void;
   /** The welcome screen is over the map: neither the map nor the panel takes input. */
   readonly behindWelcome: boolean;
   /** More tabs for the panel; each may add markers, a line and clicks to the map while open. */
@@ -48,9 +51,12 @@ export function NearbySearch({
   filters,
   notice,
   onSearchArea,
+  onShowEveryAscent,
   behindWelcome,
   extraTabs = [],
 }: NearbySearchProps) {
+  const { session } = useAuth();
+  const favouritesOnly = criteria?.favouritesOnly === true && session !== undefined;
   const { t } = useTranslation('ascents');
   const { data: ascents, error, isFetching, refetch } = useNearbyAscents(criteria);
   const [selectedId, setSelectedId] = useState<string>();
@@ -74,7 +80,18 @@ export function NearbySearch({
           }}
         />
       )}
-      {ascents?.length === 0 && (
+      {ascents?.length === 0 && favouritesOnly && (
+        <div className="flex flex-col items-start gap-3 rounded-md bg-lichen p-4">
+          <div>
+            <p className="font-semibold">{t('search.noFavourite.title')}</p>
+            <p className="text-sm text-ink-muted">{t('search.noFavourite.hint')}</p>
+          </div>
+          <Button variant="secondary" size="sm" onClick={onShowEveryAscent}>
+            {t('search.noFavourite.showEvery')}
+          </Button>
+        </div>
+      )}
+      {ascents?.length === 0 && !favouritesOnly && (
         <div className="flex flex-col items-start gap-3 rounded-md bg-lichen p-4">
           <div>
             <p className="font-semibold">{t('search.empty.title')}</p>

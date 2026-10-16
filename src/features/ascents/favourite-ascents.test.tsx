@@ -173,3 +173,79 @@ describe('Favourite Ascents in the search results', () => {
     await expectAccessible();
   });
 });
+
+describe('Only my favourites, in the search', () => {
+  const HERE = '/?latitude=45&longitude=6';
+  let searches: ReturnType<typeof recorder>;
+
+  function filterApi(ascents = [anAscentSummary({ id: 'kept', name: 'Le Mur', favourite: true })]) {
+    api();
+    searches = recorder();
+    server.use(
+      handlers.nearby((request) => {
+        searches.record(request);
+        return nearbyResults(ascents);
+      }),
+    );
+  }
+
+  const favouritesOnly = () => screen.getByRole('checkbox', { name: 'Only my favourites' });
+
+  it('keeps only the favourites, and remembers it in the page address', async () => {
+    fakeAuth.signIn();
+    filterApi();
+    const { user, router } = await renderApp(HERE);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+
+    await user.click(screen.getByRole('tab', { name: 'Filters' }));
+    await user.click(favouritesOnly());
+
+    expect(favouritesOnly()).toBeChecked();
+    expect(router.state.location.search).toMatchObject({ favourite: true });
+    await waitFor(() => {
+      expect(searches.lastUrl()?.searchParams.get('favourite')).toBe('true');
+    });
+  });
+
+  it('is still on after a reload', async () => {
+    fakeAuth.signIn();
+    filterApi();
+    const { user } = await renderApp(`${HERE}&favourite=true`);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+
+    expect(searches.lastUrl()?.searchParams.get('favourite')).toBe('true');
+    await user.click(screen.getByRole('tab', { name: 'Filters' }));
+    expect(favouritesOnly()).toBeChecked();
+  });
+
+  it('says when no favourite is around, and offers every climb again', async () => {
+    fakeAuth.signIn();
+    filterApi([]);
+    const { user, router } = await renderApp(`${HERE}&favourite=true`);
+
+    expect(await screen.findByText('None of your favourites around here')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Show every climb' }));
+
+    expect(router.state.location.search).not.toHaveProperty('favourite');
+  });
+
+  it('is not offered, nor applied, to a Visitor who is not signed in', async () => {
+    filterApi();
+    const { user } = await renderApp(`${HERE}&favourite=true`);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+
+    expect(searches.lastUrl()?.searchParams.has('favourite')).toBe(false);
+    await user.click(screen.getByRole('tab', { name: 'Filters' }));
+    expect(screen.queryByRole('checkbox', { name: 'Only my favourites' })).not.toBeInTheDocument();
+  });
+
+  it('stays accessible with the filter on', async () => {
+    fakeAuth.signIn();
+    filterApi();
+    const { user } = await renderApp(`${HERE}&favourite=true`);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+    await user.click(screen.getByRole('tab', { name: 'Filters' }));
+
+    await expectAccessible();
+  });
+});

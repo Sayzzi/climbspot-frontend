@@ -6,21 +6,26 @@ import { useAuth } from '@/shared/auth';
 
 import type { NearbyCriteria } from '../types';
 
-function toQuery({ position, radius, activities, categories }: NearbyCriteria) {
+function toQuery(
+  { position, radius, activities, categories, favouritesOnly }: NearbyCriteria,
+  signedIn: boolean,
+) {
   return {
     latitude: position.latitude,
     longitude: position.longitude,
     ...(radius !== undefined && { radius }),
     ...(activities && activities.length > 0 && { activity: [...activities] }),
     ...(categories && categories.length > 0 && { category: [...categories] }),
+    // Only a signed-in Visitor has favourites: a shared address does not ask for theirs.
+    ...(favouritesOnly === true && signedIn && { favourite: true }),
   };
 }
 
 /** Nearby Ascents, or nothing until there is a position to search around. */
 export function useNearbyAscents(criteria: NearbyCriteria | undefined) {
-  const query = criteria && toQuery(criteria);
   // Signed in, results carry the Visitor's own Ascent Times: never anyone else's.
   const { session } = useAuth();
+  const query = criteria && toQuery(criteria, session !== undefined);
 
   return useQuery({
     queryKey: ['ascents', 'nearby', session?.visitorId ?? null, query ?? null],

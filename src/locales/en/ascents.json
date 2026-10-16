@@ -17,6 +17,11 @@
     "tabs": {
       "ascents": "Climbs",
       "filters": "Filters"
+    },
+    "noFavourite": {
+      "title": "None of your favourites around here",
+      "hint": "Search another area, or show every climb.",
+      "showEvery": "Show every climb"
     }
   },
   "facts": {
@@ -44,7 +49,8 @@
   "filters": {
     "radius": "Search radius",
     "activities": "Activities",
-    "categories": "Categories"
+    "categories": "Categories",
+    "favouritesOnly": "Only my favourites"
   },
   "detail": {
     "backToSearch": "Back to search",

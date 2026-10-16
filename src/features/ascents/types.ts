@@ -15,4 +15,6 @@ export interface NearbyCriteria {
   readonly radius?: number | undefined;
   readonly activities?: readonly Activity[] | undefined;
   readonly categories?: readonly Category[] | undefined;
+  /** Only the signed-in Visitor's Favourite Ascents. */
+  readonly favouritesOnly?: boolean | undefined;
 }

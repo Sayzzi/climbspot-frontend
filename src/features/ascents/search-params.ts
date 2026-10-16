@@ -16,6 +16,7 @@ export const searchParamsSchema = z.object({
   radius: z.number().int().positive().max(MAXIMUM_RADIUS).optional().catch(undefined),
   activity: z.array(z.enum(activities)).nonempty().optional().catch(undefined),
   category: z.array(z.enum(categories)).nonempty().optional().catch(undefined),
+  favourite: z.literal(true).optional().catch(undefined),
 });
 
 export type SearchParams = z.infer<typeof searchParamsSchema>;
@@ -27,8 +28,13 @@ export function positionOf({ latitude, longitude }: SearchParams): Position | un
   return latitude !== undefined && longitude !== undefined ? { latitude, longitude } : undefined;
 }
 
-export function filtersOf({ radius, activity, category }: SearchParams): SearchFilterValues {
-  return { radius, activities: activity, categories: category };
+export function filtersOf({
+  radius,
+  activity,
+  category,
+  favourite,
+}: SearchParams): SearchFilterValues {
+  return { radius, activities: activity, categories: category, favouritesOnly: favourite };
 }
 
 export function withPosition(
@@ -44,6 +50,7 @@ export function withFilters(params: SearchParams, filters: SearchFilterValues): 
     radius: filters.radius,
     activity: nonEmpty(filters.activities),
     category: nonEmpty(filters.categories),
+    favourite: filters.favouritesOnly === true ? true : undefined,
   };
 }
 

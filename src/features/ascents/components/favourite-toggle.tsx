@@ -8,6 +8,7 @@ import { ErrorNotice } from '@/shared/ui/error-notice';
 import { textLinkClassName } from '@/shared/ui/text-link';
 
 import type { FavouriteToggle } from '../api/favourite-ascents';
+import { StarIcon } from './star-icon';
 
 interface FavouriteStarProps {
   readonly ascent: { readonly id: string; readonly name: string; readonly favourite?: boolean };
@@ -42,17 +43,13 @@ export function FavouriteStar({ ascent, toggle, signedOut = 'invite' }: Favourit
       }}
       className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full text-pine hover:bg-white focus-visible:outline-3 focus-visible:outline-pine"
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="size-7">
-        <path
-          d="M12 3.2l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.6l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"
-          strokeWidth="1.8"
-          strokeLinejoin="round"
-          className={cn(
-            'stroke-pine transition-colors duration-200',
-            favourite ? 'fill-signpost' : 'fill-transparent',
-          )}
-        />
-      </svg>
+      <StarIcon
+        className="size-7"
+        pathClassName={cn(
+          'stroke-pine transition-colors duration-200',
+          favourite ? 'fill-signpost' : 'fill-transparent',
+        )}
+      />
     </button>
   );
 }

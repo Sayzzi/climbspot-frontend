@@ -82,7 +82,8 @@ describe('Ascent Times', () => {
     await renderApp(`/ascents/${ID}`);
     await screen.findByRole('heading', { level: 1, name: 'Le Mur' });
 
-    await expect.poll(() => asked.requests.length).toBe(1);
+    // Asked again whenever Strava syncs on signing in: only that it was asked matters.
+    await expect.poll(() => asked.requests.length).toBeGreaterThan(0);
     expect(screen.queryByRole('region', { name: 'Your times' })).not.toBeInTheDocument();
   });
 

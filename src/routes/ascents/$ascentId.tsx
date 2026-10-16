@@ -7,12 +7,16 @@ import {
   ascentQuery,
   isAscentMissing,
 } from '@/features/ascents';
+import { signedInVisitorId } from '@/shared/auth';
 
 export const Route = createFileRoute('/ascents/$ascentId')({
   loader: async ({ context: { queryClient }, params: { ascentId } }) => {
     try {
       // Reuse cached data when there is some (e.g. right after creating the Ascent).
-      await queryClient.query({ ...ascentQuery(ascentId), staleTime: 'static' });
+      await queryClient.query({
+        ...ascentQuery(ascentId, signedInVisitorId()),
+        staleTime: 'static',
+      });
     } catch (error) {
       if (isAscentMissing(error)) {
         // eslint-disable-next-line @typescript-eslint/only-throw-error -- the router's not-found signal

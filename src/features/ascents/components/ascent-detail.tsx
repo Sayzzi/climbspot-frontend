@@ -2,14 +2,17 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useAuth } from '@/shared/auth';
 import { MapView } from '@/shared/map';
 import { buttonVariants } from '@/shared/ui/button-variants';
 import { useEffortFacts } from '@/shared/pace';
 import { useFormatters } from '@/shared/units';
 
 import { ascentQuery } from '../api/ascent';
+import { useFavouriteToggle } from '../api/favourite-ascents';
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { BackToSearch } from './back-to-search';
+import { FavouriteFeedback, FavouriteStar } from './favourite-toggle';
 import { MyAscentTimes } from './my-ascent-times';
 import { cn } from '@/shared/lib/cn';
 import { FactList } from '@/shared/ui/fact-list';
@@ -22,7 +25,9 @@ export function AscentDetail({ id }: { readonly id: string }) {
   const { t } = useTranslation('ascents');
   const format = useFormatters();
   const labels = useDomainLabels();
-  const { data: ascent } = useSuspenseQuery(ascentQuery(id));
+  const { session } = useAuth();
+  const { data: ascent } = useSuspenseQuery(ascentQuery(id, session?.visitorId));
+  const favourite = useFavouriteToggle(ascent.id);
   const effortFacts = useEffortFacts(ascent.effort);
   const measurementsId = useId();
   const profileId = useId();
@@ -52,7 +57,10 @@ export function AscentDetail({ id }: { readonly id: string }) {
       </div>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-3">
-          <h1 className="text-4xl leading-none font-extrabold">{ascent.name}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-4xl leading-none font-extrabold">{ascent.name}</h1>
+            <FavouriteStar ascent={ascent} toggle={favourite} />
+          </div>
           <ul aria-label={t('detail.about')} className="flex flex-wrap gap-2">
             {about.map((label) => (
               <li
@@ -63,6 +71,7 @@ export function AscentDetail({ id }: { readonly id: string }) {
               </li>
             ))}
           </ul>
+          <FavouriteFeedback toggle={favourite} />
         </div>
         <a
           href={`geo:${String(ascent.start.latitude)},${String(ascent.start.longitude)}`}

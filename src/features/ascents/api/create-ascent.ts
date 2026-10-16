@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { apiClient } from '@/shared/api/client';
+import { useAuth } from '@/shared/auth';
 import { unwrap } from '@/shared/api/request';
 
 import type { Surface } from '@/shared/domain/values';
@@ -15,6 +16,7 @@ export interface NewAscent {
 /** Uploads a GPX file as a new Ascent, and caches the created Ascent for its page. */
 export function useCreateAscent() {
   const queryClient = useQueryClient();
+  const { session } = useAuth();
 
   return useMutation({
     mutationFn: async ({ name, surface, gpx }: NewAscent) => {
@@ -34,7 +36,7 @@ export function useCreateAscent() {
       );
     },
     onSuccess: (ascent) => {
-      queryClient.setQueryData(ascentQuery(ascent.id).queryKey, ascent);
+      queryClient.setQueryData(ascentQuery(ascent.id, session?.visitorId).queryKey, ascent);
     },
   });
 }

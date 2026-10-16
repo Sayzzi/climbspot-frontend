@@ -82,5 +82,11 @@
     "best": "Best",
     "summary_one": "Your best: {{time}} · up once",
     "summary_other": "Your best: {{time}} · up {{count}} times"
+  },
+  "favourite": {
+    "toggle": "Keep {{name}} in my favourites",
+    "added": "Added to your favourites",
+    "removed": "Removed from your favourites",
+    "signIn": "Sign in to keep this climb"
   }
 }

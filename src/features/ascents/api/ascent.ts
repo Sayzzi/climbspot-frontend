@@ -19,9 +19,13 @@ export function toAscent(received: ReceivedAscent): Ascent {
   };
 }
 
-export function ascentQuery(id: string) {
+/**
+ * An Ascent as the Visitor reads it: keyed by who is signed in, since it says whether it
+ * is one of their Favourite Ascents.
+ */
+export function ascentQuery(id: string, visitorId: string | undefined) {
   return queryOptions({
-    queryKey: ['ascents', id],
+    queryKey: ['ascents', id, visitorId ?? null],
     queryFn: async ({ signal }) =>
       toAscent(await unwrap(apiClient.GET('/ascents/{id}', { params: { path: { id } }, signal }))),
   });

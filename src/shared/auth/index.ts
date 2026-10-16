@@ -1,4 +1,5 @@
 export { authClient } from './auth-client';
+export { signedInVisitorId } from './signed-in-visitor';
 export { AuthProvider } from './auth-provider';
 export { SignedInOnly } from './signed-in-only';
 export {

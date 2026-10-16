@@ -195,11 +195,38 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get an Ascent with its path and Elevation Profile */
+        /**
+         * Get an Ascent with its path and Elevation Profile
+         * @description With a signed-in Visitor's token, it says whether the Ascent is one of their Favourite Ascents.
+         */
         get: operations["getAscent"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ascents/{id}/favourite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Make an Ascent one of the signed-in Visitor's Favourite Ascents
+         * @description Only they see it. Marking it again changes nothing.
+         */
+        put: operations["markFavouriteAscent"];
+        post?: never;
+        /**
+         * Take an Ascent out of the signed-in Visitor's Favourite Ascents
+         * @description Nothing happens when it was not one of them.
+         */
+        delete: operations["unmarkFavouriteAscent"];
         options?: never;
         head?: never;
         patch?: never;
@@ -608,6 +635,8 @@ export interface components {
                 /** @description Elevation, in metres. */
                 elevation: number;
             }[];
+            /** @description Whether it is one of the signed-in Visitor's Favourite Ascents; absent when nobody is signed in. */
+            favourite?: boolean;
         };
         /** @enum {string} */
         Surface: "paved" | "gravel" | "trail";
@@ -778,8 +807,17 @@ export interface operations {
                     "application/json": components["schemas"]["Account"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -805,7 +843,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -814,7 +852,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `ACCOUNT_DELETION_UNAVAILABLE`: the identity could not be deleted; nothing was erased. */
+            /** @description `ACCOUNT_DELETION_UNAVAILABLE`: the identity could not be deleted; nothing was erased. `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -856,8 +894,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -885,8 +932,17 @@ export interface operations {
                     "application/json": components["schemas"]["SavedItineraries"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -927,7 +983,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -938,6 +994,15 @@ export interface operations {
             };
             /** @description `SAVED_ITINERARY_TOO_LARGE`: the proposal is too large to keep. */
             413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -967,7 +1032,7 @@ export interface operations {
                     "application/json": components["schemas"]["SavedItinerary"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -978,6 +1043,15 @@ export interface operations {
             };
             /** @description `SAVED_ITINERARY_NOT_FOUND`: the signed-in Visitor has no such Saved Itinerary. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1005,7 +1079,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1016,6 +1090,15 @@ export interface operations {
             };
             /** @description `SAVED_ITINERARY_NOT_FOUND`: the signed-in Visitor has no such Saved Itinerary. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1058,7 +1141,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1069,6 +1152,15 @@ export interface operations {
             };
             /** @description `SAVED_ITINERARY_NOT_FOUND`: the signed-in Visitor has no such Saved Itinerary. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1096,8 +1188,17 @@ export interface operations {
                     "application/json": components["schemas"]["StravaAuthorization"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1125,8 +1226,17 @@ export interface operations {
                     "application/json": components["schemas"]["StravaConnection"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1167,7 +1277,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1185,7 +1295,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `STRAVA_UNAVAILABLE`: Strava is down or its limits are reached. */
+            /** @description `STRAVA_UNAVAILABLE`: Strava is down or its limits are reached. `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -1212,8 +1322,17 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1241,7 +1360,7 @@ export interface operations {
                     "application/json": components["schemas"]["StravaConnection"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1259,7 +1378,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `STRAVA_UNAVAILABLE`: Strava is down or its limits are reached; what was imported stays. */
+            /** @description `STRAVA_UNAVAILABLE`: Strava is down or its limits are reached; what was imported stays. `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -1309,7 +1428,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: only signed-in Visitors add Ascents. */
+            /** @description `AUTHENTICATION_REQUIRED`: only signed-in Visitors add Ascents. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1336,7 +1455,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `ELEVATION_UNAVAILABLE`: the terrain model cannot be reached; retry later. */
+            /** @description `ELEVATION_UNAVAILABLE`: the terrain model cannot be reached; retry later. `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -1426,6 +1545,109 @@ export interface operations {
             };
         };
     };
+    markFavouriteAscent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description It is one of their Favourite Ascents. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `VALIDATION_FAILED`: the id is not a UUID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `ASCENT_NOT_FOUND`: no Ascent has this id. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    unmarkFavouriteAscent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description It is not one of their Favourite Ascents. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `VALIDATION_FAILED`: the id is not a UUID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     getMyAscentTimes: {
         parameters: {
             query?: never;
@@ -1455,7 +1677,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. */
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1466,6 +1688,15 @@ export interface operations {
             };
             /** @description `ASCENT_NOT_FOUND`: no Ascent has this id. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

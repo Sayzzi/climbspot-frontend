@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SignedInOnly } from '@/shared/auth';
@@ -10,6 +11,7 @@ import { FactList } from '@/shared/ui/fact-list';
 import { plateClassName } from '@/shared/ui/plate';
 import { SignFigures } from '@/shared/ui/sign-figures';
 import { PoweredByStrava } from '@/shared/ui/strava-brand';
+import { textLinkClassName } from '@/shared/ui/text-link';
 import { useFormatters } from '@/shared/units';
 
 import {
@@ -18,7 +20,6 @@ import {
   type FavouriteToggle,
 } from '../api/favourite-ascents';
 import type { FavouriteAscent } from '../types';
-import { AscentLink } from './ascent-list-item';
 import { FavouriteFeedback, FavouriteStar } from './favourite-toggle';
 
 /** The climbs the signed-in Visitor keeps; an invitation to sign in otherwise. */
@@ -35,6 +36,8 @@ function FavouriteAscents() {
   const { t } = useTranslation('ascents');
   const favourites = useFavouriteAscents();
   const toggle = useFavouriteToggle();
+  const headingId = useId();
+  const heading = useRef<HTMLHeadingElement>(null);
 
   if (favourites.error) {
     return <ErrorNotice error={favourites.error} onRetry={() => void favourites.refetch()} />;
@@ -43,8 +46,9 @@ function FavouriteAscents() {
     return <p className="text-ink-muted">{t('mine.loading')}</p>;
   }
   return (
-    <section aria-labelledby="favourite-climbs" className="flex flex-col gap-4">
-      <h2 id="favourite-climbs" className="text-2xl font-bold">
+    <section aria-labelledby={headingId} className="flex flex-col gap-4">
+      {/* Where the focus goes when the climb it was on leaves the list. */}
+      <h2 id={headingId} ref={heading} tabIndex={-1} className="text-2xl font-bold">
         {t('mine.favourites')}
       </h2>
       <FavouriteFeedback toggle={toggle} />
@@ -58,7 +62,12 @@ function FavouriteAscents() {
       ) : (
         <ul aria-label={t('mine.list')} className="grid gap-4 md:grid-cols-2">
           {favourites.data.map((ascent) => (
-            <FavouriteItem key={ascent.id} ascent={ascent} toggle={toggle} />
+            <FavouriteItem
+              key={ascent.id}
+              ascent={ascent}
+              toggle={toggle}
+              onRemove={() => heading.current?.focus()}
+            />
           ))}
         </ul>
       )}
@@ -69,9 +78,11 @@ function FavouriteAscents() {
 function FavouriteItem({
   ascent,
   toggle,
+  onRemove,
 }: {
   readonly ascent: FavouriteAscent;
   readonly toggle: FavouriteToggle;
+  readonly onRemove: () => void;
 }) {
   const { t } = useTranslation('ascents');
   const format = useFormatters();
@@ -81,7 +92,10 @@ function FavouriteItem({
     <li className={cn(plateClassName, 'flex flex-col gap-3 p-4')}>
       <header className="flex items-center justify-between gap-2">
         <h3 className="text-xl leading-tight font-semibold">{ascent.name}</h3>
-        <FavouriteStar ascent={{ ...ascent, favourite: true }} toggle={toggle} />
+        {/* Focus first: the star goes with the climb it takes out. */}
+        <div onClickCapture={onRemove}>
+          <FavouriteStar ascent={{ ...ascent, favourite: true }} toggle={toggle} />
+        </div>
       </header>
       <SignFigures
         facts={[
@@ -108,7 +122,14 @@ function FavouriteItem({
           <PoweredByStrava />
         </div>
       )}
-      <AscentLink ascent={ascent} className="self-start" />
+      <Link
+        to="/ascents/$ascentId"
+        params={{ ascentId: ascent.id }}
+        aria-label={t('search.viewDetails', { name: ascent.name })}
+        className={cn(textLinkClassName, 'self-start text-sm font-semibold')}
+      >
+        {t('search.details')}
+      </Link>
     </li>
   );
 }

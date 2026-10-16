@@ -93,7 +93,8 @@
     "toggle": "Keep {{name}} in my favourites",
     "added": "Added to your favourites",
     "removed": "Removed from your favourites",
-    "signIn": "Sign in to keep this climb"
+    "signIn": "Sign in to keep this climb",
+    "enterCode": "Enter your code to keep this climb"
   },
   "mine": {
     "title": "My climbs",

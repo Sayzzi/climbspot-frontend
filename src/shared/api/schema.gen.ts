@@ -177,7 +177,7 @@ export interface paths {
         };
         /**
          * Find the Ascents whose Start is closest to a position
-         * @description With a signed-in Visitor's token, each Ascent they went up carries their best Ascent Time.
+         * @description With a signed-in Visitor's token, each Ascent says whether it is one of their Favourite Ascents, and those they went up carry their best Ascent Time. `favourite=true` keeps only their Favourite Ascents.
          */
         get: operations["findAscentsNearby"];
         put?: never;
@@ -1559,6 +1559,24 @@ export interface operations {
             };
             /** @description `VALIDATION_FAILED`: a query parameter is missing or out of range. */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: `favourite=true` needs a signed-in Visitor. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

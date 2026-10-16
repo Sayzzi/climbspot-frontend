@@ -1,5 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react';
-import { HttpResponse } from 'msw';
+import { delay, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -92,6 +92,56 @@ describe('Favourite Ascents on an Ascent page', () => {
     });
   });
 
+  it('shows the change before the API answers', async () => {
+    api({ favourite: false });
+    server.use(
+      handlers.markFavourite(async () => {
+        await delay(200);
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const { user } = await renderApp(PAGE);
+    await screen.findByRole('heading', { level: 1, name: 'Le Mur' });
+
+    await user.click(star());
+
+    expect(star()).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('waits for one change to be made before taking another on the same climb', async () => {
+    api({ favourite: false });
+    server.use(
+      handlers.markFavourite(async (_id, request) => {
+        marks.record(request);
+        await delay(200);
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const { user } = await renderApp(PAGE);
+    await screen.findByRole('heading', { level: 1, name: 'Le Mur' });
+
+    await user.click(star());
+    await user.click(star());
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Added to your favourites');
+    expect(marks.requests).toHaveLength(1);
+    expect(unmarks.requests).toHaveLength(0);
+    expect(star()).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('asks to sign in again when the session has ended', async () => {
+    api({ favourite: false });
+    server.use(handlers.markFavourite(() => apiErrorResponse(401, 'AUTHENTICATION_REQUIRED')));
+    const { user } = await renderApp(PAGE);
+    await screen.findByRole('heading', { level: 1, name: 'Le Mur' });
+
+    await user.click(star());
+
+    expect(await screen.findByRole('link', { name: 'Sign in to keep this climb' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+  });
+
   it('stays accessible', async () => {
     api({ favourite: false });
     await renderApp(PAGE);
@@ -155,6 +205,48 @@ describe('Favourite Ascents in the search results', () => {
     );
   });
 
+  it('puts a result’s star back and explains when the change could not be made', async () => {
+    fakeAuth.signIn();
+    nearbyApi();
+    server.use(handlers.markFavourite(() => apiErrorResponse(500, 'INTERNAL_ERROR')));
+    const { user } = await renderApp(HERE);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+    const bosse = results().getByRole('button', { name: 'Keep La Bosse in my favourites' });
+
+    await user.click(bosse);
+
+    expect(await results().findByRole('alert')).toHaveTextContent(
+      'Something went wrong on our side. Please try again.',
+    );
+    await waitFor(() => {
+      expect(bosse).toHaveAttribute('aria-pressed', 'false');
+    });
+  });
+
+  it('shows a change made in the results on the climb’s page', async () => {
+    fakeAuth.signIn();
+    nearbyApi();
+    server.use(
+      handlers.ascent((id) =>
+        HttpResponse.json(anAscent({ id, name: 'La Bosse', favourite: false })),
+      ),
+    );
+    const { user } = await renderApp(HERE);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+    // The climb's page is cached once opened.
+    await user.click(results().getByRole('link', { name: 'View La Bosse' }));
+    await screen.findByRole('heading', { level: 1, name: 'La Bosse' });
+    await user.click(screen.getByRole('button', { name: 'Back to search' }));
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+
+    await user.click(results().getByRole('button', { name: 'Keep La Bosse in my favourites' }));
+    await user.click(results().getByRole('link', { name: 'View La Bosse' }));
+
+    expect(
+      await screen.findByRole('button', { name: 'Keep La Bosse in my favourites' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('shows no star to a Visitor who is not signed in', async () => {
     nearbyApi();
     await renderApp(HERE);
@@ -205,6 +297,37 @@ describe('Only my favourites, in the search', () => {
     await waitFor(() => {
       expect(searches.lastUrl()?.searchParams.get('favourite')).toBe('true');
     });
+  });
+
+  it('keeps a climb taken out, its star empty, until the next search', async () => {
+    fakeAuth.signIn();
+    filterApi([
+      anAscentSummary({ id: 'kept', name: 'Le Mur', favourite: true }),
+      anAscentSummary({ id: 'other', name: 'La Bosse', favourite: true }),
+    ]);
+    const { user } = await renderApp(`${HERE}&favourite=true`);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+    const bosse = screen.getByRole('button', { name: 'Keep La Bosse in my favourites' });
+
+    await user.click(bosse);
+
+    expect(bosse).toHaveAttribute('aria-pressed', 'false');
+    expect(bosse).toHaveFocus();
+    expect(await screen.findByRole('status')).toHaveTextContent('Removed from your favourites');
+  });
+
+  it('is still on after going to a climb and back', async () => {
+    fakeAuth.signIn();
+    filterApi();
+    const { user, router } = await renderApp(`${HERE}&favourite=true`);
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+
+    await user.click(screen.getByRole('link', { name: 'View Le Mur' }));
+    await screen.findByRole('heading', { level: 1, name: 'Le Mur' });
+    await user.click(screen.getByRole('button', { name: 'Back to search' }));
+    await screen.findByRole('list', { name: 'Nearby climbs' });
+
+    expect(router.state.location.search).toMatchObject({ favourite: true });
   });
 
   it('is still on after a reload', async () => {

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { authClient } from './auth-client';
 import { AuthContext } from './auth-context';
+import { complete } from './signed-in-visitor';
 import type { AuthSession } from './types';
 
 /** Where the Visitor comes back after signing in: the home page of this site. */
@@ -12,10 +13,6 @@ const newPasswordPage = () => `${window.location.origin}/new-password`;
 
 /** How long signing in is confirmed for. */
 const SIGNED_IN_MS = 5000;
-
-/** Signed in as far as the app is concerned: with the second factor's code, if needed. */
-const complete = (session: AuthSession | undefined) =>
-  session?.secondFactor === 'required' ? undefined : session;
 
 /** Holds the signed-in Visitor's session for the whole app. */
 export function AuthProvider({ children }: { readonly children: ReactNode }) {

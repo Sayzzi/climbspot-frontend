@@ -1,10 +1,11 @@
 import { authClient } from './auth-client';
+import type { AuthSession } from './types';
 
-/**
- * The signed-in Visitor's id where hooks cannot reach (e.g. route loaders); none until
- * they gave the second factor's code, if they need one.
- */
+/** Signed in as far as the app is concerned: with the second factor's code, if needed. */
+export const complete = (session: AuthSession | undefined) =>
+  session?.secondFactor === 'required' ? undefined : session;
+
+/** The signed-in Visitor's id where hooks cannot reach (e.g. route loaders). */
 export function signedInVisitorId(): string | undefined {
-  const session = authClient.session();
-  return session?.secondFactor === 'required' ? undefined : session?.visitorId;
+  return complete(authClient.session())?.visitorId;
 }

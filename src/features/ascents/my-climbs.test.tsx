@@ -1,5 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react';
-import { HttpResponse } from 'msw';
+import { delay, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -90,6 +90,7 @@ describe('My climbs', () => {
     await user.click(list().getByRole('button', { name: 'Keep Le Mur in my favourites' }));
 
     expect(list().queryByRole('heading', { name: 'Le Mur' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Favourites' })).toHaveFocus();
     expect(await screen.findByRole('status')).toHaveTextContent('Removed from your favourites');
     expect(unmarks.lastUrl()?.pathname).toBe('/ascents/mur/favourite');
   });
@@ -120,6 +121,19 @@ describe('My climbs', () => {
       ),
     ).toBeVisible();
     expect(screen.getByRole('link', { name: 'Find climbs' })).toHaveAttribute('href', '/');
+  });
+
+  it('says it is loading', async () => {
+    api();
+    server.use(
+      handlers.favourites(async () => {
+        await delay(200);
+        return HttpResponse.json({ ascents: [] });
+      }),
+    );
+    await renderApp(PAGE);
+
+    expect(await screen.findByText('Loading your climbs…')).toBeVisible();
   });
 
   it('explains a failure to load, and retries', async () => {

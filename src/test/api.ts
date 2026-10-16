@@ -239,7 +239,12 @@ export const handlers = {
   createAscent: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.post(apiUrl('/ascents'), ({ request }) => respond(request)),
-  markFavourite: (respond: (id: string, request: Request) => HttpResponse<JsonBodyType | null>) =>
+  markFavourite: (
+    respond: (
+      id: string,
+      request: Request,
+    ) => HttpResponse<JsonBodyType | null> | Promise<HttpResponse<JsonBodyType | null>>,
+  ) =>
     http.put(apiUrl('/ascents/:id/favourite'), ({ params, request }) =>
       respond(String(params.id), request),
     ),

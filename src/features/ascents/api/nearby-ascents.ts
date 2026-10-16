@@ -21,6 +21,18 @@ function toQuery(
   };
 }
 
+type NearbyQuery = ReturnType<typeof toQuery>;
+
+/** Every nearby search of a Visitor (or of nobody), or one of them. */
+export const nearbyKey = (visitorId: string | undefined, query?: NearbyQuery | null) =>
+  query === undefined
+    ? (['ascents', 'nearby', visitorId ?? null] as const)
+    : (['ascents', 'nearby', visitorId ?? null, query] as const);
+
+/** Whether a nearby search, by its key, keeps only the Visitor's favourites. */
+export const keepsFavouritesOnly = (key: readonly unknown[]) =>
+  (key[3] as NearbyQuery | null | undefined)?.favourite === true;
+
 /** Nearby Ascents, or nothing until there is a position to search around. */
 export function useNearbyAscents(criteria: NearbyCriteria | undefined) {
   // Signed in, results carry the Visitor's own Ascent Times: never anyone else's.
@@ -28,7 +40,7 @@ export function useNearbyAscents(criteria: NearbyCriteria | undefined) {
   const query = criteria && toQuery(criteria, session !== undefined);
 
   return useQuery({
-    queryKey: ['ascents', 'nearby', session?.visitorId ?? null, query ?? null],
+    queryKey: nearbyKey(session?.visitorId, query ?? null),
     queryFn: query
       ? async ({ signal }) =>
           (await unwrap(apiClient.GET('/ascents/nearby', { params: { query }, signal }))).ascents

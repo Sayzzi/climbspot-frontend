@@ -207,10 +207,15 @@ export const handlers = {
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.get(apiUrl('/ascents/nearby'), ({ request }) => respond(request)),
   ascent: (respond: (id: string) => HttpResponse<JsonBodyType>) =>
-    // `/ascents/nearby` and `/ascents/favourites` match `/ascents/:id` too; leave them be.
+    // `/ascents/nearby`, `/favourites` and `/my-times` match `/ascents/:id` too; leave them be.
     http.get(apiUrl('/ascents/:id'), ({ params }) =>
-      params.id === 'nearby' || params.id === 'favourites' ? undefined : respond(String(params.id)),
+      ['nearby', 'favourites', 'my-times'].includes(String(params.id))
+        ? undefined
+        : respond(String(params.id)),
     ),
+  ascentsRun: (
+    respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
+  ) => http.get(apiUrl('/ascents/my-times'), ({ request }) => respond(request)),
   favourites: (
     respond: (request: Request) => HttpResponse<JsonBodyType> | Promise<HttpResponse<JsonBodyType>>,
   ) => http.get(apiUrl('/ascents/favourites'), ({ request }) => respond(request)),

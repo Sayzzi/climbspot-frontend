@@ -7,8 +7,10 @@ import {
   anAscent,
   anAscentSummary,
   apiErrorResponse,
+  aStravaConnection,
   handlers,
   recorder,
+  stravaApi,
 } from '@/test/api';
 import { expectAccessible } from '@/test/axe';
 import { fakeAuth } from '@/test/fake-auth';
@@ -29,6 +31,7 @@ function api(favourites = [favourite('mur', 'Le Mur'), favourite('bosse', 'La Bo
   server.use(
     handlers.me(() => HttpResponse.json(anAccount())),
     handlers.favourites(() => HttpResponse.json({ ascents: favourites })),
+    handlers.ascentsRun(() => HttpResponse.json({ ascents: [] })),
     handlers.ascent((id) => HttpResponse.json(anAscent({ id, name: 'Le Mur', favourite: true }))),
     handlers.unmarkFavourite((_id, request) => {
       unmarks.record(request);
@@ -189,5 +192,112 @@ describe('My climbs for a Visitor who is not signed in', () => {
     await renderApp(PAGE);
 
     expect(await screen.findByText('Sign in to see the climbs you keep.')).toBeVisible();
+  });
+});
+
+describe('Climbs I’ve run, in My climbs', () => {
+  const run = (id: string, name: string, best: number, latest: string) => ({
+    ...favourite(id, name),
+    myAscentTimes: { best, count: 2, latest: { startedAt: latest, seconds: best + 8 } },
+  });
+  const section = () => within(screen.getByRole('region', { name: 'Climbs I’ve run' }));
+
+  beforeEach(() => {
+    fakeAuth.signIn();
+    api([]);
+  });
+
+  it('lists the climbs the Visitor went up, as the API orders them, with their times', async () => {
+    stravaApi(aStravaConnection());
+    server.use(
+      handlers.ascentsRun(() =>
+        HttpResponse.json({
+          ascents: [
+            run('mur', 'Le Mur', 312, '2026-10-02T07:10:00.000Z'),
+            run('bosse', 'La Bosse', 600, '2026-09-20T07:10:00.000Z'),
+          ],
+        }),
+      ),
+    );
+    await renderApp(PAGE);
+
+    const climbs = within(await screen.findByRole('list', { name: 'Climbs run' }));
+    expect(climbs.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual([
+      'Le Mur',
+      'La Bosse',
+    ]);
+    expect(climbs.getByText('Latest: 5:20 on Oct 2, 2026')).toBeVisible();
+    expect(climbs.getByRole('link', { name: 'View Le Mur' })).toHaveAttribute(
+      'href',
+      '/ascents/mur',
+    );
+    expect(section().getAllByText('Powered by Strava').length).toBeGreaterThan(0);
+  });
+
+  it('leads to connecting Strava when it is not connected', async () => {
+    server.use(handlers.ascentsRun(() => HttpResponse.json({ ascents: [] })));
+    await renderApp(PAGE);
+
+    expect(
+      await screen.findByText('Your times come from Strava: connect it to see the climbs you run.'),
+    ).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Connect Strava' })).toHaveAttribute(
+      'href',
+      '/account',
+    );
+  });
+
+  it('says when no run went up a climb yet', async () => {
+    stravaApi(aStravaConnection());
+    server.use(handlers.ascentsRun(() => HttpResponse.json({ ascents: [] })));
+    await renderApp(PAGE);
+
+    expect(await screen.findByText('None of your runs went up a climb yet.')).toBeVisible();
+  });
+
+  it('explains a failure to load, and retries', async () => {
+    let failing = true;
+    server.use(
+      handlers.ascentsRun(() =>
+        failing
+          ? apiErrorResponse(500, 'INTERNAL_ERROR')
+          : HttpResponse.json({ ascents: [run('mur', 'Le Mur', 312, '2026-10-02T07:10:00.000Z')] }),
+      ),
+    );
+    const { user } = await renderApp(PAGE);
+    await screen.findByRole('region', { name: 'Climbs I’ve run' });
+    const retry = await section().findByRole('button', { name: 'Try again' });
+
+    failing = false;
+    await user.click(retry);
+
+    expect(await screen.findByRole('list', { name: 'Climbs run' })).toBeVisible();
+  });
+
+  it('says it is loading', async () => {
+    server.use(
+      handlers.ascentsRun(async () => {
+        await delay(200);
+        return HttpResponse.json({ ascents: [] });
+      }),
+    );
+    await renderApp(PAGE);
+
+    expect(await screen.findByText('Loading the climbs you ran…')).toBeVisible();
+  });
+
+  it('stays accessible with both sections', async () => {
+    stravaApi(aStravaConnection());
+    api([favourite('mur', 'Le Mur')]);
+    server.use(
+      handlers.ascentsRun(() =>
+        HttpResponse.json({ ascents: [run('mur', 'Le Mur', 312, '2026-10-02T07:10:00.000Z')] }),
+      ),
+    );
+    await renderApp(PAGE);
+    await screen.findByRole('list', { name: 'Climbs run' });
+    await screen.findByRole('list', { name: 'Favourite climbs' });
+
+    await expectAccessible();
   });
 });

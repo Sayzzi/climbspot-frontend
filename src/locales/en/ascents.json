@@ -110,6 +110,12 @@
     "loading": "Loading your climbs…",
     "empty": "No favourite climbs yet. Press the star on a climb to keep it here.",
     "find": "Find climbs",
-    "signedOut": "Sign in to see the climbs you keep."
+    "signedOut": "Sign in to see the climbs you keep.",
+    "run": "Climbs I’ve run",
+    "runList": "Climbs run",
+    "runLoading": "Loading the climbs you ran…",
+    "runWithoutStrava": "Your times come from Strava: connect it to see the climbs you run.",
+    "connectStrava": "Connect Strava",
+    "runNone": "None of your runs went up a climb yet."
   }
 }

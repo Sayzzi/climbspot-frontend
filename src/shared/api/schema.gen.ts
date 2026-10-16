@@ -228,6 +228,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ascents/my-times": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The Ascents the signed-in Visitor went up, the latest run first
+         * @description Found in their Recorded Runs through their Strava Connection; only for them, with their best, count and latest Ascent Time on each.
+         */
+        get: operations["listAscentsRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ascents/{id}/favourite": {
         parameters: {
             query?: never;
@@ -753,6 +773,53 @@ export interface components {
                 createdAt: string;
                 /** @description The signed-in Visitor's best Ascent Time here, how many they have and their latest; only for them, and only when they have one. */
                 myAscentTimes?: {
+                    /** @description Seconds. */
+                    best: number;
+                    count: number;
+                    /** @description Their most recent Ascent Time here. */
+                    latest: {
+                        /**
+                         * Format: date-time
+                         * @description When the Visitor left the Start.
+                         */
+                        startedAt: string;
+                        seconds: number;
+                    };
+                };
+            }[];
+        };
+        AscentsRun: {
+            ascents: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                surface: components["schemas"]["Surface"];
+                activities: components["schemas"]["Activity"][];
+                start: components["schemas"]["AscentPoint"];
+                top: components["schemas"]["AscentPoint"];
+                /** @description Length along the path, in metres. */
+                length: number;
+                /** @description Top elevation minus Start elevation, in metres. */
+                elevationGain: number;
+                /** @description Every rise along the path, Dips included, in metres. */
+                heightGained: number;
+                /**
+                 * @description Average Gradient, as a ratio (0.08 = 8 %).
+                 * @example 0.072
+                 */
+                averageGradient: number;
+                /**
+                 * @description Steepest Gradient over at least 500 m, as a ratio (0.08 = 8 %).
+                 * @example 0.072
+                 */
+                maximumGradient: number;
+                /** @description Length in metres × average Gradient in percent. */
+                difficultyScore: number;
+                category: components["schemas"]["Category"];
+                effort?: components["schemas"]["Effort"];
+                /** Format: date-time */
+                createdAt: string;
+                myAscentTimes: {
                     /** @description Seconds. */
                     best: number;
                     count: number;
@@ -1660,6 +1727,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FavouriteAscents"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    listAscentsRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The Ascents they went up; empty when none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AscentsRun"];
                 };
             };
             /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */

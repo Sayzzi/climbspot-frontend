@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { useId, useRef } from 'react';
+import { useId, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SignedInOnly } from '@/shared/auth';
@@ -13,6 +13,7 @@ import { SignFigures } from '@/shared/ui/sign-figures';
 import { textLinkClassName } from '@/shared/ui/text-link';
 import { useFormatters } from '@/shared/units';
 
+import { useAscentsRun } from '../api/ascents-run';
 import {
   useFavouriteAscents,
   useFavouriteToggle,
@@ -22,12 +23,20 @@ import type { FavouriteAscent } from '../types';
 import { FavouriteFeedback, FavouriteStar } from './favourite-toggle';
 import { MyTimesSummary } from './my-times-summary';
 
-/** The climbs the signed-in Visitor keeps; an invitation to sign in otherwise. */
-export function MyAscents() {
+interface MyAscentsProps {
+  /** Whether the Visitor's times can come from Strava; unknown until it says. */
+  readonly stravaConnected: boolean | undefined;
+}
+
+/** The climbs the signed-in Visitor keeps and runs; an invitation to sign in otherwise. */
+export function MyAscents({ stravaConnected }: MyAscentsProps) {
   const { t } = useTranslation('ascents');
   return (
     <SignedInOnly reason={t('mine.signedOut')}>
-      <FavouriteAscents />
+      <div className="flex flex-col gap-10">
+        <FavouriteAscents />
+        <AscentsRun stravaConnected={stravaConnected} />
+      </div>
     </SignedInOnly>
   );
 }
@@ -84,18 +93,34 @@ function FavouriteItem({
   readonly toggle: FavouriteToggle;
   readonly onRemove: () => void;
 }) {
+  return (
+    <ClimbPlate ascent={ascent}>
+      {/* Focus first: the star goes with the climb it takes out. */}
+      <div onClickCapture={onRemove}>
+        <FavouriteStar ascent={{ ...ascent, favourite: true }} toggle={toggle} />
+      </div>
+    </ClimbPlate>
+  );
+}
+
+/** A climb of My climbs: its key figures, the Visitor's times on it, and its page. */
+function ClimbPlate({
+  ascent,
+  children,
+}: {
+  readonly ascent: FavouriteAscent;
+  /** Shown next to the climb's name, e.g. its star. */
+  readonly children?: ReactNode;
+}) {
   const { t } = useTranslation('ascents');
   const format = useFormatters();
   const labels = useDomainLabels();
 
   return (
     <li className={cn(plateClassName, 'flex flex-col gap-3 p-4')}>
-      <header className="flex items-center justify-between gap-2">
+      <header className="flex min-h-11 items-center justify-between gap-2">
         <h3 className="text-xl leading-tight font-semibold">{ascent.name}</h3>
-        {/* Focus first: the star goes with the climb it takes out. */}
-        <div onClickCapture={onRemove}>
-          <FavouriteStar ascent={{ ...ascent, favourite: true }} toggle={toggle} />
-        </div>
+        {children}
       </header>
       <SignFigures
         facts={[
@@ -121,5 +146,46 @@ function FavouriteItem({
         {t('search.details')}
       </Link>
     </li>
+  );
+}
+
+/** The climbs the Visitor went up, found in their runs from Strava. */
+function AscentsRun({ stravaConnected }: { readonly stravaConnected: boolean | undefined }) {
+  const { t } = useTranslation('ascents');
+  const run = useAscentsRun();
+  const headingId = useId();
+
+  return (
+    <section aria-labelledby={headingId} className="flex flex-col gap-4">
+      <h2 id={headingId} className="text-2xl font-bold">
+        {t('mine.run')}
+      </h2>
+      {run.error ? (
+        <ErrorNotice error={run.error} onRetry={() => void run.refetch()} />
+      ) : !run.data ? (
+        <p className="text-ink-muted">{t('mine.runLoading')}</p>
+      ) : run.data.length === 0 ? (
+        <div className={cn(plateClassName, 'flex max-w-xl flex-col items-start gap-3 p-6')}>
+          {stravaConnected === false ? (
+            <>
+              <p>{t('mine.runWithoutStrava')}</p>
+              <Link to="/account" className={buttonVariants({ variant: 'secondary' })}>
+                {t('mine.connectStrava')}
+              </Link>
+            </>
+          ) : (
+            <p>{t('mine.runNone')}</p>
+          )}
+        </div>
+      ) : (
+        <>
+          <ul aria-label={t('mine.runList')} className="grid gap-4 md:grid-cols-2">
+            {run.data.map((ascent) => (
+              <ClimbPlate key={ascent.id} ascent={ascent} />
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
   );
 }

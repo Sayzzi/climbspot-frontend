@@ -42,7 +42,14 @@ describe('Ascent Times', () => {
     server.use(
       handlers.nearby(() =>
         nearbyResults([
-          { ...anAscentSummary({ name: 'Le Mur' }), myAscentTimes: { best: 312, count: 3 } },
+          {
+            ...anAscentSummary({ name: 'Le Mur' }),
+            myAscentTimes: {
+              best: 312,
+              count: 3,
+              latest: { startedAt: '2026-10-02T07:10:00.000Z', seconds: 320 },
+            },
+          },
           anAscentSummary({ name: 'La Bosse' }),
         ]),
       ),
@@ -54,6 +61,7 @@ describe('Ascent Times', () => {
       throw new Error('two Ascents expected');
     }
     expect(await within(mur).findByText('Your best: 5:12 · up 3 times')).toBeInTheDocument();
+    expect(within(mur).getByText('Latest: 5:20 on Oct 2, 2026')).toBeInTheDocument();
     expect(within(mur).getByText('Powered by Strava')).toBeInTheDocument();
     expect(within(bosse).queryByText(/Your best/)).not.toBeInTheDocument();
     expect(within(bosse).queryByText('Powered by Strava')).not.toBeInTheDocument();

@@ -93,7 +93,8 @@
     "gapSeconds": "{{seconds}} s",
     "latestMark": "Latest",
     "timeAxis": "Time (faster higher)",
-    "chart": "Your {{count}} times from {{first}} to {{last}}: best {{best}} on {{bestDate}}, latest {{latest}} on {{latestDate}}."
+    "chart": "Your {{count}} times from {{first}} to {{last}}: best {{best}} on {{bestDate}}, latest {{latest}} on {{latestDate}}.",
+    "latestOn": "Latest: {{time}} on {{date}}"
   },
   "favourite": {
     "toggle": "Keep {{name}} in my favourites",

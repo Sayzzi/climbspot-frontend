@@ -10,7 +10,6 @@ import { ErrorNotice } from '@/shared/ui/error-notice';
 import { FactList } from '@/shared/ui/fact-list';
 import { plateClassName } from '@/shared/ui/plate';
 import { SignFigures } from '@/shared/ui/sign-figures';
-import { PoweredByStrava } from '@/shared/ui/strava-brand';
 import { textLinkClassName } from '@/shared/ui/text-link';
 import { useFormatters } from '@/shared/units';
 
@@ -21,6 +20,7 @@ import {
 } from '../api/favourite-ascents';
 import type { FavouriteAscent } from '../types';
 import { FavouriteFeedback, FavouriteStar } from './favourite-toggle';
+import { MyTimesSummary } from './my-times-summary';
 
 /** The climbs the signed-in Visitor keeps; an invitation to sign in otherwise. */
 export function MyAscents() {
@@ -111,17 +111,7 @@ function FavouriteItem({
           { term: t('facts.surface'), value: labels.surface(ascent.surface) },
         ]}
       />
-      {ascent.myAscentTimes && (
-        <div className="flex flex-wrap items-baseline gap-x-3">
-          <p className="text-sm font-semibold text-moss">
-            {t('myTimes.summary', {
-              time: format.clock(ascent.myAscentTimes.best),
-              count: ascent.myAscentTimes.count,
-            })}
-          </p>
-          <PoweredByStrava />
-        </div>
-      )}
+      {ascent.myAscentTimes && <MyTimesSummary times={ascent.myAscentTimes} />}
       <Link
         to="/ascents/$ascentId"
         params={{ ascentId: ascent.id }}

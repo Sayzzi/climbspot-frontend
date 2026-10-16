@@ -72,6 +72,25 @@ describe('My climbs', () => {
     expect(mur.getByText('Category').nextSibling).toHaveTextContent('Cat 4');
   });
 
+  it('gives the Visitor’s best and latest times on a favourite they went up', async () => {
+    api([
+      {
+        ...favourite('mur', 'Le Mur'),
+        myAscentTimes: {
+          best: 312,
+          count: 2,
+          latest: { startedAt: '2026-10-02T07:10:00.000Z', seconds: 320 },
+        },
+      },
+    ]);
+    await renderApp(PAGE);
+
+    await screen.findByRole('list', { name: 'Favourite climbs' });
+    expect(list().getByText('Your best: 5:12 · up 2 times')).toBeVisible();
+    expect(list().getByText('Latest: 5:20 on Oct 2, 2026')).toBeVisible();
+    expect(list().getByText('Powered by Strava')).toBeVisible();
+  });
+
   it('opens a favourite’s page', async () => {
     api();
     const { user, router } = await renderApp(PAGE);

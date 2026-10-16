@@ -9,9 +9,9 @@ import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
 import { useFavouriteToggle } from '../api/favourite-ascents';
 import type { NearbyAscent } from '../types';
 import { FavouriteFeedback, FavouriteStar } from './favourite-toggle';
+import { MyTimesSummary } from './my-times-summary';
 import { FactList } from '@/shared/ui/fact-list';
 import { SignFigures } from '@/shared/ui/sign-figures';
-import { PoweredByStrava } from '@/shared/ui/strava-brand';
 
 interface AscentListItemProps {
   readonly ascent: NearbyAscent;
@@ -80,14 +80,8 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
           ]}
         />
         {ascent.myAscentTimes && (
-          <div className="mt-2 flex flex-wrap items-baseline gap-x-3">
-            <p className="text-sm font-semibold text-moss">
-              {t('myTimes.summary', {
-                time: format.clock(ascent.myAscentTimes.best),
-                count: ascent.myAscentTimes.count,
-              })}
-            </p>
-            <PoweredByStrava />
+          <div className="mt-2">
+            <MyTimesSummary times={ascent.myAscentTimes} />
           </div>
         )}
         <AscentLink ascent={ascent} className="mt-3 inline-block" />

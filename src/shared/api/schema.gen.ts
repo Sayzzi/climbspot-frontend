@@ -701,11 +701,20 @@ export interface components {
                 createdAt: string;
                 /** @description Geodesic distance from the searched position to the Start, in metres. */
                 distanceToStart: number;
-                /** @description The signed-in Visitor's best Ascent Time here and how many they have; only for them, and only when they have one. */
+                /** @description The signed-in Visitor's best Ascent Time here, how many they have and their latest; only for them, and only when they have one. */
                 myAscentTimes?: {
                     /** @description Seconds. */
                     best: number;
                     count: number;
+                    /** @description Their most recent Ascent Time here. */
+                    latest: {
+                        /**
+                         * Format: date-time
+                         * @description When the Visitor left the Start.
+                         */
+                        startedAt: string;
+                        seconds: number;
+                    };
                 };
                 /** @description Whether it is one of the signed-in Visitor's Favourite Ascents; absent when nobody is signed in. */
                 favourite?: boolean;
@@ -742,11 +751,20 @@ export interface components {
                 effort?: components["schemas"]["Effort"];
                 /** Format: date-time */
                 createdAt: string;
-                /** @description The signed-in Visitor's best Ascent Time here and how many they have; only for them, and only when they have one. */
+                /** @description The signed-in Visitor's best Ascent Time here, how many they have and their latest; only for them, and only when they have one. */
                 myAscentTimes?: {
                     /** @description Seconds. */
                     best: number;
                     count: number;
+                    /** @description Their most recent Ascent Time here. */
+                    latest: {
+                        /**
+                         * Format: date-time
+                         * @description When the Visitor left the Start.
+                         */
+                        startedAt: string;
+                        seconds: number;
+                    };
                 };
             }[];
         };

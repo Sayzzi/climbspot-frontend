@@ -10,7 +10,7 @@ import { textLinkClassName } from '@/shared/ui/text-link';
 import type { FavouriteToggle } from '../api/favourite-ascents';
 
 interface FavouriteStarProps {
-  readonly ascent: { readonly name: string; readonly favourite?: boolean };
+  readonly ascent: { readonly id: string; readonly name: string; readonly favourite?: boolean };
   readonly toggle: FavouriteToggle;
   /** What a Visitor who is not signed in sees: an invitation to sign in, or nothing. */
   readonly signedOut?: 'invite' | 'nothing';
@@ -38,7 +38,7 @@ export function FavouriteStar({ ascent, toggle, signedOut = 'invite' }: Favourit
       aria-pressed={favourite}
       aria-label={t('favourite.toggle', { name: ascent.name })}
       onClick={() => {
-        toggle.mutate(!favourite);
+        toggle.mutate({ id: ascent.id, favourite: !favourite });
       }}
       className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full text-pine hover:bg-white focus-visible:outline-3 focus-visible:outline-pine"
     >
@@ -64,7 +64,7 @@ export function FavouriteFeedback({ toggle }: { readonly toggle: FavouriteToggle
   if (toggle.isSuccess) {
     return (
       <Confirmation className="self-start">
-        {t(toggle.variables ? 'favourite.added' : 'favourite.removed')}
+        {t(toggle.variables.favourite ? 'favourite.added' : 'favourite.removed')}
       </Confirmation>
     );
   }

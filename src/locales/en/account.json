@@ -42,6 +42,7 @@
   "menu": {
     "label": "{{name}}’s menu",
     "addAscent": "Add a climb",
+    "climbs": "My climbs",
     "itineraries": "My itineraries",
     "account": "Account",
     "signOut": "Sign out"

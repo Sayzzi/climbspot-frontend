@@ -4,6 +4,7 @@ import type { Activity, Category } from '@/shared/domain/values';
 
 export type NearbyAscent = components['schemas']['NearbyAscents']['ascents'][number];
 export type Ascent = components['schemas']['Ascent'];
+export type FavouriteAscent = components['schemas']['FavouriteAscents']['ascents'][number];
 
 export type { Position } from '@/shared/lib/position';
 

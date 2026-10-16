@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './../routes/__root'
 import { Route as IndexRouteImport } from './../routes/index'
 import { Route as AccountRouteImport } from './../routes/account'
 import { Route as ItinerariesRouteImport } from './../routes/itineraries'
+import { Route as MyClimbsRouteImport } from './../routes/my-climbs'
 import { Route as NewPasswordRouteImport } from './../routes/new-password'
 import { Route as SecondFactorRouteImport } from './../routes/second-factor'
 import { Route as SignInRouteImport } from './../routes/sign-in'
@@ -32,6 +33,11 @@ const AccountRoute = AccountRouteImport.update({
 const ItinerariesRoute = ItinerariesRouteImport.update({
   id: '/itineraries',
   path: '/itineraries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyClimbsRoute = MyClimbsRouteImport.update({
+  id: '/my-climbs',
+  path: '/my-climbs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewPasswordRoute = NewPasswordRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/itineraries': typeof ItinerariesRoute
+  '/my-climbs': typeof MyClimbsRoute
   '/new-password': typeof NewPasswordRoute
   '/second-factor': typeof SecondFactorRoute
   '/sign-in': typeof SignInRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/itineraries': typeof ItinerariesRoute
+  '/my-climbs': typeof MyClimbsRoute
   '/new-password': typeof NewPasswordRoute
   '/second-factor': typeof SecondFactorRoute
   '/sign-in': typeof SignInRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/itineraries': typeof ItinerariesRoute
+  '/my-climbs': typeof MyClimbsRoute
   '/new-password': typeof NewPasswordRoute
   '/second-factor': typeof SecondFactorRoute
   '/sign-in': typeof SignInRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/itineraries'
+    | '/my-climbs'
     | '/new-password'
     | '/second-factor'
     | '/sign-in'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/itineraries'
+    | '/my-climbs'
     | '/new-password'
     | '/second-factor'
     | '/sign-in'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/itineraries'
+    | '/my-climbs'
     | '/new-password'
     | '/second-factor'
     | '/sign-in'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   ItinerariesRoute: typeof ItinerariesRoute
+  MyClimbsRoute: typeof MyClimbsRoute
   NewPasswordRoute: typeof NewPasswordRoute
   SecondFactorRoute: typeof SecondFactorRoute
   SignInRoute: typeof SignInRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/itineraries'
       fullPath: '/itineraries'
       preLoaderRoute: typeof ItinerariesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-climbs': {
+      id: '/my-climbs'
+      path: '/my-climbs'
+      fullPath: '/my-climbs'
+      preLoaderRoute: typeof MyClimbsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/new-password': {
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   ItinerariesRoute: ItinerariesRoute,
+  MyClimbsRoute: MyClimbsRoute,
   NewPasswordRoute: NewPasswordRoute,
   SecondFactorRoute: SecondFactorRoute,
   SignInRoute: SignInRoute,

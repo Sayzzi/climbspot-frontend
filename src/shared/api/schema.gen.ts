@@ -208,6 +208,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ascents/favourites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The signed-in Visitor's Favourite Ascents, most recently marked first
+         * @description Only for them, with their best Ascent Time on each when they have one.
+         */
+        get: operations["listFavouriteAscents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ascents/{id}/favourite": {
         parameters: {
             query?: never;
@@ -689,6 +709,45 @@ export interface components {
                 };
                 /** @description Whether it is one of the signed-in Visitor's Favourite Ascents; absent when nobody is signed in. */
                 favourite?: boolean;
+            }[];
+        };
+        FavouriteAscents: {
+            ascents: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                surface: components["schemas"]["Surface"];
+                activities: components["schemas"]["Activity"][];
+                start: components["schemas"]["AscentPoint"];
+                top: components["schemas"]["AscentPoint"];
+                /** @description Length along the path, in metres. */
+                length: number;
+                /** @description Top elevation minus Start elevation, in metres. */
+                elevationGain: number;
+                /** @description Every rise along the path, Dips included, in metres. */
+                heightGained: number;
+                /**
+                 * @description Average Gradient, as a ratio (0.08 = 8 %).
+                 * @example 0.072
+                 */
+                averageGradient: number;
+                /**
+                 * @description Steepest Gradient over at least 500 m, as a ratio (0.08 = 8 %).
+                 * @example 0.072
+                 */
+                maximumGradient: number;
+                /** @description Length in metres × average Gradient in percent. */
+                difficultyScore: number;
+                category: components["schemas"]["Category"];
+                effort?: components["schemas"]["Effort"];
+                /** Format: date-time */
+                createdAt: string;
+                /** @description The signed-in Visitor's best Ascent Time here and how many they have; only for them, and only when they have one. */
+                myAscentTimes?: {
+                    /** @description Seconds. */
+                    best: number;
+                    count: number;
+                };
             }[];
         };
         MyAscentTimes: {
@@ -1538,6 +1597,44 @@ export interface operations {
             };
             /** @description `ASCENT_NOT_FOUND`: no Ascent has this id. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    listFavouriteAscents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Their Favourite Ascents; empty when they have none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FavouriteAscents"];
+                };
+            };
+            /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `AUTHENTICATION_UNAVAILABLE`: whether the Visitor has a second factor cannot be told right now. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

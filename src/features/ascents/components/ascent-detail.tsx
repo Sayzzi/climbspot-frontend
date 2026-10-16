@@ -27,7 +27,7 @@ export function AscentDetail({ id }: { readonly id: string }) {
   const labels = useDomainLabels();
   const { session } = useAuth();
   const { data: ascent } = useSuspenseQuery(ascentQuery(id, session?.visitorId));
-  const favourite = useFavouriteToggle(ascent.id);
+  const favourite = useFavouriteToggle();
   const effortFacts = useEffortFacts(ascent.effort);
   const measurementsId = useId();
   const profileId = useId();

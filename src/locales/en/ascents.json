@@ -88,5 +88,14 @@
     "added": "Added to your favourites",
     "removed": "Removed from your favourites",
     "signIn": "Sign in to keep this climb"
+  },
+  "mine": {
+    "title": "My climbs",
+    "favourites": "Favourites",
+    "list": "Favourite climbs",
+    "loading": "Loading your climbs…",
+    "empty": "No favourite climbs yet. Press the star on a climb to keep it here.",
+    "find": "Find climbs",
+    "signedOut": "Sign in to see the climbs you keep."
   }
 }

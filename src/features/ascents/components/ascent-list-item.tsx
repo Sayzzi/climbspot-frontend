@@ -24,7 +24,7 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
   const format = useFormatters();
   const labels = useDomainLabels();
   const effortFacts = useEffortFacts(ascent.effort);
-  const favourite = useFavouriteToggle(ascent.id);
+  const favourite = useFavouriteToggle();
 
   return (
     <li>

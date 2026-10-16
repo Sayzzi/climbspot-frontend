@@ -87,7 +87,13 @@
     "title": "Your times",
     "best": "Best",
     "summary_one": "Your best: {{time}} · up once",
-    "summary_other": "Your best: {{time}} · up {{count}} times"
+    "summary_other": "Your best: {{time}} · up {{count}} times",
+    "latest": "Latest {{time}}, {{gap}} off your best",
+    "latestBest": "Latest {{time}}, your best!",
+    "gapSeconds": "{{seconds}} s",
+    "latestMark": "Latest",
+    "timeAxis": "Time (faster higher)",
+    "chart": "Your {{count}} times from {{first}} to {{last}}: best {{best}} on {{bestDate}}, latest {{latest}} on {{latestDate}}."
   },
   "favourite": {
     "toggle": "Keep {{name}} in my favourites",

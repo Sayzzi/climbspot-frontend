@@ -10,6 +10,7 @@ import {
   nearbyResults,
   recorder,
 } from '@/test/api';
+import { expectAccessible } from '@/test/axe';
 import { fakeAuth } from '@/test/fake-auth';
 import { renderApp } from '@/test/render-app';
 import { server } from '@/test/server';
@@ -94,5 +95,75 @@ describe('Ascent Times', () => {
 
     expect(asked.requests).toHaveLength(0);
     expect(screen.queryByRole('region', { name: 'Your times' })).not.toBeInTheDocument();
+  });
+});
+
+describe('Progress on an Ascent’s page', () => {
+  const page = async () => {
+    await renderApp(`/ascents/${ID}`);
+    return within(await screen.findByRole('region', { name: 'Your times' }));
+  };
+
+  it('charts the times, saying how many, when, the best and the latest', async () => {
+    signedIn();
+    ascentWithTimes([
+      { startedAt: '2026-10-02T07:10:00.000Z', seconds: 320 },
+      { startedAt: '2026-09-20T07:10:00.000Z', seconds: 3725 },
+      { startedAt: '2026-09-12T07:10:00.000Z', seconds: 312 },
+    ]);
+
+    const times = await page();
+
+    expect(
+      times.getByRole('img', {
+        name: 'Your 3 times from Sep 12, 2026 to Oct 2, 2026: best 5:12 on Sep 12, 2026, latest 5:20 on Oct 2, 2026.',
+      }),
+    ).toBeVisible();
+    expect(times.getByText('Latest 5:20, 8 s off your best')).toBeVisible();
+  });
+
+  it('says when the latest time is the best', async () => {
+    signedIn();
+    ascentWithTimes([
+      { startedAt: '2026-10-02T07:10:00.000Z', seconds: 300 },
+      { startedAt: '2026-09-12T07:10:00.000Z', seconds: 312 },
+    ]);
+
+    const times = await page();
+
+    expect(times.getByText('Latest 5:00, your best!')).toBeVisible();
+  });
+
+  it('gives the gap in minutes once it passes one', async () => {
+    signedIn();
+    ascentWithTimes([
+      { startedAt: '2026-10-02T07:10:00.000Z', seconds: 377 },
+      { startedAt: '2026-09-12T07:10:00.000Z', seconds: 312 },
+    ]);
+
+    const times = await page();
+
+    expect(times.getByText('Latest 6:17, 1:05 off your best')).toBeVisible();
+  });
+
+  it('shows a single time without a chart', async () => {
+    signedIn();
+    ascentWithTimes([{ startedAt: '2026-10-02T07:10:00.000Z', seconds: 312 }]);
+
+    const times = await page();
+
+    expect(times.queryByRole('img')).not.toBeInTheDocument();
+    expect(times.getByText('Latest 5:12, your best!')).toBeVisible();
+  });
+
+  it('stays accessible', async () => {
+    signedIn();
+    ascentWithTimes([
+      { startedAt: '2026-10-02T07:10:00.000Z', seconds: 320 },
+      { startedAt: '2026-09-12T07:10:00.000Z', seconds: 312 },
+    ]);
+    await page();
+
+    await expectAccessible();
   });
 });

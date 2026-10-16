@@ -6,7 +6,9 @@ import { useEffortFacts } from '@/shared/pace';
 import { useFormatters } from '@/shared/units';
 
 import { useDomainLabels } from '@/shared/i18n/use-domain-labels';
+import { useFavouriteToggle } from '../api/favourite-ascents';
 import type { NearbyAscent } from '../types';
+import { FavouriteFeedback, FavouriteStar } from './favourite-toggle';
 import { FactList } from '@/shared/ui/fact-list';
 import { SignFigures } from '@/shared/ui/sign-figures';
 import { PoweredByStrava } from '@/shared/ui/strava-brand';
@@ -22,6 +24,7 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
   const format = useFormatters();
   const labels = useDomainLabels();
   const effortFacts = useEffortFacts(ascent.effort);
+  const favourite = useFavouriteToggle(ascent.id);
 
   return (
     <li>
@@ -32,7 +35,7 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
           selected ? 'border-blaze bg-lichen/60' : 'border-transparent',
         )}
       >
-        <header className="flex items-baseline justify-between gap-4">
+        <header className="flex items-center justify-between gap-2">
           <h3 className="text-xl leading-tight font-semibold">
             <button
               type="button"
@@ -45,10 +48,14 @@ export function AscentListItem({ ascent, selected, onSelect }: AscentListItemPro
               {ascent.name}
             </button>
           </h3>
-          <span className="text-sm whitespace-nowrap text-ink-muted">
-            {t('facts.distanceToStart', { distance: format.distance(ascent.distanceToStart) })}
-          </span>
+          <div className="flex items-center">
+            <span className="text-sm whitespace-nowrap text-ink-muted">
+              {t('facts.distanceToStart', { distance: format.distance(ascent.distanceToStart) })}
+            </span>
+            <FavouriteStar ascent={ascent} toggle={favourite} signedOut="nothing" />
+          </div>
         </header>
+        <FavouriteFeedback toggle={favourite} />
         {/* What tells climbs apart, first and large, like the figures on a trail sign. */}
         <div className="mt-3">
           <SignFigures

@@ -12,14 +12,19 @@ import type { FavouriteToggle } from '../api/favourite-ascents';
 interface FavouriteStarProps {
   readonly ascent: { readonly name: string; readonly favourite?: boolean };
   readonly toggle: FavouriteToggle;
+  /** What a Visitor who is not signed in sees: an invitation to sign in, or nothing. */
+  readonly signedOut?: 'invite' | 'nothing';
 }
 
 /** Keeps a climb in the signed-in Visitor's favourites, or not; signed out, invites to sign in. */
-export function FavouriteStar({ ascent, toggle }: FavouriteStarProps) {
+export function FavouriteStar({ ascent, toggle, signedOut = 'invite' }: FavouriteStarProps) {
   const { t } = useTranslation('ascents');
   const { session } = useAuth();
 
   if (!session) {
+    if (signedOut === 'nothing') {
+      return null;
+    }
     return (
       <Link to="/sign-in" className={`text-sm ${textLinkClassName}`}>
         {t('favourite.signIn')}

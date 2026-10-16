@@ -239,7 +239,7 @@ export interface paths {
          * The Ascents the signed-in Visitor went up, the latest run first
          * @description Found in their Recorded Runs through their Strava Connection; only for them, with their best, count and latest Ascent Time on each.
          */
-        get: operations["listAscentsRun"];
+        get: operations["listAscentsWithMyTimes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -788,7 +788,7 @@ export interface components {
                 };
             }[];
         };
-        AscentsRun: {
+        AscentsWithMyTimes: {
             ascents: {
                 /** Format: uuid */
                 id: string;
@@ -1749,7 +1749,7 @@ export interface operations {
             };
         };
     };
-    listAscentsRun: {
+    listAscentsWithMyTimes: {
         parameters: {
             query?: never;
             header?: never;
@@ -1764,7 +1764,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AscentsRun"];
+                    "application/json": components["schemas"]["AscentsWithMyTimes"];
                 };
             };
             /** @description `AUTHENTICATION_REQUIRED`: nobody is signed in. `SECOND_FACTOR_REQUIRED`: the Visitor has a second factor, and this session has not given its code. */

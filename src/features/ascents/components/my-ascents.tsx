@@ -13,7 +13,7 @@ import { SignFigures } from '@/shared/ui/sign-figures';
 import { textLinkClassName } from '@/shared/ui/text-link';
 import { useFormatters } from '@/shared/units';
 
-import { useAscentsRun } from '../api/ascents-run';
+import { useAscentsWithMyTimes } from '../api/ascents-with-my-times';
 import {
   useFavouriteAscents,
   useFavouriteToggle,
@@ -35,7 +35,7 @@ export function MyAscents({ stravaConnected }: MyAscentsProps) {
     <SignedInOnly reason={t('mine.signedOut')}>
       <div className="flex flex-col gap-10">
         <FavouriteAscents />
-        <AscentsRun stravaConnected={stravaConnected} />
+        <AscentsWithMyTimes stravaConnected={stravaConnected} />
       </div>
     </SignedInOnly>
   );
@@ -94,17 +94,17 @@ function FavouriteItem({
   readonly onRemove: () => void;
 }) {
   return (
-    <ClimbPlate ascent={ascent}>
+    <AscentPlate ascent={ascent}>
       {/* Focus first: the star goes with the climb it takes out. */}
       <div onClickCapture={onRemove}>
         <FavouriteStar ascent={{ ...ascent, favourite: true }} toggle={toggle} />
       </div>
-    </ClimbPlate>
+    </AscentPlate>
   );
 }
 
 /** A climb of My climbs: its key figures, the Visitor's times on it, and its page. */
-function ClimbPlate({
+function AscentPlate({
   ascent,
   children,
 }: {
@@ -150,9 +150,13 @@ function ClimbPlate({
 }
 
 /** The climbs the Visitor went up, found in their runs from Strava. */
-function AscentsRun({ stravaConnected }: { readonly stravaConnected: boolean | undefined }) {
+function AscentsWithMyTimes({
+  stravaConnected,
+}: {
+  readonly stravaConnected: boolean | undefined;
+}) {
   const { t } = useTranslation('ascents');
-  const run = useAscentsRun();
+  const run = useAscentsWithMyTimes();
   const headingId = useId();
 
   return (
@@ -173,18 +177,19 @@ function AscentsRun({ stravaConnected }: { readonly stravaConnected: boolean | u
                 {t('mine.connectStrava')}
               </Link>
             </>
-          ) : (
+          ) : stravaConnected ? (
             <p>{t('mine.runNone')}</p>
+          ) : (
+            // Whether Strava is connected is still unknown: say nothing that may be wrong.
+            <p className="text-ink-muted">{t('mine.runLoading')}</p>
           )}
         </div>
       ) : (
-        <>
-          <ul aria-label={t('mine.runList')} className="grid gap-4 md:grid-cols-2">
-            {run.data.map((ascent) => (
-              <ClimbPlate key={ascent.id} ascent={ascent} />
-            ))}
-          </ul>
-        </>
+        <ul aria-label={t('mine.runList')} className="grid gap-4 md:grid-cols-2">
+          {run.data.map((ascent) => (
+            <AscentPlate key={ascent.id} ascent={ascent} />
+          ))}
+        </ul>
       )}
     </section>
   );

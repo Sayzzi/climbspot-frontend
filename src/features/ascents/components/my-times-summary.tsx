@@ -17,12 +17,15 @@ export function MyTimesSummary({ times }: { readonly times: AscentTimeSummary })
       <p className="text-sm font-semibold text-moss">
         {t('myTimes.summary', { time: format.clock(times.best), count: times.count })}
       </p>
-      <p className="text-sm text-ink-muted">
-        {t('myTimes.latestOn', {
-          time: format.clock(times.latest.seconds),
-          date: format.date(times.latest.startedAt),
-        })}
-      </p>
+      {/* Up once, the latest is the best: no need to say it twice. */}
+      {times.count > 1 && (
+        <p className="text-sm text-ink-muted">
+          {t('myTimes.latestOn', {
+            time: format.clock(times.latest.seconds),
+            date: format.date(times.latest.startedAt),
+          })}
+        </p>
+      )}
       <PoweredByStrava />
     </div>
   );

@@ -59,8 +59,11 @@ export function MyAscentTimes({ ascentId }: { readonly ascentId: string }) {
         </div>
       )}
       <ol className="flex flex-col divide-y divide-pine/10 text-sm">
-        {times.map((time) => (
-          <li key={time.startedAt} className="flex items-baseline gap-3 py-1.5">
+        {times.map((time, index) => (
+          <li
+            key={`${time.startedAt}-${String(index)}`}
+            className="flex items-baseline gap-3 py-1.5"
+          >
             <time dateTime={time.startedAt} className="w-28 text-ink-muted">
               {format.date(time.startedAt)}
             </time>{' '}

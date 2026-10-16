@@ -234,6 +234,31 @@ describe('Climbs I’ve run, in My climbs', () => {
     expect(section().getAllByText('Powered by Strava').length).toBeGreaterThan(0);
   });
 
+  it('does not repeat the only time of a climb gone up once', async () => {
+    stravaApi(aStravaConnection());
+    server.use(
+      handlers.ascentsRun(() =>
+        HttpResponse.json({
+          ascents: [
+            {
+              ...favourite('mur', 'Le Mur'),
+              myAscentTimes: {
+                best: 312,
+                count: 1,
+                latest: { startedAt: '2026-10-02T07:10:00.000Z', seconds: 312 },
+              },
+            },
+          ],
+        }),
+      ),
+    );
+    await renderApp(PAGE);
+
+    const climbs = within(await screen.findByRole('list', { name: 'Climbs run' }));
+    expect(climbs.getByText('Your best: 5:12 · up once')).toBeVisible();
+    expect(climbs.queryByText(/Latest/)).not.toBeInTheDocument();
+  });
+
   it('leads to connecting Strava when it is not connected', async () => {
     server.use(handlers.ascentsRun(() => HttpResponse.json({ ascents: [] })));
     await renderApp(PAGE);

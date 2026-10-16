@@ -92,7 +92,7 @@
     "latestBest": "Latest {{time}}, your best!",
     "gapSeconds": "{{seconds}} s",
     "latestMark": "Latest",
-    "timeAxis": "Time (faster higher)",
+    "timeAxis": "Faster times are higher.",
     "chart": "Your {{count}} times from {{first}} to {{last}}: best {{best}} on {{bestDate}}, latest {{latest}} on {{latestDate}}.",
     "latestOn": "Latest: {{time}} on {{date}}"
   },
